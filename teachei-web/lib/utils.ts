@@ -1,0 +1,119 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+// Combine class names with Tailwind merge
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// Format currency to BRL
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+// Format date to Brazilian format
+export function formatDate(date: string | Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
+}
+
+// Format relative time
+export function formatRelativeTime(date: string | Date): string {
+  const now = new Date();
+  const then = new Date(date);
+  const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "agora";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}min`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
+  return formatDate(date);
+}
+
+// Format phone number
+export function formatPhone(phone: string): string {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 11) {
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+  }
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+  }
+  return phone;
+}
+
+// Generate WhatsApp link
+export function getWhatsAppLink(phone: string, message?: string): string {
+  const cleaned = phone.replace(/\D/g, "");
+  const phoneWithCountry = cleaned.startsWith("55") ? cleaned : `55${cleaned}`;
+  const encodedMessage = message ? encodeURIComponent(message) : "";
+  return `https://wa.me/${phoneWithCountry}${encodedMessage ? `?text=${encodedMessage}` : ""}`;
+}
+
+// Generate Instagram link
+export function getInstagramLink(username: string): string {
+  const cleaned = username.replace("@", "").replace("https://instagram.com/", "");
+  return `https://instagram.com/${cleaned}`;
+}
+
+// Truncate text
+export function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength)}...`;
+}
+
+// Slugify text
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+// Vehicle type labels
+export const vehicleTypeLabels: Record<string, string> = {
+  CARRO: "Carro",
+  MOTO: "Moto",
+  CAMINHAO: "Caminhão",
+};
+
+// Status labels
+export const statusLabels: Record<string, string> = {
+  ATIVO: "Ativo",
+  PENDENTE_PAGAMENTO: "Pendente",
+  FINALIZADO: "Finalizado",
+  EXPIRADO: "Expirado",
+};
+
+// Status colors
+export const statusColors: Record<string, string> = {
+  ATIVO: "bg-success text-white",
+  PENDENTE_PAGAMENTO: "bg-warning text-white",
+  FINALIZADO: "bg-muted text-white",
+  EXPIRADO: "bg-error text-white",
+};
+
+// Vehicle colors
+export const vehicleColors = [
+  { value: "BRANCO", label: "Branco", hex: "#FFFFFF" },
+  { value: "PRETO", label: "Preto", hex: "#000000" },
+  { value: "PRATA", label: "Prata", hex: "#C0C0C0" },
+  { value: "CINZA", label: "Cinza", hex: "#808080" },
+  { value: "VERMELHO", label: "Vermelho", hex: "#FF0000" },
+  { value: "AZUL", label: "Azul", hex: "#0000FF" },
+  { value: "VERDE", label: "Verde", hex: "#008000" },
+  { value: "AMARELO", label: "Amarelo", hex: "#FFFF00" },
+  { value: "MARROM", label: "Marrom", hex: "#8B4513" },
+  { value: "BEGE", label: "Bege", hex: "#F5F5DC" },
+];
+
+
+

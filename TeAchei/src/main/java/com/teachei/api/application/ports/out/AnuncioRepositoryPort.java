@@ -1,0 +1,95 @@
+package com.teachei.api.application.ports.out;
+
+import com.teachei.api.domain.model.Anuncio;
+import com.teachei.api.domain.model.StatusAnuncio;
+import com.teachei.api.domain.model.TipoVeiculo;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Outbound port for intention (anúncio) persistence operations.
+ * Implemented by the Cosmos DB adapter.
+ */
+public interface AnuncioRepositoryPort {
+
+    /**
+     * Saves an intention.
+     *
+     * @param anuncio the intention to save
+     * @return the saved intention
+     */
+    Anuncio salvar(Anuncio anuncio);
+
+    /**
+     * Finds an intention by ID.
+     *
+     * @param id the intention ID
+     * @return the intention if found
+     */
+    Optional<Anuncio> buscarPorId(String id);
+
+    /**
+     * Finds all intentions by user ID.
+     *
+     * @param usuarioId the user ID
+     * @return list of intentions
+     */
+    List<Anuncio> buscarPorUsuarioId(UUID usuarioId);
+
+    /**
+     * Searches intentions with filters.
+     *
+     * @param status the status filter
+     * @param tipo the vehicle type filter
+     * @param marcaCodigo the brand code filter
+     * @param modeloCodigo the model code filter
+     * @param ano the year filter (matches if in anos array)
+     * @param precoMinimo the minimum price filter
+     * @param cidade the city filter
+     * @param estado the state filter
+     * @param pagina the page number
+     * @param tamanho the page size
+     * @return paginated results
+     */
+    ResultadoBusca buscar(
+        StatusAnuncio status,
+        TipoVeiculo tipo,
+        String marcaCodigo,
+        String modeloCodigo,
+        Integer ano,
+        BigDecimal precoMinimo,
+        String cidade,
+        String estado,
+        int pagina,
+        int tamanho
+    );
+
+    /**
+     * Counts intentions by status.
+     *
+     * @param status the status
+     * @return the count
+     */
+    long contarPorStatus(StatusAnuncio status);
+
+    /**
+     * Deletes an intention by ID.
+     *
+     * @param id the intention ID
+     */
+    void deletar(String id);
+
+    /**
+     * Search result wrapper.
+     */
+    record ResultadoBusca(
+        List<Anuncio> anuncios,
+        long total
+    ) {}
+}
+
+
+

@@ -1,0 +1,278 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Heart,
+  Share2,
+  MessageCircle,
+  Calendar,
+  Palette,
+  DollarSign,
+  Settings,
+  Fuel,
+  Eye,
+  MapPin,
+  Verified,
+  Instagram,
+  Facebook,
+  Phone,
+} from "lucide-react";
+import { Button, Card, CardContent, Badge, Avatar } from "@/components/ui";
+import { formatCurrency, formatRelativeTime, vehicleTypeLabels, getWhatsAppLink, getInstagramLink } from "@/lib/utils";
+import type { Anuncio } from "@/types";
+
+interface IntentionDetailsClientProps {
+  initialData: Anuncio;
+}
+
+export function IntentionDetailsClient({ initialData }: IntentionDetailsClientProps) {
+  const router = useRouter();
+  const [isSaved, setIsSaved] = useState(false);
+  const intention = initialData;
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({
+        title: `Procuro ${intention.veiculoInfo.marca} ${intention.veiculoInfo.modelo}`,
+        text: intention.observacoes || "Confira esta intenção de compra",
+        url: window.location.href,
+      });
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const whatsappMessage = `Olá! Vi sua intenção de compra do ${intention.veiculoInfo.marca} ${intention.veiculoInfo.modelo} no TeAchei e gostaria de fazer uma proposta.`;
+
+  // Placeholder image
+  const vehicleImage = "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&h=600&fit=crop";
+
+  const specs = [
+    {
+      icon: Calendar,
+      label: "Ano",
+      value: intention.anoMinimo && intention.anoMaximo
+        ? `${intention.anoMinimo} - ${intention.anoMaximo}`
+        : intention.anoMinimo || intention.anoMaximo || "Qualquer",
+    },
+    {
+      icon: DollarSign,
+      label: "Orçamento",
+      value: intention.precoMaximo ? `Até ${formatCurrency(intention.precoMaximo)}` : "A combinar",
+    },
+    {
+      icon: Palette,
+      label: "Cores",
+      value: intention.cores.length > 0 ? intention.cores.join(", ") : "Qualquer",
+    },
+    {
+      icon: Settings,
+      label: "Transmissão",
+      value: intention.transmissao || "Qualquer",
+    },
+    {
+      icon: Fuel,
+      label: "Combustível",
+      value: intention.combustivel || "Qualquer",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-sm border-b border-border">
+        <div className="flex items-center justify-between h-16 px-4 lg:px-6 max-w-4xl mx-auto">
+          <button
+            onClick={() => router.back()}
+            className="p-2 -ml-2 rounded-full text-muted hover:text-foreground hover:bg-muted/10 transition-colors"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsSaved(!isSaved)}
+              className={`p-2 rounded-full transition-colors ${
+                isSaved ? "bg-error text-white" : "text-muted hover:text-foreground hover:bg-muted/10"
+              }`}
+            >
+              <Heart size={22} fill={isSaved ? "currentColor" : "none"} />
+            </button>
+            <button
+              onClick={handleShare}
+              className="p-2 rounded-full text-muted hover:text-foreground hover:bg-muted/10 transition-colors"
+            >
+              <Share2 size={22} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto pb-24">
+        {/* Hero Image */}
+        <div className="relative h-64 lg:h-80">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${vehicleImage})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          
+          {/* Badges */}
+          <div className="absolute top-4 left-4 flex gap-2">
+            <Badge variant="default" className="bg-primary text-white">
+              {vehicleTypeLabels[intention.veiculoInfo.tipoVeiculo]}
+            </Badge>
+          </div>
+        </div>
+
+        <div className="px-4 lg:px-6 -mt-8 relative z-10">
+          {/* Title Section */}
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground mb-1">
+                    {intention.veiculoInfo.marca} {intention.veiculoInfo.modelo}
+                  </h1>
+                  <p className="text-muted flex items-center gap-2">
+                    <Eye size={16} />
+                    {intention.visualizacoes} visualizações • {formatRelativeTime(intention.createdAt)}
+                  </p>
+                </div>
+                {intention.precoMaximo && (
+                  <div className="text-right">
+                    <p className="text-sm text-muted">Orçamento</p>
+                    <p className="text-xl font-bold text-primary">
+                      {formatCurrency(intention.precoMaximo)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Specs Grid */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {specs.map((spec, index) => {
+                  const Icon = spec.icon;
+                  return (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-background rounded-xl">
+                      <div className="p-2 bg-muted/10 rounded-lg">
+                        <Icon size={18} className="text-muted" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted">{spec.label}</p>
+                        <p className="font-medium text-foreground text-sm">{spec.value}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notes Section */}
+          {intention.observacoes && (
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 className="font-semibold text-foreground mb-3">Observações do comprador</h2>
+                <p className="text-foreground whitespace-pre-wrap">{intention.observacoes}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Buyer Profile */}
+          {intention.usuario && (
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 className="font-semibold text-foreground mb-4">Sobre o comprador</h2>
+                
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar src={intention.usuario.avatarUrl} fallback={intention.usuario.nome} size="lg" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Link href={`/user/${intention.usuario.id}`} className="font-bold text-foreground hover:text-primary transition-colors">
+                        {intention.usuario.nome}
+                      </Link>
+                      {intention.usuario.verified && (
+                        <Verified className="text-primary" size={18} />
+                      )}
+                    </div>
+                    {(intention.usuario.cidade || intention.usuario.estado) && (
+                      <p className="text-sm text-muted flex items-center gap-1">
+                        <MapPin size={14} />
+                        {[intention.usuario.cidade, intention.usuario.estado].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {intention.usuario.bio && (
+                  <p className="text-foreground text-sm mb-4">{intention.usuario.bio}</p>
+                )}
+
+                {/* Social Links */}
+                <div className="flex items-center gap-3">
+                  {intention.usuario.instagramUrl && (
+                    <a
+                      href={getInstagramLink(intention.usuario.instagramUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <Instagram size={20} />
+                    </a>
+                  )}
+                  {intention.usuario.facebookUrl && (
+                    <a
+                      href={intention.usuario.facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <Facebook size={20} />
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Fixed CTA */}
+        <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border p-4 z-50">
+          <div className="max-w-4xl mx-auto flex gap-3">
+            {intention.usuario?.telefone && (
+              <a
+                href={getWhatsAppLink(intention.usuario.telefone, whatsappMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="whatsapp" className="w-full" size="lg">
+                  <MessageCircle size={20} />
+                  Enviar proposta
+                </Button>
+              </a>
+            )}
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                if (intention.usuario?.telefone) {
+                  window.location.href = `tel:${intention.usuario.telefone}`;
+                }
+              }}
+            >
+              <Phone size={20} />
+            </Button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+
+
