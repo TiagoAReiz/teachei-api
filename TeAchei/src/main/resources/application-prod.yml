@@ -1,0 +1,12 @@
+# Production Profile Configuration
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+# Ensure tables are created on first run
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
