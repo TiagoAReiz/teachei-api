@@ -1,4 +1,7 @@
 # Production Profile Configuration
+server:
+  port: 80
+
 spring:
   jpa:
     hibernate:

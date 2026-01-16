@@ -157,12 +157,6 @@ jobs:
               APP_BASE_URL=https://teachei-api.icybush-e691b538.eastus2.azurecontainerapps.io \
               FRONTEND_URL=https://teachei.vercel.app
           
-          # Configure ingress to target port 8080
-          az containerapp ingress update \
-            --name ${{ env.CONTAINER_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --target-port 8080
-          
           # Get the FQDN
           FQDN=$(az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)
           echo "url=https://$FQDN" >> $GITHUB_OUTPUT
