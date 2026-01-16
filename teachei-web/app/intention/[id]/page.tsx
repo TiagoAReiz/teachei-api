@@ -34,9 +34,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `Procuro ${intention.veiculoInfo.marca} ${intention.veiculoInfo.modelo} - ${siteConfig.name}`;
+  const title = `Procuro ${intention.veiculo.marcaNome} ${intention.veiculo.modeloNome} - ${siteConfig.name}`;
+  const anos = intention.veiculo.anos;
+  const anosText = anos.length > 0 
+    ? (anos.length === 1 ? anos[0].toString() : `${Math.min(...anos)}-${Math.max(...anos)}`) 
+    : "";
   const description = intention.observacoes 
-    || `Comprador procura ${intention.veiculoInfo.marca} ${intention.veiculoInfo.modelo} ${intention.anoMinimo && intention.anoMaximo ? `${intention.anoMinimo}-${intention.anoMaximo}` : ""} ${intention.precoMaximo ? `por até R$ ${intention.precoMaximo.toLocaleString("pt-BR")}` : ""}`.trim();
+    || `Comprador procura ${intention.veiculo.marcaNome} ${intention.veiculo.modeloNome} ${anosText} ${intention.veiculo.precoMaximo ? `por até R$ ${intention.veiculo.precoMaximo.toLocaleString("pt-BR")}` : ""}`.trim();
 
   return {
     title,

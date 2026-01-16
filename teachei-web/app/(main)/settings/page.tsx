@@ -14,8 +14,8 @@ const profileSchema = z.object({
   cidade: z.string().optional(),
   estado: z.string().optional(),
   bio: z.string().max(500, "Bio deve ter no máximo 500 caracteres").optional(),
-  instagramUrl: z.string().optional(),
-  facebookUrl: z.string().optional(),
+  instagram: z.string().optional(),
+  facebook: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -36,8 +36,8 @@ export default function SettingsPage() {
       cidade: user?.cidade || "",
       estado: user?.estado || "",
       bio: user?.bio || "",
-      instagramUrl: user?.instagramUrl || "",
-      facebookUrl: user?.facebookUrl || "",
+      instagram: user?.instagram || "",
+      facebook: user?.facebook || "",
     },
   });
 
@@ -105,19 +105,19 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                {...register("instagramUrl")}
+                {...register("instagram")}
                 label="Instagram"
                 placeholder="@seuusuario"
                 icon={<Instagram size={20} />}
-                error={errors.instagramUrl?.message}
+                error={errors.instagram?.message}
               />
 
               <Input
-                {...register("facebookUrl")}
+                {...register("facebook")}
                 label="Facebook"
                 placeholder="URL do perfil"
                 icon={<Facebook size={20} />}
-                error={errors.facebookUrl?.message}
+                error={errors.facebook?.message}
               />
             </div>
 

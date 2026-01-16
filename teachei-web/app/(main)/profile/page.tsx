@@ -55,9 +55,9 @@ export default function ProfilePage() {
 
               {/* Social Links */}
               <div className="flex items-center justify-center sm:justify-start gap-3 mb-4">
-                {user.instagramUrl && (
+                {user.instagram && (
                   <a
-                    href={getInstagramLink(user.instagramUrl)}
+                    href={getInstagramLink(user.instagram)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
@@ -65,9 +65,9 @@ export default function ProfilePage() {
                     <Instagram size={20} />
                   </a>
                 )}
-                {user.facebookUrl && (
+                {user.facebook && (
                   <a
-                    href={user.facebookUrl}
+                    href={user.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"

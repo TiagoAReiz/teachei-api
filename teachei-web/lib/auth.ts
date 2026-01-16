@@ -7,8 +7,8 @@ import type {
   Perfil,
   AtualizarPerfilRequest,
   User,
-  perfilToUser,
 } from "@/types";
+import { perfilToUser } from "@/types";
 
 // Combined login result with user data
 export interface LoginResult {

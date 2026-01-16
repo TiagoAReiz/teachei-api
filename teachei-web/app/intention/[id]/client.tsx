@@ -36,7 +36,7 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
-        title: `Procuro ${intention.veiculoInfo.marca} ${intention.veiculoInfo.modelo}`,
+        title: `Procuro ${intention.veiculo.marcaNome} ${intention.veiculo.modeloNome}`,
         text: intention.observacoes || "Confira esta intenção de compra",
         url: window.location.href,
       });
@@ -45,38 +45,36 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
     }
   };
 
-  const whatsappMessage = `Olá! Vi sua intenção de compra do ${intention.veiculoInfo.marca} ${intention.veiculoInfo.modelo} no TeAchei e gostaria de fazer uma proposta.`;
+  const whatsappMessage = `Olá! Vi sua intenção de compra do ${intention.veiculo.marcaNome} ${intention.veiculo.modeloNome} no TeAchei e gostaria de fazer uma proposta.`;
 
   // Placeholder image
   const vehicleImage = "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&h=600&fit=crop";
+
+  // Format anos display
+  const anosDisplay = (() => {
+    const anos = intention.veiculo.anos;
+    if (!anos || anos.length === 0) return "Qualquer";
+    if (anos.length === 1) return anos[0].toString();
+    const min = Math.min(...anos);
+    const max = Math.max(...anos);
+    return min === max ? min.toString() : `${min} - ${max}`;
+  })();
 
   const specs = [
     {
       icon: Calendar,
       label: "Ano",
-      value: intention.anoMinimo && intention.anoMaximo
-        ? `${intention.anoMinimo} - ${intention.anoMaximo}`
-        : intention.anoMinimo || intention.anoMaximo || "Qualquer",
+      value: anosDisplay,
     },
     {
       icon: DollarSign,
       label: "Orçamento",
-      value: intention.precoMaximo ? `Até ${formatCurrency(intention.precoMaximo)}` : "A combinar",
+      value: intention.veiculo.precoMaximo ? `Até ${formatCurrency(intention.veiculo.precoMaximo)}` : "A combinar",
     },
     {
       icon: Palette,
       label: "Cores",
-      value: intention.cores.length > 0 ? intention.cores.join(", ") : "Qualquer",
-    },
-    {
-      icon: Settings,
-      label: "Transmissão",
-      value: intention.transmissao || "Qualquer",
-    },
-    {
-      icon: Fuel,
-      label: "Combustível",
-      value: intention.combustivel || "Qualquer",
+      value: intention.veiculo.cores.length > 0 ? intention.veiculo.cores.join(", ") : "Qualquer",
     },
   ];
 
@@ -123,7 +121,7 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
           {/* Badges */}
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge variant="default" className="bg-primary text-white">
-              {vehicleTypeLabels[intention.veiculoInfo.tipoVeiculo]}
+              {vehicleTypeLabels[intention.tipo]}
             </Badge>
           </div>
         </div>
@@ -135,18 +133,18 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground mb-1">
-                    {intention.veiculoInfo.marca} {intention.veiculoInfo.modelo}
+                    {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
                   </h1>
                   <p className="text-muted flex items-center gap-2">
                     <Eye size={16} />
-                    {intention.visualizacoes} visualizações • {formatRelativeTime(intention.createdAt)}
+                    {formatRelativeTime(intention.criadoEm)}
                   </p>
                 </div>
-                {intention.precoMaximo && (
+                {intention.veiculo.precoMaximo && (
                   <div className="text-right">
                     <p className="text-sm text-muted">Orçamento</p>
                     <p className="text-xl font-bold text-primary">
-                      {formatCurrency(intention.precoMaximo)}
+                      {formatCurrency(intention.veiculo.precoMaximo)}
                     </p>
                   </div>
                 )}
@@ -182,56 +180,29 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
             </Card>
           )}
 
-          {/* Buyer Profile */}
-          {intention.usuario && (
+          {/* Contact Info */}
+          {intention.contato && (
             <Card className="mb-6">
               <CardContent className="p-6">
-                <h2 className="font-semibold text-foreground mb-4">Sobre o comprador</h2>
+                <h2 className="font-semibold text-foreground mb-4">Contato</h2>
                 
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar src={intention.usuario.avatarUrl} fallback={intention.usuario.nome} size="lg" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/user/${intention.usuario.id}`} className="font-bold text-foreground hover:text-primary transition-colors">
-                        {intention.usuario.nome}
-                      </Link>
-                      {intention.usuario.verified && (
-                        <Verified className="text-primary" size={18} />
-                      )}
-                    </div>
-                    {(intention.usuario.cidade || intention.usuario.estado) && (
-                      <p className="text-sm text-muted flex items-center gap-1">
-                        <MapPin size={14} />
-                        {[intention.usuario.cidade, intention.usuario.estado].filter(Boolean).join(", ")}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {intention.usuario.bio && (
-                  <p className="text-foreground text-sm mb-4">{intention.usuario.bio}</p>
+                {(intention.contato.cidade || intention.contato.estado) && (
+                  <p className="text-muted flex items-center gap-2 mb-4">
+                    <MapPin size={16} />
+                    {intention.contato.localizacao || [intention.contato.cidade, intention.contato.estado].filter(Boolean).join(", ")}
+                  </p>
                 )}
 
                 {/* Social Links */}
                 <div className="flex items-center gap-3">
-                  {intention.usuario.instagramUrl && (
+                  {intention.contato.instagram && (
                     <a
-                      href={getInstagramLink(intention.usuario.instagramUrl)}
+                      href={getInstagramLink(intention.contato.instagram)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
                     >
                       <Instagram size={20} />
-                    </a>
-                  )}
-                  {intention.usuario.facebookUrl && (
-                    <a
-                      href={intention.usuario.facebookUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
-                    >
-                      <Facebook size={20} />
                     </a>
                   )}
                 </div>
@@ -243,9 +214,21 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
         {/* Fixed CTA */}
         <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border p-4 z-50">
           <div className="max-w-4xl mx-auto flex gap-3">
-            {intention.usuario?.telefone && (
+            {intention.contato?.whatsappLink ? (
               <a
-                href={getWhatsAppLink(intention.usuario.telefone, whatsappMessage)}
+                href={intention.contato.whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="whatsapp" className="w-full" size="lg">
+                  <MessageCircle size={20} />
+                  Enviar proposta
+                </Button>
+              </a>
+            ) : intention.contato?.whatsapp && (
+              <a
+                href={getWhatsAppLink(intention.contato.whatsapp, whatsappMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1"
@@ -256,17 +239,17 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
                 </Button>
               </a>
             )}
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                if (intention.usuario?.telefone) {
-                  window.location.href = `tel:${intention.usuario.telefone}`;
-                }
-              }}
-            >
-              <Phone size={20} />
-            </Button>
+            {intention.contato?.whatsapp && (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  window.location.href = `tel:${intention.contato.whatsapp}`;
+                }}
+              >
+                <Phone size={20} />
+              </Button>
+            )}
           </div>
         </div>
       </main>

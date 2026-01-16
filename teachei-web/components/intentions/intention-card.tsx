@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Eye, MessageCircle, Share2 } from "lucide-react";
-import { Card, CardContent, Badge, Avatar } from "@/components/ui";
+import { Heart, Share2 } from "lucide-react";
+import { Card, CardContent, Badge } from "@/components/ui";
 import { cn, formatCurrency, formatRelativeTime, vehicleTypeLabels } from "@/lib/utils";
 import type { Anuncio } from "@/types";
 
@@ -29,7 +29,7 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
     
     if (navigator.share) {
       await navigator.share({
-        title: `Procuro ${intention.veiculoInfo.modelo}`,
+        title: `Procuro ${intention.veiculo.modeloNome}`,
         text: `Confira esta intenção de compra no TeAchei`,
         url: `${window.location.origin}/intention/${intention.id}`,
       });
@@ -37,6 +37,16 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
       await navigator.clipboard.writeText(`${window.location.origin}/intention/${intention.id}`);
     }
   };
+
+  // Format anos display
+  const anosDisplay = (() => {
+    const anos = intention.veiculo.anos;
+    if (!anos || anos.length === 0) return "Qualquer ano";
+    if (anos.length === 1) return anos[0].toString();
+    const min = Math.min(...anos);
+    const max = Math.max(...anos);
+    return min === max ? min.toString() : `${min} - ${max}`;
+  })();
 
   // Generate a placeholder vehicle image URL
   const vehicleImage = `https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=300&fit=crop`;
@@ -54,7 +64,7 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
           
           {/* Vehicle Type Badge */}
           <Badge variant="default" className="absolute top-3 left-3 bg-primary text-white">
-            {vehicleTypeLabels[intention.veiculoInfo.tipoVeiculo]}
+            {vehicleTypeLabels[intention.tipo]}
           </Badge>
 
           {/* Actions */}
@@ -79,10 +89,10 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
           </div>
 
           {/* Price */}
-          {intention.precoMaximo && (
+          {intention.veiculo.precoMaximo && (
             <div className="absolute bottom-3 right-3">
               <span className="bg-white/90 backdrop-blur-sm text-foreground font-bold px-3 py-1 rounded-full text-sm">
-                até {formatCurrency(intention.precoMaximo)}
+                até {formatCurrency(intention.veiculo.precoMaximo)}
               </span>
             </div>
           )}
@@ -92,56 +102,40 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
           {/* Title */}
           <div>
             <h3 className="font-bold text-lg text-foreground line-clamp-1">
-              {intention.veiculoInfo.marca} {intention.veiculoInfo.modelo}
+              {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
             </h3>
             <p className="text-sm text-muted">
-              {intention.anoMinimo && intention.anoMaximo
-                ? `${intention.anoMinimo} - ${intention.anoMaximo}`
-                : intention.anoMinimo || intention.anoMaximo || "Qualquer ano"}
+              {anosDisplay}
             </p>
           </div>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
-            {intention.cores.slice(0, 3).map((cor) => (
+            {intention.veiculo.cores.slice(0, 3).map((cor) => (
               <Badge key={cor} variant="outline" size="sm">
                 {cor}
               </Badge>
             ))}
-            {intention.cores.length > 3 && (
+            {intention.veiculo.cores.length > 3 && (
               <Badge variant="outline" size="sm">
-                +{intention.cores.length - 3}
+                +{intention.veiculo.cores.length - 3}
               </Badge>
             )}
           </div>
 
-          {/* User Info & Stats */}
+          {/* Location & Time */}
           <div className="flex items-center justify-between pt-2 border-t border-border">
             <div className="flex items-center gap-2">
-              <Avatar
-                src={intention.usuario?.avatarUrl}
-                fallback={intention.usuario?.nome}
-                size="sm"
-              />
               <div>
-                <p className="text-sm font-medium text-foreground line-clamp-1">
-                  {intention.usuario?.nome || "Usuário"}
-                </p>
+                {intention.contato?.localizacao || intention.contato?.cidade ? (
+                  <p className="text-sm font-medium text-foreground line-clamp-1">
+                    {intention.contato.localizacao || [intention.contato.cidade, intention.contato.estado].filter(Boolean).join(", ")}
+                  </p>
+                ) : null}
                 <p className="text-xs text-muted">
-                  {formatRelativeTime(intention.createdAt)}
+                  {formatRelativeTime(intention.criadoEm)}
                 </p>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3 text-muted">
-              <span className="flex items-center gap-1 text-xs">
-                <Eye size={14} />
-                {intention.visualizacoes}
-              </span>
-              <span className="flex items-center gap-1 text-xs">
-                <MessageCircle size={14} />
-                {intention.propostas}
-              </span>
             </div>
           </div>
         </CardContent>

@@ -38,19 +38,30 @@ export default function CreateReviewPage() {
   }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
 
   const handleSubmit = () => {
-    if (!tipoVeiculo || !marcaNome || !modeloNome) return;
+    if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
+
+    // Build anos array from anoMinimo and anoMaximo
+    const anos: number[] = [];
+    if (anoMinimo && anoMaximo) {
+      for (let year = anoMinimo; year <= anoMaximo; year++) {
+        anos.push(year);
+      }
+    } else if (anoMinimo) {
+      anos.push(anoMinimo);
+    } else if (anoMaximo) {
+      anos.push(anoMaximo);
+    }
 
     createIntention(
       {
-        tipoVeiculo,
-        marca: marcaNome,
-        modelo: modeloNome,
-        anoMinimo: anoMinimo || undefined,
-        anoMaximo: anoMaximo || undefined,
+        tipo: tipoVeiculo,
+        marcaCodigo: marcaCodigo || undefined,
+        marcaNome,
+        modeloCodigo: modeloCodigo || undefined,
+        modeloNome,
+        anos,
         cores,
-        precoMaximo: precoMaximo || undefined,
-        transmissao: transmissao || undefined,
-        combustivel: combustivel || undefined,
+        precoMaximo,
         observacoes: observacoes || undefined,
       },
       {
