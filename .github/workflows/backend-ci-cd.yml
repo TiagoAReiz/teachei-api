@@ -133,10 +133,12 @@ jobs:
       - name: Deploy to Azure Container Apps
         id: deploy 
         run: |
-          # Update container app with new image, ingress port, and environment variables
+          # Update the existing container with new image and environment variables
+          # Using --container-name to target the specific container
           az containerapp update \
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
+            --container-name simple-hello-world-container \
             --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             --set-env-vars \
               SPRING_PROFILES_ACTIVE=prod \
