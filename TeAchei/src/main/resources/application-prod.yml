@@ -1,6 +1,6 @@
 # Production Profile Configuration
 server:
-  port: 80
+  port: 8080
 
 spring:
   jpa:
