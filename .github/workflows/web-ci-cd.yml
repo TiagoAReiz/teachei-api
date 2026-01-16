@@ -1,4 +1,4 @@
-name: Web Frontend CI/CD
+name: Web Frontend CI
 
 on:
   push:
@@ -13,10 +13,10 @@ on:
 
 jobs:
   # ========================================
-  # Job 1: Build and Test
+  # Build and Lint (Vercel handles deployment automatically)
   # ========================================
-  build-and-test:
-    name: Build & Test
+  build-and-lint:
+    name: Build & Lint
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,25 +43,3 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://teachei-api.azurecontainerapps.io/api' }}
-
-  # ========================================
-  # Job 2: Deploy to Vercel (recommended for Next.js)
-  # ========================================
-  deploy-vercel:
-    name: Deploy to Vercel
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./teachei-web
-          vercel-args: '--prod'
