@@ -1,3 +1,4 @@
+# TeAchei API Configuration
 spring:
   application:
     name: teachei-api
