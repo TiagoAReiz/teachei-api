@@ -13,8 +13,8 @@ public interface AutenticarUsuarioUseCase {
      */
     AuthResult executar(AutenticarUsuarioCommand command);
 
-    /**
-     * Command for user authentication.
+    /** 
+     * Command for user authentication.a
      */
     record AutenticarUsuarioCommand(
         String email,
