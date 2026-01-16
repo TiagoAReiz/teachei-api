@@ -133,7 +133,7 @@ jobs:
       - name: Deploy to Azure Container Apps
         id: deploy 
         run: |
-          # Update container app with new image and environment variables
+          # Update container app with new image, ingress port, and environment variables
           az containerapp update \
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
@@ -154,6 +154,12 @@ jobs:
               MERCADOPAGO_WEBHOOK_SECRET="${{ secrets.MERCADOPAGO_WEBHOOK_SECRET }}" \
               APP_BASE_URL=https://teachei-api.icybush-e691b538.eastus2.azurecontainerapps.io \
               FRONTEND_URL=https://teachei.vercel.app
+          
+          # Configure ingress to target port 8080
+          az containerapp ingress update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --target-port 8080
           
           # Get the FQDN
           FQDN=$(az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)
