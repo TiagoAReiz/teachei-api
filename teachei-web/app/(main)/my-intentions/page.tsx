@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, MessageCircle, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { Button, Card, CardContent, Badge } from "@/components/ui";
 import { useMyIntentions } from "@/hooks/use-intentions";
 import { formatCurrency, formatRelativeTime, statusLabels, vehicleTypeLabels } from "@/lib/utils";
@@ -96,6 +96,12 @@ export default function MyIntentionsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredIntentions?.map((intention) => {
             const StatusIcon = statusIcons[intention.status];
+            const anos = intention.veiculo.anos;
+            const anoDisplay = anos.length > 1 
+              ? `${Math.min(...anos)} - ${Math.max(...anos)}`
+              : anos.length === 1 
+                ? anos[0].toString()
+                : "Qualquer ano";
             
             return (
               <Card key={intention.id} hoverable onClick={() => router.push(`/intention/${intention.id}`)}>
@@ -104,10 +110,10 @@ export default function MyIntentionsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <Badge variant="outline" size="sm">
-                        {vehicleTypeLabels[intention.veiculoInfo.tipoVeiculo]}
+                        {vehicleTypeLabels[intention.tipo]}
                       </Badge>
                       <h3 className="font-bold text-lg text-foreground mt-2">
-                        {intention.veiculoInfo.marca} {intention.veiculoInfo.modelo}
+                        {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
                       </h3>
                     </div>
                     <Badge variant={statusBadgeVariants[intention.status]} size="sm">
@@ -118,26 +124,16 @@ export default function MyIntentionsPage() {
 
                   {/* Info */}
                   <div className="text-sm text-muted">
-                    {intention.anoMinimo && intention.anoMaximo
-                      ? `${intention.anoMinimo} - ${intention.anoMaximo}`
-                      : intention.anoMinimo || intention.anoMaximo || "Qualquer ano"}
-                    {intention.precoMaximo && (
-                      <> • até {formatCurrency(intention.precoMaximo)}</>
+                    {anoDisplay}
+                    {intention.veiculo.precoMaximo && (
+                      <> • até {formatCurrency(intention.veiculo.precoMaximo)}</>
                     )}
                   </div>
 
                   {/* Stats */}
                   <div className="flex items-center gap-4 pt-2 border-t border-border text-muted text-sm">
-                    <span className="flex items-center gap-1">
-                      <Eye size={16} />
-                      {intention.visualizacoes} views
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MessageCircle size={16} />
-                      {intention.propostas} propostas
-                    </span>
                     <span className="ml-auto">
-                      {formatRelativeTime(intention.createdAt)}
+                      {formatRelativeTime(intention.criadoEm)}
                     </span>
                   </div>
 
