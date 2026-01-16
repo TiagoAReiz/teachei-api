@@ -131,7 +131,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Container Apps
-        id: deploy
+        id: deploy 
         run: |
           # Update container app with new image and environment variables
           az containerapp update \
