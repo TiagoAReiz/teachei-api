@@ -132,30 +132,32 @@ jobs:
 
       - name: Deploy to Azure Container Apps
         id: deploy
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: ${{ env.CONTAINER_APP_NAME }}
-          imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          registryUrl: ${{ secrets.ACR_LOGIN_SERVER }}
-          registryUsername: ${{ secrets.ACR_USERNAME }}
-          registryPassword: ${{ secrets.ACR_PASSWORD }}
-          environmentVariables: |
-            SPRING_PROFILES_ACTIVE=prod
-            POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
-            POSTGRES_PORT=5432
-            POSTGRES_DB=teachei
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            COSMOS_ENDPOINT=${{ secrets.COSMOS_ENDPOINT }}
-            COSMOS_KEY=${{ secrets.COSMOS_KEY }}
-            COSMOS_DATABASE=teachei
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            MERCADOPAGO_ACCESS_TOKEN=${{ secrets.MERCADOPAGO_ACCESS_TOKEN }}
-            MERCADOPAGO_PUBLIC_KEY=${{ secrets.MERCADOPAGO_PUBLIC_KEY }}
-            MERCADOPAGO_WEBHOOK_SECRET=${{ secrets.MERCADOPAGO_WEBHOOK_SECRET }}
-            APP_BASE_URL=https://teachei-api.azurecontainerapps.io
-            FRONTEND_URL=https://teachei.vercel.app
+        run: |
+          # Update container app with new image and environment variables
+          az containerapp update \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            --set-env-vars \
+              SPRING_PROFILES_ACTIVE=prod \
+              POSTGRES_HOST="${{ secrets.POSTGRES_HOST }}" \
+              POSTGRES_PORT=5432 \
+              POSTGRES_DB=teachei \
+              POSTGRES_USER="${{ secrets.POSTGRES_USER }}" \
+              POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+              COSMOS_ENDPOINT="${{ secrets.COSMOS_ENDPOINT }}" \
+              COSMOS_KEY="${{ secrets.COSMOS_KEY }}" \
+              COSMOS_DATABASE=teachei \
+              JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              MERCADOPAGO_ACCESS_TOKEN="${{ secrets.MERCADOPAGO_ACCESS_TOKEN }}" \
+              MERCADOPAGO_PUBLIC_KEY="${{ secrets.MERCADOPAGO_PUBLIC_KEY }}" \
+              MERCADOPAGO_WEBHOOK_SECRET="${{ secrets.MERCADOPAGO_WEBHOOK_SECRET }}" \
+              APP_BASE_URL=https://teachei-api.icybush-e691b538.eastus2.azurecontainerapps.io \
+              FRONTEND_URL=https://teachei.vercel.app
+          
+          # Get the FQDN
+          FQDN=$(az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)
+          echo "url=https://$FQDN" >> $GITHUB_OUTPUT
 
       - name: Output deployment URL
         run: |
