@@ -33,11 +33,11 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Expose port
-EXPOSE 80
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/api/actuator/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:8080/api/actuator/health || exit 1
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
