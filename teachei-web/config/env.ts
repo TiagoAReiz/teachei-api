@@ -6,37 +6,37 @@ export const env = {
   IS_PRODUCTION: process.env.NODE_ENV === "production",
 } as const;
 
-// API endpoints (aligned with backend /v1 prefix)
+// API endpoints (aligned with backend /api/v1 prefix)
 export const API_ENDPOINTS = {
   // Auth
-  AUTH_LOGIN: "/v1/auth/login",
-  AUTH_REGISTER: "/v1/auth/registrar",
+  AUTH_LOGIN: "/api/v1/auth/login",
+  AUTH_REGISTER: "/api/v1/auth/registrar",
 
   // Profile
-  PROFILE: "/v1/perfil",
-  PROFILE_BY_ID: (id: string) => `/v1/perfil/${id}`,
+  PROFILE: "/api/v1/perfil",
+  PROFILE_BY_ID: (id: string) => `/api/v1/perfil/${id}`,
 
   // Intentions (Anuncios)
-  INTENTIONS: "/v1/anuncios",
-  INTENTION_BY_ID: (id: string) => `/v1/anuncios/${id}`,
-  MY_INTENTIONS: "/v1/anuncios/meus",
+  INTENTIONS: "/api/v1/anuncios",
+  INTENTION_BY_ID: (id: string) => `/api/v1/anuncios/${id}`,
+  MY_INTENTIONS: "/api/v1/anuncios/meus",
 
   // Vehicles (FIPE)
-  VEHICLE_BRANDS: (tipo: string) => `/v1/veiculos/${tipo}/marcas`,
+  VEHICLE_BRANDS: (tipo: string) => `/api/v1/veiculos/${tipo}/marcas`,
   VEHICLE_MODELS: (tipo: string, marcaCodigo: string) =>
-    `/v1/veiculos/${tipo}/marcas/${marcaCodigo}/modelos`,
+    `/api/v1/veiculos/${tipo}/marcas/${marcaCodigo}/modelos`,
   VEHICLE_YEARS: (tipo: string, marcaCodigo: string, modeloCodigo: string) =>
-    `/v1/veiculos/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`,
+    `/api/v1/veiculos/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`,
   VEHICLE_PRICE: (
     tipo: string,
     marcaCodigo: string,
     modeloCodigo: string,
     anoCodigo: string
   ) =>
-    `/v1/veiculos/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}/preco`,
+    `/api/v1/veiculos/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}/preco`,
 
   // Payments
   PAYMENT_PREFERENCE: (anuncioId: string) =>
-    `/v1/pagamentos/preferencia/${anuncioId}`,
-  PAYMENT_WEBHOOK: "/v1/pagamentos/webhook",
+    `/api/v1/pagamentos/preferencia/${anuncioId}`,
+  PAYMENT_WEBHOOK: "/api/v1/pagamentos/webhook",
 } as const;
