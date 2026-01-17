@@ -1,11 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { IntentionGrid, IntentionFilters } from "@/components/intentions";
 import { useInfiniteIntentions } from "@/hooks/use-intentions";
 import type { TipoVeiculo, IntentionFilters as Filters } from "@/types";
 
-export default function HomePage() {
+function HomeContent() {
   const searchParams = useSearchParams();
   
   const filters: Omit<Filters, "page"> = {
@@ -48,6 +49,30 @@ export default function HomePage() {
         isLoadingMore={isFetchingNextPage}
       />
     </div>
+  );
+}
+
+function HomeLoading() {
+  return (
+    <div className="p-4 lg:p-6">
+      <div className="mb-6">
+        <div className="h-8 w-48 bg-muted/20 rounded animate-pulse mb-2" />
+        <div className="h-5 w-72 bg-muted/20 rounded animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-64 bg-muted/20 rounded-2xl animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
+    </Suspense>
   );
 }
 
