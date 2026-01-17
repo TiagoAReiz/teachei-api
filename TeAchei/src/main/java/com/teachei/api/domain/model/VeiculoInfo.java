@@ -74,6 +74,21 @@ public class VeiculoInfo {
             anos.size() == 1 ? anos.get(0).toString() : anos.get(0) + "-" + anos.get(anos.size() - 1));
     }
 
+    /**
+     * Updates the editable fields of the vehicle info.
+     */
+    public void atualizar(List<Integer> anos, List<String> cores, BigDecimal precoMaximo) {
+        if (anos != null && !anos.isEmpty()) {
+            this.anos = new ArrayList<>(anos);
+        }
+        if (cores != null && !cores.isEmpty()) {
+            this.cores = new ArrayList<>(cores);
+        }
+        if (precoMaximo != null && precoMaximo.compareTo(BigDecimal.ZERO) > 0) {
+            this.precoMaximo = precoMaximo;
+        }
+    }
+
     // Getters and Setters
     public String getMarcaCodigo() {
         return marcaCodigo;

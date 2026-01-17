@@ -63,6 +63,15 @@ export async function apiFetch<T>(
     throw new Error("Unauthorized");
   }
 
+  // Handle 429 - rate limited
+  if (response.status === 429) {
+    const retryAfter = response.headers.get("Retry-After");
+    const message = retryAfter 
+      ? `Muitas tentativas. Tente novamente em ${retryAfter} segundos.`
+      : "Muitas tentativas. Tente novamente mais tarde.";
+    throw new Error(message);
+  }
+
   // Handle non-2xx responses
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

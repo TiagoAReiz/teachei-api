@@ -36,8 +36,16 @@ public class MercadoPagoWebhookValidator {
      * @param dataId the data.id from the webhook payload
      * @return true if signature is valid, false otherwise
      */
+    @Value("${spring.profiles.active:default}")
+    private String activeProfile;
+
     public boolean validateSignature(String xSignature, String xRequestId, String dataId) {
         if (webhookSecret == null || webhookSecret.isBlank()) {
+            // In production, reject requests without a configured secret
+            if ("prod".equals(activeProfile) || "production".equals(activeProfile)) {
+                log.error("SECURITY: Webhook secret not configured in production! Rejecting request.");
+                return false;
+            }
             log.warn("Webhook secret not configured, skipping signature validation. " +
                      "Configure MERCADOPAGO_WEBHOOK_SECRET for production!");
             return true; // Allow in dev mode without secret

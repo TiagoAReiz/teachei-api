@@ -1,6 +1,7 @@
 package com.teachei.api.adapter.in.web.controller;
 
 import com.teachei.api.adapter.in.web.dto.request.AtualizarPerfilRequest;
+import com.teachei.api.adapter.in.web.dto.response.PerfilPublicoResponse;
 import com.teachei.api.adapter.in.web.dto.response.PerfilResponse;
 import com.teachei.api.application.ports.in.GerenciarPerfilUseCase;
 import com.teachei.api.config.security.CurrentUser;
@@ -28,9 +29,18 @@ public class PerfilController {
     }
 
     @GetMapping("/{usuarioId}")
-    public ResponseEntity<PerfilResponse> buscarPerfil(@PathVariable UUID usuarioId) {
+    public ResponseEntity<?> buscarPerfil(
+            @PathVariable UUID usuarioId,
+            @AuthenticationPrincipal CurrentUser currentUser) {
         var perfil = gerenciarPerfilUseCase.buscarPorUsuario(usuarioId);
-        return ResponseEntity.ok(PerfilResponse.fromDomain(perfil));
+        
+        // If the requester is the owner, return full profile
+        if (currentUser != null && currentUser.getId().equals(usuarioId)) {
+            return ResponseEntity.ok(PerfilResponse.fromDomain(perfil));
+        }
+        
+        // Otherwise, return public profile (no WhatsApp, Instagram, Facebook)
+        return ResponseEntity.ok(PerfilPublicoResponse.fromDomain(perfil));
     }
 
     @PutMapping

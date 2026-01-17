@@ -1,5 +1,6 @@
 package com.teachei.api.adapter.in.web.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record AtualizarPerfilRequest(
@@ -9,10 +10,20 @@ public record AtualizarPerfilRequest(
     @Size(max = 500, message = "Bio deve ter no máximo 500 caracteres")
     String bio,
 
+    @Pattern(regexp = "^$|^\\+?[1-9]\\d{10,14}$", message = "WhatsApp deve estar no formato internacional (ex: +5511999998888)")
     String whatsapp,
+
+    @Pattern(regexp = "^$|^@?[a-zA-Z0-9._]{1,30}$", message = "Instagram deve ser um nome de usuário válido")
     String instagram,
+
+    @Pattern(regexp = "^$|^[a-zA-Z0-9.]{5,50}$|^https?://.*facebook\\.com/.*$", message = "Facebook deve ser um nome de usuário ou URL válida")
     String facebook,
+
+    @Size(max = 100, message = "Cidade deve ter no máximo 100 caracteres")
     String cidade,
+
+    @Size(max = 2, message = "Estado deve ter 2 caracteres (sigla)")
+    @Pattern(regexp = "^$|^[A-Z]{2}$", message = "Estado deve ser uma sigla válida (ex: SP, RJ)")
     String estado
 ) {}
 

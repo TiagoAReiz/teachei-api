@@ -26,7 +26,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle 401 errors
+// Response interceptor - handle 401 and 429 errors
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -35,6 +35,16 @@ api.interceptors.response.use(
       await removeToken();
       router.replace("/(auth)/login");
     }
+    
+    if (error.response?.status === 429) {
+      // Rate limited - extract Retry-After header
+      const retryAfter = error.response.headers?.["retry-after"];
+      const message = retryAfter 
+        ? `Muitas tentativas. Tente novamente em ${retryAfter} segundos.`
+        : "Muitas tentativas. Tente novamente mais tarde.";
+      error.message = message;
+    }
+    
     return Promise.reject(error);
   }
 );

@@ -54,6 +54,10 @@ public class Anuncio {
         this.status = StatusAnuncio.EXPIRADO;
     }
 
+    public void finalizar() {
+        this.status = StatusAnuncio.FINALIZADO;
+    }
+
     public boolean isExpirado() {
         return expiraEm != null && LocalDateTime.now().isAfter(expiraEm);
     }

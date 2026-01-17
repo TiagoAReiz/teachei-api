@@ -193,6 +193,7 @@ export interface PagamentoResponse {
   preferenceId: string;
   initPoint: string;
   sandboxInitPoint?: string;
+  valor: number;
 }
 
 // ============================================
@@ -217,6 +218,8 @@ export interface PaginatedResponse<T> {
   totalPages: number;
   page: number;
   size: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 export interface ApiError {

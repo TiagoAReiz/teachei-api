@@ -67,6 +67,24 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public AtualizarAnuncioUseCase atualizarAnuncioUseCase(
+            AnuncioRepositoryPort anuncioRepository) {
+        return new AtualizarAnuncioUseCaseImpl(anuncioRepository);
+    }
+
+    @Bean
+    public ExcluirAnuncioUseCase excluirAnuncioUseCase(
+            AnuncioRepositoryPort anuncioRepository) {
+        return new ExcluirAnuncioUseCaseImpl(anuncioRepository);
+    }
+
+    @Bean
+    public FinalizarAnuncioUseCase finalizarAnuncioUseCase(
+            AnuncioRepositoryPort anuncioRepository) {
+        return new FinalizarAnuncioUseCaseImpl(anuncioRepository);
+    }
+
+    @Bean
     public BuscarVeiculosUseCase buscarVeiculosUseCase(
             VeiculoDataPort veiculoDataPort) {
         return new BuscarVeiculosUseCaseImpl(veiculoDataPort);
