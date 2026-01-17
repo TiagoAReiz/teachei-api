@@ -89,6 +89,12 @@
 			<version>${resilience4j.version}</version>
 		</dependency>
 		
+		<!-- AOP (required for Resilience4j annotations) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		
 		<!-- Mercado Pago SDK -->
 		<dependency>
 			<groupId>com.mercadopago</groupId>

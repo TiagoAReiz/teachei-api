@@ -159,6 +159,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(FipeApiException.class)
+    public ResponseEntity<ErrorResponse> handleFipeApi(
+            FipeApiException ex, HttpServletRequest request) {
+        log.warn("FIPE API error: {} (HTTP {})", ex.getMessage(), ex.getHttpStatusCode());
+        var response = new ErrorResponse(
+            HttpStatus.SERVICE_UNAVAILABLE.value(),
+            "Service Unavailable",
+            "Serviço de consulta de veículos temporariamente indisponível",
+            ex.getErrorCode(),
+            request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
     @ExceptionHandler(ServicoIndisponivelException.class)
     public ResponseEntity<ErrorResponse> handleServicoIndisponivel(
             ServicoIndisponivelException ex, HttpServletRequest request) {

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -86,30 +85,33 @@ public class FipeAdapter implements VeiculoDataPort {
         }
     }
 
-    // Fallback methods
+    // Fallback methods - all throw ServicoIndisponivelException for proper error feedback
     @SuppressWarnings("unused")
     private List<Marca> getMarcasFallback(TipoVeiculo tipo, Throwable t) {
-        log.warn("FIPE API unavailable for getMarcas, returning empty list", t);
-        return Collections.emptyList();
+        log.error("FIPE API unavailable for getMarcas (tipo={}): {}", tipo, t.getMessage());
+        throw new ServicoIndisponivelException("FIPE API", t);
     }
 
     @SuppressWarnings("unused")
     private List<Modelo> getModelosFallback(TipoVeiculo tipo, String marcaCodigo, Throwable t) {
-        log.warn("FIPE API unavailable for getModelos, returning empty list", t);
-        return Collections.emptyList();
+        log.error("FIPE API unavailable for getModelos (tipo={}, marca={}): {}", 
+            tipo, marcaCodigo, t.getMessage());
+        throw new ServicoIndisponivelException("FIPE API", t);
     }
 
     @SuppressWarnings("unused")
     private List<Ano> getAnosFallback(TipoVeiculo tipo, String marcaCodigo, 
                                        String modeloCodigo, Throwable t) {
-        log.warn("FIPE API unavailable for getAnos, returning empty list", t);
-        return Collections.emptyList();
+        log.error("FIPE API unavailable for getAnos (tipo={}, marca={}, modelo={}): {}", 
+            tipo, marcaCodigo, modeloCodigo, t.getMessage());
+        throw new ServicoIndisponivelException("FIPE API", t);
     }
 
     @SuppressWarnings("unused")
     private PrecoFipe getPrecoFipeFallback(TipoVeiculo tipo, String marcaCodigo, 
                                             String modeloCodigo, String anoCodigo, Throwable t) {
-        log.warn("FIPE API unavailable for getPrecoFipe", t);
+        log.error("FIPE API unavailable for getPrecoFipe (tipo={}, marca={}, modelo={}, ano={}): {}", 
+            tipo, marcaCodigo, modeloCodigo, anoCodigo, t.getMessage());
         throw new ServicoIndisponivelException("FIPE API", t);
     }
 }
