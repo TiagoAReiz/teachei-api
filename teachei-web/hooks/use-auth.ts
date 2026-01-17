@@ -7,6 +7,7 @@ import {
   getCurrentUser,
   login,
   register,
+  loginWithGoogle,
   logout as logoutUser,
   updateProfile,
   getUserProfile,
@@ -60,6 +61,20 @@ export function useAuth() {
     },
   });
 
+  // Google login mutation
+  const googleLoginMutation = useMutation({
+    mutationFn: (credential: string) => loginWithGoogle(credential),
+    onSuccess: (result: LoginResult) => {
+      queryClient.setQueryData(["auth", "user"], result.user);
+      // Navigate based on role - if no role, show role selection
+      if (!result.user.role) {
+        router.push("/role-select");
+      } else {
+        router.push("/");
+      }
+    },
+  });
+
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: (data: AtualizarPerfilRequest) => updateProfile(data),
@@ -88,6 +103,10 @@ export function useAuth() {
     registerAsync: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
     registerError: registerMutation.error,
+    googleLogin: googleLoginMutation.mutate,
+    googleLoginAsync: googleLoginMutation.mutateAsync,
+    isGoogleLoggingIn: googleLoginMutation.isPending,
+    googleLoginError: googleLoginMutation.error,
     updateProfile: updateProfileMutation.mutate,
     updateProfileAsync: updateProfileMutation.mutateAsync,
     isUpdatingProfile: updateProfileMutation.isPending,

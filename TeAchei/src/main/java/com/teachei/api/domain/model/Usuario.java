@@ -40,6 +40,29 @@ public class Usuario {
         return usuario;
     }
 
+    /**
+     * Creates a new user authenticated via Google OAuth.
+     * Uses a special password hash that cannot be used for regular login.
+     */
+    public static Usuario criarComGoogle(String email, String googleId) {
+        Usuario usuario = new Usuario();
+        usuario.id = UUID.randomUUID();
+        usuario.email = email;
+        // Mark as OAuth user - this hash cannot be matched by any password
+        usuario.senha = "GOOGLE_OAUTH:" + googleId;
+        usuario.ativo = true;
+        usuario.criadoEm = LocalDateTime.now();
+        usuario.atualizadoEm = LocalDateTime.now();
+        return usuario;
+    }
+
+    /**
+     * Checks if this user was created via Google OAuth.
+     */
+    public boolean isGoogleUser() {
+        return senha != null && senha.startsWith("GOOGLE_OAUTH:");
+    }
+
     public void desativar() {
         this.ativo = false;
         this.atualizadoEm = LocalDateTime.now();

@@ -4,11 +4,10 @@ import com.teachei.api.application.ports.in.RegistrarUsuarioUseCase;
 import com.teachei.api.application.ports.out.PasswordEncoderPort;
 import com.teachei.api.application.ports.out.PerfilRepositoryPort;
 import com.teachei.api.application.ports.out.UsuarioRepositoryPort;
+import com.teachei.api.config.security.JwtService;
 import com.teachei.api.domain.exception.EmailJaCadastradoException;
 import com.teachei.api.domain.model.Perfil;
 import com.teachei.api.domain.model.Usuario;
-
-import java.util.UUID;
 
 /**
  * Implementation of the user registration use case.
@@ -18,17 +17,20 @@ public class RegistrarUsuarioUseCaseImpl implements RegistrarUsuarioUseCase {
     private final UsuarioRepositoryPort usuarioRepository;
     private final PerfilRepositoryPort perfilRepository;
     private final PasswordEncoderPort passwordEncoder;
+    private final JwtService jwtService;
 
     public RegistrarUsuarioUseCaseImpl(UsuarioRepositoryPort usuarioRepository,
                                         PerfilRepositoryPort perfilRepository,
-                                        PasswordEncoderPort passwordEncoder) {
+                                        PasswordEncoderPort passwordEncoder,
+                                        JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
         this.perfilRepository = perfilRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public UUID executar(RegistrarUsuarioCommand command) {
+    public AuthResult executar(RegistrarUsuarioCommand command) {
         // Check if email already exists
         if (usuarioRepository.existePorEmail(command.email())) {
             throw new EmailJaCadastradoException(command.email());
@@ -46,7 +48,16 @@ public class RegistrarUsuarioUseCaseImpl implements RegistrarUsuarioUseCase {
         }
         perfilRepository.salvar(perfil);
 
-        return usuario.getId();
+        // Generate JWT token (auto-login after registration)
+        String token = jwtService.generateToken(usuario.getId().toString(), usuario.getEmail());
+        long expiresIn = jwtService.getExpirationMillis();
+
+        return new AuthResult(
+            token,
+            usuario.getId().toString(),
+            usuario.getEmail(),
+            expiresIn
+        );
     }
 }
 

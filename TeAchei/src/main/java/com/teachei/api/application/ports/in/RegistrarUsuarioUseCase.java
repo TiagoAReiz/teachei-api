@@ -1,7 +1,5 @@
 package com.teachei.api.application.ports.in;
 
-import java.util.UUID;
-
 /**
  * Inbound port for user registration use case.
  */
@@ -11,9 +9,9 @@ public interface RegistrarUsuarioUseCase {
      * Registers a new user with email and password.
      *
      * @param command the registration command
-     * @return the created user's ID
+     * @return the authentication result with token (auto-login after registration)
      */
-    UUID executar(RegistrarUsuarioCommand command);
+    AuthResult executar(RegistrarUsuarioCommand command);
 
     /**
      * Command for user registration.
@@ -32,6 +30,16 @@ public interface RegistrarUsuarioUseCase {
             }
         }
     }
+
+    /**
+     * Result of registration (same as authentication).
+     */
+    record AuthResult(
+        String token,
+        String usuarioId,
+        String email,
+        long expiresIn
+    ) {}
 }
 
 

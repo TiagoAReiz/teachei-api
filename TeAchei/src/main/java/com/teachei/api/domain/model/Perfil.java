@@ -13,11 +13,13 @@ public class Perfil {
     private UUID usuarioId;
     private String nome;
     private String bio;
+    private String fotoUrl;
     private String whatsapp;
     private String instagram;
     private String facebook;
     private String cidade;
     private String estado;
+    private String role;
     private double avaliacaoMedia;
     private int totalAvaliacoes;
     private LocalDateTime criadoEm;
@@ -100,6 +102,22 @@ public class Perfil {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getWhatsapp() {

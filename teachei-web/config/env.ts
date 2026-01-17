@@ -4,6 +4,7 @@ export const env = {
   APP_URL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   NODE_ENV: process.env.NODE_ENV || "development",
   IS_PRODUCTION: process.env.NODE_ENV === "production",
+  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
 } as const;
 
 // API endpoints (aligned with backend /api/v1 prefix)
@@ -11,6 +12,7 @@ export const API_ENDPOINTS = {
   // Auth
   AUTH_LOGIN: "/api/v1/auth/login",
   AUTH_REGISTER: "/api/v1/auth/registrar",
+  AUTH_GOOGLE: "/api/v1/auth/google",
 
   // Profile
   PROFILE: "/api/v1/perfil",

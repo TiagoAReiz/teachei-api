@@ -10,6 +10,11 @@ import type {
 } from "@/types";
 import { perfilToUser } from "@/types";
 
+// Google auth request
+export interface GoogleAuthRequest {
+  credential: string; // Google ID token
+}
+
 // Combined login result with user data
 export interface LoginResult {
   token: string;
@@ -54,6 +59,33 @@ export async function register(data: RegisterRequest): Promise<LoginResult> {
   const authResponse = await api.post<AuthResponse>(
     API_ENDPOINTS.AUTH_REGISTER,
     data,
+    { requireAuth: false }
+  );
+
+  // Step 2: Store token
+  setToken(authResponse.token);
+
+  // Step 3: Fetch profile with the new token
+  const perfil = await api.get<Perfil>(API_ENDPOINTS.PROFILE);
+
+  return {
+    token: authResponse.token,
+    usuarioId: authResponse.usuarioId,
+    email: authResponse.email,
+    expiresIn: authResponse.expiresIn,
+    user: perfilToUser(perfil, authResponse.email),
+  };
+}
+
+/**
+ * Login/Register with Google
+ * Sends Google ID token to backend for verification
+ */
+export async function loginWithGoogle(credential: string): Promise<LoginResult> {
+  // Step 1: Send Google credential to backend
+  const authResponse = await api.post<AuthResponse>(
+    API_ENDPOINTS.AUTH_GOOGLE,
+    { credential },
     { requireAuth: false }
   );
 

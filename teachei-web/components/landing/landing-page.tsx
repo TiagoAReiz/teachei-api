@@ -118,7 +118,7 @@ export function LandingPage() {
                 Começar agora
                 <ArrowRight size={20} />
               </Button>
-              <Button variant="outline" size="lg" onClick={() => router.push("/(main)")} className="text-lg px-8">
+              <Button variant="outline" size="lg" onClick={() => router.push("/feed")} className="text-lg px-8">
                 <Search size={20} />
                 Ver intenções
               </Button>
@@ -267,7 +267,7 @@ export function LandingPage() {
             <div>
               <h3 className="font-semibold text-foreground mb-4">Navegação</h3>
               <ul className="space-y-2">
-                <li><Link href="/(main)" className="text-muted hover:text-primary text-sm">Feed de Intenções</Link></li>
+                <li><Link href="/feed" className="text-muted hover:text-primary text-sm">Feed de Intenções</Link></li>
                 <li><a href="#como-funciona" className="text-muted hover:text-primary text-sm">Como Funciona</a></li>
                 <li><a href="#recursos" className="text-muted hover:text-primary text-sm">Recursos</a></li>
               </ul>

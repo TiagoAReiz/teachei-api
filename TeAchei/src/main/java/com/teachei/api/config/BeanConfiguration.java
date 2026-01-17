@@ -34,8 +34,9 @@ public class BeanConfiguration {
     public RegistrarUsuarioUseCase registrarUsuarioUseCase(
             UsuarioRepositoryPort usuarioRepository,
             PerfilRepositoryPort perfilRepository,
-            PasswordEncoderPort passwordEncoder) {
-        return new RegistrarUsuarioUseCaseImpl(usuarioRepository, perfilRepository, passwordEncoder);
+            PasswordEncoderPort passwordEncoder,
+            JwtService jwtService) {
+        return new RegistrarUsuarioUseCaseImpl(usuarioRepository, perfilRepository, passwordEncoder, jwtService);
     }
 
     @Bean
@@ -44,6 +45,15 @@ public class BeanConfiguration {
             PasswordEncoderPort passwordEncoder,
             JwtService jwtService) {
         return new AutenticarUsuarioUseCaseImpl(usuarioRepository, passwordEncoder, jwtService);
+    }
+
+    @Bean
+    public AutenticarGoogleUseCase autenticarGoogleUseCase(
+            GoogleAuthPort googleAuthPort,
+            UsuarioRepositoryPort usuarioRepository,
+            PerfilRepositoryPort perfilRepository,
+            JwtService jwtService) {
+        return new AutenticarGoogleUseCaseImpl(googleAuthPort, usuarioRepository, perfilRepository, jwtService);
     }
 
     @Bean

@@ -26,6 +26,12 @@ public class PerfilEntity {
     @Column(length = 500)
     private String bio;
 
+    @Column(name = "foto_url")
+    private String fotoUrl;
+
+    @Column
+    private String role;
+
     @Column
     private String whatsapp;
 
@@ -89,6 +95,22 @@ public class PerfilEntity {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getWhatsapp() {
