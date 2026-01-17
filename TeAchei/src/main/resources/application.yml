@@ -1,4 +1,4 @@
-# TeAchei API Configuration
+# TeAchei API Configuration - v1.0.1
 spring:
   application:
     name: teachei-api
