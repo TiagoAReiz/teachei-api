@@ -18,7 +18,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Implementation of the payment processing use case.
+ * Implementation of the payment processing use case. 
+ * bla
  */
 public class ProcessarPagamentoUseCaseImpl implements ProcessarPagamentoUseCase {
 
