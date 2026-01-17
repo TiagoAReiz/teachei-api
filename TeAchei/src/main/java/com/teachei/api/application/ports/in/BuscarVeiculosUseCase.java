@@ -56,7 +56,7 @@ public interface BuscarVeiculosUseCase {
         BigDecimal valor,
         String marca,
         String modelo,
-        int anoModelo,
+        int anoModelo, 
         String combustivel,
         String codigoFipe,
         String mesReferencia
