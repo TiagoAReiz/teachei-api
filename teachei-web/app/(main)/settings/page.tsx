@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, Mail, Phone, MapPin, Instagram, Facebook } from "lucide-react";
+import { User, Mail, Phone, Instagram, Facebook } from "lucide-react";
 import { Button, Input, Card, CardContent } from "@/components/ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/components/ui/toast";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Settings, FileText, Phone } from "lucide-react";
 import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
@@ -16,9 +16,10 @@ export default function CreateReviewPage() {
   const { success, error } = useToast();
   const { user, updateProfile, isUpdatingProfile } = useAuth();
   
-  // Contact phone state
-  const [telefoneContato, setTelefoneContato] = useState("");
+  // Contact phone state - initialized with user's whatsapp if available
+  const [telefoneContato, setTelefoneContato] = useState(() => user?.whatsapp || "");
   const [showUpdateProfileDialog, setShowUpdateProfileDialog] = useState(false);
+  const hasInitializedRef = useRef(!!user?.whatsapp);
   
   const {
     tipoVeiculo,
@@ -45,12 +46,15 @@ export default function CreateReviewPage() {
     }
   }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
 
-  // Pre-fill contact phone from user profile
+  // Pre-fill contact phone from user profile (only once when user data loads)
+  // This is a valid pattern for async data initialization
   useEffect(() => {
-    if (user?.whatsapp && !telefoneContato) {
+    if (user?.whatsapp && !hasInitializedRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTelefoneContato(user.whatsapp);
+      hasInitializedRef.current = true;
     }
-  }, [user, telefoneContato]);
+  }, [user?.whatsapp]);
 
   const proceedWithCreation = () => {
     if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
