@@ -7,7 +7,8 @@ public enum StatusAnuncio {
     PENDENTE_PAGAMENTO("Aguardando Pagamento"),
     ATIVO("Ativo"),
     EXPIRADO("Expirado"),
-    CANCELADO("Cancelado");
+    CANCELADO("Cancelado"),
+    FINALIZADO("Finalizado");
 
     private final String descricao;
 
