@@ -1,16 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, Mail, Phone, MapPin, FileText, Instagram, Facebook } from "lucide-react";
+import { User, Mail, Phone, MapPin, Instagram, Facebook } from "lucide-react";
 import { Button, Input, Card, CardContent } from "@/components/ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/components/ui/toast";
 
 const profileSchema = z.object({
   nome: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
-  telefone: z.string().optional(),
+  whatsapp: z.string()
+    .regex(/^$|^\+?[1-9]\d{10,14}$/, "Use formato internacional: +5511999998888")
+    .optional()
+    .or(z.literal("")),
   cidade: z.string().optional(),
   estado: z.string().optional(),
   bio: z.string().max(500, "Bio deve ter no máximo 500 caracteres").optional(),
@@ -27,19 +31,35 @@ export default function SettingsPage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      nome: user?.nome || "",
-      telefone: user?.telefone || "",
-      cidade: user?.cidade || "",
-      estado: user?.estado || "",
-      bio: user?.bio || "",
-      instagram: user?.instagram || "",
-      facebook: user?.facebook || "",
+      nome: "",
+      whatsapp: "",
+      cidade: "",
+      estado: "",
+      bio: "",
+      instagram: "",
+      facebook: "",
     },
   });
+
+  // Re-initialize form when user data loads
+  useEffect(() => {
+    if (user) {
+      reset({
+        nome: user.nome || "",
+        whatsapp: user.whatsapp || "",
+        cidade: user.cidade || "",
+        estado: user.estado || "",
+        bio: user.bio || "",
+        instagram: user.instagram || "",
+        facebook: user.facebook || "",
+      });
+    }
+  }, [user, reset]);
 
   const onSubmit = (data: ProfileFormData) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,11 +88,11 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                {...register("telefone")}
-                label="Telefone"
-                placeholder="(00) 00000-0000"
+                {...register("whatsapp")}
+                label="WhatsApp"
+                placeholder="+5511999998888"
                 icon={<Phone size={20} />}
-                error={errors.telefone?.message}
+                error={errors.whatsapp?.message}
               />
 
               <div className="grid grid-cols-2 gap-2">

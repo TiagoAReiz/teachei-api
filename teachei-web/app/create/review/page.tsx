@@ -1,17 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Settings, FileText } from "lucide-react";
-import { Button, Card, CardContent, Badge } from "@/components/ui";
+import { useEffect, useState } from "react";
+import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Settings, FileText, Phone } from "lucide-react";
+import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
 import { useCreateIntention } from "@/hooks/use-intentions";
+import { useAuth } from "@/hooks/use-auth";
 import { formatCurrency, vehicleTypeLabels } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 
 export default function CreateReviewPage() {
   const router = useRouter();
   const { success, error } = useToast();
+  const { user, updateProfile, isUpdatingProfile } = useAuth();
+  
+  // Contact phone state
+  const [telefoneContato, setTelefoneContato] = useState("");
+  const [showUpdateProfileDialog, setShowUpdateProfileDialog] = useState(false);
+  
   const {
     tipoVeiculo,
     marcaCodigo,
@@ -37,7 +45,14 @@ export default function CreateReviewPage() {
     }
   }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
 
-  const handleSubmit = () => {
+  // Pre-fill contact phone from user profile
+  useEffect(() => {
+    if (user?.whatsapp && !telefoneContato) {
+      setTelefoneContato(user.whatsapp);
+    }
+  }, [user, telefoneContato]);
+
+  const proceedWithCreation = () => {
     if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
 
     // Build anos array from anoMinimo and anoMaximo
@@ -68,7 +83,6 @@ export default function CreateReviewPage() {
         onSuccess: (data) => {
           success("Intenção criada com sucesso!");
           reset();
-          // Redirect to payment or intention page
           router.push(`/intention/${data.id}`);
         },
         onError: (err) => {
@@ -76,6 +90,55 @@ export default function CreateReviewPage() {
         },
       }
     );
+  };
+
+  const handleUpdateProfileAndCreate = () => {
+    updateProfile(
+      { whatsapp: telefoneContato },
+      {
+        onSuccess: () => {
+          setShowUpdateProfileDialog(false);
+          proceedWithCreation();
+        },
+        onError: (err) => {
+          error(err.message || "Erro ao atualizar perfil");
+        },
+      }
+    );
+  };
+
+  const handleSkipProfileUpdate = () => {
+    // Update profile silently (required for backend) but don't show confirmation
+    updateProfile(
+      { whatsapp: telefoneContato },
+      {
+        onSuccess: () => {
+          setShowUpdateProfileDialog(false);
+          proceedWithCreation();
+        },
+        onError: (err) => {
+          error(err.message || "Erro ao atualizar perfil");
+        },
+      }
+    );
+  };
+
+  const handleSubmit = () => {
+    if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
+
+    // Validate contact phone
+    if (!telefoneContato || telefoneContato.trim() === "") {
+      error("WhatsApp é obrigatório para contato");
+      return;
+    }
+
+    // Check if phone changed from profile
+    if (telefoneContato !== user?.whatsapp) {
+      setShowUpdateProfileDialog(true);
+      return;
+    }
+
+    proceedWithCreation();
   };
 
   if (!tipoVeiculo || !marcaNome || !modeloNome) return null;
@@ -159,6 +222,26 @@ export default function CreateReviewPage() {
         </CardContent>
       </Card>
 
+      {/* Contact Phone Card */}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold text-foreground mb-3">Telefone de contato</h3>
+          <p className="text-sm text-muted mb-4">
+            Os vendedores entrarão em contato por este número via WhatsApp.
+          </p>
+          <Input
+            value={telefoneContato}
+            onChange={(e) => setTelefoneContato(e.target.value)}
+            label="WhatsApp"
+            placeholder="+5511999998888"
+            icon={<Phone size={20} />}
+          />
+          <p className="text-xs text-muted mt-2">
+            Use o formato internacional com código do país (ex: +5511999998888)
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Edit Button */}
       <button
         onClick={() => router.push("/create")}
@@ -209,6 +292,37 @@ export default function CreateReviewPage() {
       <p className="text-center text-xs text-muted">
         Ao continuar, você será redirecionado para o Mercado Pago para concluir o pagamento.
       </p>
+
+      {/* Update Profile Dialog */}
+      <Dialog isOpen={showUpdateProfileDialog} onClose={() => setShowUpdateProfileDialog(false)}>
+        <DialogHeader onClose={() => setShowUpdateProfileDialog(false)}>
+          <DialogTitle>Atualizar telefone no perfil?</DialogTitle>
+          <DialogDescription>
+            Você alterou o telefone de contato. Deseja salvar este número no seu perfil para uso futuro?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogContent>
+          <div className="p-4 bg-muted/10 rounded-xl">
+            <p className="text-sm text-muted">Novo número:</p>
+            <p className="font-medium text-foreground">{telefoneContato}</p>
+          </div>
+        </DialogContent>
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            onClick={handleSkipProfileUpdate}
+            isLoading={isUpdatingProfile}
+          >
+            Continuar sem salvar
+          </Button>
+          <Button 
+            onClick={handleUpdateProfileAndCreate}
+            isLoading={isUpdatingProfile}
+          >
+            Sim, atualizar perfil
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }

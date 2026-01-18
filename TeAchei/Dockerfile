@@ -39,8 +39,11 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:8080/api/actuator/health || exit 1
 
+# JVM options for Java 21 module system compatibility with Spring Data Cosmos
+ENV JAVA_OPTS="--add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
+
 # Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
 
 
