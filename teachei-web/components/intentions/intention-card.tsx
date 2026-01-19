@@ -14,12 +14,6 @@ const vehicleTypeIcons: Record<TipoVeiculo, typeof Car> = {
   CAMINHAO: Truck,
 };
 
-// Vehicle type gradient backgrounds
-const vehicleTypeGradients: Record<TipoVeiculo, string> = {
-  CARRO: "from-blue-500 to-blue-700",
-  MOTO: "from-orange-500 to-orange-700",
-  CAMINHAO: "from-green-500 to-green-700",
-};
 
 interface IntentionCardProps {
   intention: Anuncio;
@@ -60,27 +54,20 @@ export function IntentionCard({ intention }: IntentionCardProps) {
     return min === max ? min.toString() : `${min} - ${max}`;
   })();
 
-  // Get vehicle type icon and gradient
+  // Get vehicle type icon
   const VehicleIcon = vehicleTypeIcons[intention.tipo] || Car;
-  const gradient = vehicleTypeGradients[intention.tipo] || vehicleTypeGradients.CARRO;
 
   return (
     <Link href={`/intention/${intention.id}`}>
       <Card hoverable className="group h-full">
         {/* Vehicle Icon Area */}
-        <div className="relative h-48 overflow-hidden">
-          <div
-            className={cn(
-              "absolute inset-0 bg-gradient-to-br flex items-center justify-center transition-transform duration-300 group-hover:scale-105",
-              gradient
-            )}
-          >
-            <VehicleIcon size={80} className="text-white/30" strokeWidth={1} />
+        <div className="relative h-48 overflow-hidden rounded-t-2xl">
+          <div className="absolute inset-0 bg-muted/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+            <VehicleIcon size={80} className="text-primary/40" strokeWidth={1.5} />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           
           {/* Vehicle Type Badge */}
-          <Badge variant="default" className="absolute top-3 left-3 bg-white/90 text-foreground">
+          <Badge variant="default" className="absolute top-3 left-3 bg-primary text-white">
             {vehicleTypeLabels[intention.tipo]}
           </Badge>
 
@@ -89,17 +76,17 @@ export function IntentionCard({ intention }: IntentionCardProps) {
             <button
               onClick={handleSave}
               className={cn(
-                "p-2 rounded-full backdrop-blur-sm transition-colors",
+                "p-2 rounded-full transition-colors",
                 saved 
                   ? "bg-primary text-white" 
-                  : "bg-white/20 text-white hover:bg-white/30"
+                  : "bg-white/80 text-muted hover:bg-white hover:text-foreground"
               )}
             >
               <Bookmark size={18} fill={saved ? "currentColor" : "none"} />
             </button>
             <button
               onClick={handleShare}
-              className="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-colors"
+              className="p-2 rounded-full bg-white/80 text-muted hover:bg-white hover:text-foreground transition-colors"
             >
               <Share2 size={18} />
             </button>
@@ -108,7 +95,7 @@ export function IntentionCard({ intention }: IntentionCardProps) {
           {/* Price */}
           {intention.veiculo.precoMaximo && (
             <div className="absolute bottom-3 right-3">
-              <span className="bg-white/90 backdrop-blur-sm text-foreground font-bold px-3 py-1 rounded-full text-sm">
+              <span className="bg-white shadow-sm text-foreground font-bold px-3 py-1 rounded-full text-sm">
                 até {formatCurrency(intention.veiculo.precoMaximo)}
               </span>
             </div>
