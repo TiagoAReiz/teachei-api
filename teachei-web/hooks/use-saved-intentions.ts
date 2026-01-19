@@ -5,41 +5,33 @@ import { useState, useEffect, useCallback } from "react";
 const STORAGE_KEY = "teachei_saved_intentions";
 
 /**
- * Load saved IDs from localStorage (runs only on client)
- */
-function getInitialSavedIds(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) {
-        return parsed;
-      }
-    }
-  } catch (error) {
-    console.error("Error loading saved intentions:", error);
-  }
-  return [];
-}
-
-/**
  * Hook to manage saved intentions in localStorage
  * Provides persistence across browser sessions
  */
 export function useSavedIntentions() {
-  // Use lazy initialization to load from localStorage
-  const [savedIds, setSavedIds] = useState<string[]>(getInitialSavedIds);
-  const [isLoaded, setIsLoaded] = useState(() => typeof window !== "undefined");
+  // Initialize with empty array, load from localStorage in effect
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Mark as loaded on mount (for SSR hydration)
+  // Load from localStorage on mount (client-side only)
   useEffect(() => {
-    if (!isLoaded) {
-      setIsLoaded(true);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setSavedIds(parsed);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading saved intentions:", error);
     }
-  }, [isLoaded]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoaded(true);
+  }, []);
 
-  // Persist to localStorage whenever savedIds changes
+  // Persist to localStorage whenever savedIds changes (after initial load)
   useEffect(() => {
     if (isLoaded) {
       try {
