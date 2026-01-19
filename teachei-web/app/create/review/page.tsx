@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Settings, FileText, Phone } from "lucide-react";
+import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Phone } from "lucide-react";
 import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
@@ -33,8 +33,6 @@ export default function CreateReviewPage() {
     anoMaximo,
     cores,
     precoMaximo,
-    transmissao,
-    combustivel,
     observacoes,
     reset,
   } = useCreateIntentionStore();
@@ -207,16 +205,6 @@ export default function CreateReviewPage() {
       label: "Preço máximo",
       value: precoMaximo ? formatCurrency(precoMaximo) : "Sem limite",
     },
-    {
-      icon: Settings,
-      label: "Transmissão",
-      value: transmissao || "Qualquer",
-    },
-    {
-      icon: FileText,
-      label: "Combustível",
-      value: combustivel || "Qualquer",
-    },
   ];
 
   return (
@@ -301,7 +289,7 @@ export default function CreateReviewPage() {
               <p className="text-sm text-muted">Válido por 30 dias</p>
             </div>
             <div className="ml-auto text-right">
-              <p className="text-xl font-bold text-primary">R$ 2,00</p>
+              <p className="text-xl font-bold text-primary">R$ 0,01</p>
             </div>
           </div>
           <ul className="text-sm text-muted space-y-1">

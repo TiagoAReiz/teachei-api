@@ -17,8 +17,6 @@ interface CreateIntentionState {
   cores: string[];
   precoMinimo: number | null;
   precoMaximo: number | null;
-  transmissao: string | null;
-  combustivel: string | null;
   observacoes: string;
   
   // Actions
@@ -28,8 +26,6 @@ interface CreateIntentionState {
   setAnos: (min: number | null, max: number | null) => void;
   setCores: (cores: string[]) => void;
   setPreco: (min: number | null, max: number | null) => void;
-  setTransmissao: (transmissao: string | null) => void;
-  setCombustivel: (combustivel: string | null) => void;
   setObservacoes: (obs: string) => void;
   reset: () => void;
 }
@@ -45,8 +41,6 @@ const initialState = {
   cores: [],
   precoMinimo: null,
   precoMaximo: null,
-  transmissao: null,
-  combustivel: null,
   observacoes: "",
 };
 
@@ -59,11 +53,6 @@ export const useCreateIntentionStore = create<CreateIntentionState>((set) => ({
   setAnos: (min, max) => set({ anoMinimo: min, anoMaximo: max }),
   setCores: (cores) => set({ cores }),
   setPreco: (min, max) => set({ precoMinimo: min, precoMaximo: max }),
-  setTransmissao: (transmissao) => set({ transmissao }),
-  setCombustivel: (combustivel) => set({ combustivel }),
   setObservacoes: (obs) => set({ observacoes: obs }),
   reset: () => set(initialState),
 }));
-
-
-

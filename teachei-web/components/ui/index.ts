@@ -1,6 +1,7 @@
 // UI Component exports
 export { Button, type ButtonProps } from "./button";
 export { Input, type InputProps } from "./input";
+export { CurrencyInput, type CurrencyInputProps } from "./currency-input";
 export { Card, CardHeader, CardContent, CardFooter, CardImage, type CardProps } from "./card";
 export { Badge, type BadgeProps } from "./badge";
 export { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "./dialog";

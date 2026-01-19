@@ -3,28 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { ArrowRight } from "lucide-react";
-import { Button, Input, Select } from "@/components/ui";
+import { Button, CurrencyInput, Select } from "@/components/ui";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
 import { useAnos } from "@/hooks/use-vehicles";
 import { vehicleColors } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-
-const transmissaoOptions = [
-  { value: "", label: "Qualquer" },
-  { value: "MANUAL", label: "Manual" },
-  { value: "AUTOMATICO", label: "Automático" },
-  { value: "CVT", label: "CVT" },
-];
-
-const combustivelOptions = [
-  { value: "", label: "Qualquer" },
-  { value: "FLEX", label: "Flex" },
-  { value: "GASOLINA", label: "Gasolina" },
-  { value: "ETANOL", label: "Etanol" },
-  { value: "DIESEL", label: "Diesel" },
-  { value: "ELETRICO", label: "Elétrico" },
-  { value: "HIBRIDO", label: "Híbrido" },
-];
 
 export default function CreateSpecsPage() {
   const router = useRouter();
@@ -36,14 +19,10 @@ export default function CreateSpecsPage() {
     anoMaximo,
     cores,
     precoMaximo,
-    transmissao,
-    combustivel,
     observacoes,
     setAnos,
     setCores,
     setPreco,
-    setTransmissao,
-    setCombustivel,
     setObservacoes,
   } = useCreateIntentionStore();
 
@@ -179,33 +158,11 @@ export default function CreateSpecsPage() {
       </div>
 
       {/* Price */}
-      <div className="space-y-3">
-        <label className="block text-sm font-medium text-foreground">
-          Preço máximo
-        </label>
-        <Input
-          type="number"
-          placeholder="R$ 0,00"
-          value={precoMaximo || ""}
-          onChange={(e) => setPreco(null, e.target.value ? parseInt(e.target.value) : null)}
-        />
-      </div>
-
-      {/* Transmission & Fuel */}
-      <div className="grid grid-cols-2 gap-4">
-        <Select
-          label="Transmissão"
-          options={transmissaoOptions}
-          value={transmissao || ""}
-          onChange={(e) => setTransmissao(e.target.value || null)}
-        />
-        <Select
-          label="Combustível"
-          options={combustivelOptions}
-          value={combustivel || ""}
-          onChange={(e) => setCombustivel(e.target.value || null)}
-        />
-      </div>
+      <CurrencyInput
+        label="Preço máximo"
+        value={precoMaximo}
+        onChange={(value) => setPreco(null, value)}
+      />
 
       {/* Notes */}
       <div className="space-y-3">
