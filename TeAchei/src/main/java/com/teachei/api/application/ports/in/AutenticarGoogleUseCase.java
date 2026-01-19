@@ -17,7 +17,7 @@ public interface AutenticarGoogleUseCase {
     /**
      * Command for Google authentication.
      */
-    record GoogleAuthCommand(
+    record GoogleAuthCommand( 
         String accessToken
     ) {
         public GoogleAuthCommand {
