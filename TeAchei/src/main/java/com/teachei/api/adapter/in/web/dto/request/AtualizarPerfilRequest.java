@@ -24,7 +24,10 @@ public record AtualizarPerfilRequest(
 
     @Size(max = 2, message = "Estado deve ter 2 caracteres (sigla)")
     @Pattern(regexp = "^$|^[A-Z]{2}$", message = "Estado deve ser uma sigla válida (ex: SP, RJ)")
-    String estado
+    String estado,
+
+    @Pattern(regexp = "^$|^(BUYER|SELLER)$", message = "Role deve ser BUYER ou SELLER")
+    String role
 ) {}
 
 

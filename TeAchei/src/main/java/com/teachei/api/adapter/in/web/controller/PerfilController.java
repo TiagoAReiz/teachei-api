@@ -55,7 +55,8 @@ public class PerfilController {
             request.instagram(),
             request.facebook(),
             request.cidade(),
-            request.estado()
+            request.estado(),
+            request.role()
         );
 
         var perfil = gerenciarPerfilUseCase.atualizar(currentUser.getId(), command);

@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Clock, CheckCircle, AlertCircle, CreditCard } from "lucide-react";
 import { Button, Card, CardContent, Badge } from "@/components/ui";
 import { useMyIntentions } from "@/hooks/use-intentions";
+import { useCreatePaymentPreference } from "@/hooks/use-payments";
 import { formatCurrency, formatRelativeTime, statusLabels, vehicleTypeLabels } from "@/lib/utils";
 import { SkeletonCard } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
+import { redirectToPaymentCheckout } from "@/lib/payments";
 import type { StatusAnuncio } from "@/types";
 
 const statusFilters: { value: StatusAnuncio | ""; label: string }[] = [
@@ -34,6 +37,24 @@ export default function MyIntentionsPage() {
   const router = useRouter();
   const { data: intentions, isLoading } = useMyIntentions();
   const [filter, setFilter] = useState<StatusAnuncio | "">("");
+  const [payingIntentionId, setPayingIntentionId] = useState<string | null>(null);
+  const { error: showError, success: showSuccess } = useToast();
+  
+  const { mutate: createPaymentPreference, isPending: isCreatingPayment } = useCreatePaymentPreference();
+
+  const handlePayNow = (intentionId: string) => {
+    setPayingIntentionId(intentionId);
+    createPaymentPreference(intentionId, {
+      onSuccess: (preference) => {
+        showSuccess("Redirecionando para pagamento...");
+        redirectToPaymentCheckout(preference);
+      },
+      onError: (err) => {
+        showError(err.message || "Erro ao criar preferência de pagamento");
+        setPayingIntentionId(null);
+      },
+    });
+  };
 
   const filteredIntentions = filter
     ? intentions?.filter((i) => i.status === filter)
@@ -144,10 +165,12 @@ export default function MyIntentionsPage() {
                       className="w-full"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Redirect to payment
+                        handlePayNow(intention.id);
                       }}
+                      isLoading={isCreatingPayment && payingIntentionId === intention.id}
                     >
-                      Pagar Agora
+                      <CreditCard size={16} />
+                      <span>Pagar Agora</span>
                     </Button>
                   )}
                 </CardContent>

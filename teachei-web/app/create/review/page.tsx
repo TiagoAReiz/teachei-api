@@ -7,9 +7,11 @@ import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
 import { useCreateIntention } from "@/hooks/use-intentions";
+import { useCreatePaymentPreference } from "@/hooks/use-payments";
 import { useAuth } from "@/hooks/use-auth";
 import { formatCurrency, vehicleTypeLabels } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { redirectToPaymentCheckout } from "@/lib/payments";
 
 export default function CreateReviewPage() {
   const router = useRouter();
@@ -37,7 +39,14 @@ export default function CreateReviewPage() {
     reset,
   } = useCreateIntentionStore();
 
-  const { mutate: createIntention, isPending } = useCreateIntention();
+  const { mutate: createIntention, isPending: isCreating } = useCreateIntention();
+  const { mutate: createPaymentPreference, isPending: isCreatingPayment } = useCreatePaymentPreference();
+  
+  // Track the created intention ID for payment retry
+  const [createdIntentionId, setCreatedIntentionId] = useState<string | null>(null);
+  const [showPaymentRetry, setShowPaymentRetry] = useState(false);
+
+  const isPending = isCreating || isCreatingPayment;
 
   // Redirect if incomplete
   useEffect(() => {
@@ -55,6 +64,31 @@ export default function CreateReviewPage() {
       hasInitializedRef.current = true;
     }
   }, [user?.whatsapp]);
+
+  // Proceed with payment after intention is created
+  const proceedWithPayment = (intentionId: string) => {
+    createPaymentPreference(intentionId, {
+      onSuccess: (preference) => {
+        success("Redirecionando para pagamento...");
+        reset();
+        // Redirect to Mercado Pago checkout
+        redirectToPaymentCheckout(preference);
+      },
+      onError: (err) => {
+        error(err.message || "Erro ao criar preferência de pagamento");
+        setCreatedIntentionId(intentionId);
+        setShowPaymentRetry(true);
+      },
+    });
+  };
+
+  // Retry payment for an already created intention
+  const handleRetryPayment = () => {
+    if (createdIntentionId) {
+      setShowPaymentRetry(false);
+      proceedWithPayment(createdIntentionId);
+    }
+  };
 
   const proceedWithCreation = () => {
     if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
@@ -85,9 +119,9 @@ export default function CreateReviewPage() {
       },
       {
         onSuccess: (data) => {
-          success("Intenção criada com sucesso!");
-          reset();
-          router.push(`/intention/${data.id}`);
+          success("Intenção criada! Iniciando pagamento...");
+          // Proceed with payment after intention is created
+          proceedWithPayment(data.id);
         },
         onError: (err) => {
           error(err.message || "Erro ao criar intenção");
@@ -267,7 +301,7 @@ export default function CreateReviewPage() {
               <p className="text-sm text-muted">Válido por 30 dias</p>
             </div>
             <div className="ml-auto text-right">
-              <p className="text-xl font-bold text-primary">R$ 19,90</p>
+              <p className="text-xl font-bold text-primary">R$ 2,00</p>
             </div>
           </div>
           <ul className="text-sm text-muted space-y-1">
@@ -324,6 +358,41 @@ export default function CreateReviewPage() {
             isLoading={isUpdatingProfile}
           >
             Sim, atualizar perfil
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Payment Retry Dialog */}
+      <Dialog isOpen={showPaymentRetry} onClose={() => setShowPaymentRetry(false)}>
+        <DialogHeader onClose={() => setShowPaymentRetry(false)}>
+          <DialogTitle>Erro no pagamento</DialogTitle>
+          <DialogDescription>
+            Sua intenção foi criada, mas houve um erro ao iniciar o pagamento. Deseja tentar novamente?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogContent>
+          <div className="p-4 bg-error/10 rounded-xl">
+            <p className="text-sm text-error">
+              A intenção está pendente de pagamento. Você pode tentar pagar agora ou acessá-la depois em &quot;Minhas Intenções&quot;.
+            </p>
+          </div>
+        </DialogContent>
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setShowPaymentRetry(false);
+              reset();
+              router.push("/my-intentions");
+            }}
+          >
+            Ver minhas intenções
+          </Button>
+          <Button 
+            onClick={handleRetryPayment}
+            isLoading={isCreatingPayment}
+          >
+            Tentar novamente
           </Button>
         </DialogFooter>
       </Dialog>

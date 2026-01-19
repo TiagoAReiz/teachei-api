@@ -33,8 +33,7 @@ export default function RoleSelectPage() {
   const handleContinue = () => {
     if (!selectedRole) return;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updateProfile({ role: selectedRole } as any, {
+    updateProfile({ role: selectedRole }, {
       onSuccess: () => {
         router.push("/");
       },

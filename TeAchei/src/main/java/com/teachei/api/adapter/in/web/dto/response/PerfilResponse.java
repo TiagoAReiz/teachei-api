@@ -15,6 +15,7 @@ public record PerfilResponse(
     String facebook,
     String cidade,
     String estado,
+    String role,
     double avaliacaoMedia,
     int totalAvaliacoes,
     LocalDateTime criadoEm
@@ -31,6 +32,7 @@ public record PerfilResponse(
             perfil.getFacebook(),
             perfil.getCidade(),
             perfil.getEstado(),
+            perfil.getRole(),
             perfil.getAvaliacaoMedia(),
             perfil.getTotalAvaliacoes(),
             perfil.getCriadoEm()

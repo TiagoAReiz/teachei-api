@@ -4,7 +4,18 @@ import { useState, type ReactNode } from "react";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
+import { AuthGuard } from "@/components/auth";
 import { cn } from "@/lib/utils";
+
+// Routes that don't require authentication
+const PUBLIC_ROUTES = [
+  "/",           // Main feed
+  "/feed",       // Feed page
+  "/intention",  // Public intention view
+  "/user",       // Public user profiles
+  "/termos",     // Terms of service
+  "/privacidade" // Privacy policy
+];
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -16,31 +27,33 @@ export function MainLayout({ children, showSidebar = true, className }: MainLayo
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header
-        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        isSidebarOpen={isSidebarOpen}
-      />
-      
-      {showSidebar && (
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
+    <AuthGuard publicRoutes={PUBLIC_ROUTES}>
+      <div className="min-h-screen bg-background">
+        <Header
+          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          isSidebarOpen={isSidebarOpen}
         />
-      )}
-      
-      <main
-        className={cn(
-          "min-h-[calc(100vh-4rem)] pb-20 lg:pb-0",
-          showSidebar && "lg:ml-64",
-          className
+        
+        {showSidebar && (
+          <Sidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+          />
         )}
-      >
-        {children}
-      </main>
-      
-      <MobileNav />
-    </div>
+        
+        <main
+          className={cn(
+            "min-h-[calc(100vh-4rem)] pb-20 lg:pb-0",
+            showSidebar && "lg:ml-64",
+            className
+          )}
+        >
+          {children}
+        </main>
+        
+        <MobileNav />
+      </div>
+    </AuthGuard>
   );
 }
 

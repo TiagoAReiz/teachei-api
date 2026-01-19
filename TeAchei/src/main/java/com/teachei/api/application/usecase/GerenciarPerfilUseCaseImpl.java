@@ -39,6 +39,11 @@ public class GerenciarPerfilUseCaseImpl implements GerenciarPerfilUseCase {
             command.estado()
         );
 
+        // Update role if provided
+        if (command.role() != null && !command.role().isBlank()) {
+            perfil.setRole(command.role());
+        }
+
         return perfilRepository.salvar(perfil);
     }
 }

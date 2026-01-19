@@ -40,6 +40,7 @@ export interface Perfil {
   facebook?: string;
   cidade?: string;
   estado?: string;
+  role?: UserRole;
   avaliacaoMedia: number;
   totalAvaliacoes: number;
   criadoEm: string;
@@ -53,6 +54,7 @@ export interface AtualizarPerfilRequest {
   facebook?: string;
   cidade?: string;
   estado?: string;
+  role?: UserRole;
 }
 
 // Legacy User type for UI compatibility - maps from Perfil
@@ -260,6 +262,7 @@ export function perfilToUser(perfil: Perfil, email?: string): User {
     facebook: perfil.facebook,
     cidade: perfil.cidade,
     estado: perfil.estado,
+    role: perfil.role,
     avaliacaoMedia: perfil.avaliacaoMedia,
     totalAvaliacoes: perfil.totalAvaliacoes,
     createdAt: perfil.criadoEm,

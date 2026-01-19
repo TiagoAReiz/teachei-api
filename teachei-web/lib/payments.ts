@@ -30,6 +30,21 @@ export function openPaymentCheckout(
 }
 
 /**
+ * Redirect to payment checkout (same window)
+ * Uses sandbox URL in development, production URL in prod
+ */
+export function redirectToPaymentCheckout(
+  paymentResponse: PagamentoResponse,
+  useSandbox = process.env.NODE_ENV !== "production"
+): void {
+  const url = useSandbox
+    ? paymentResponse.sandboxInitPoint || paymentResponse.initPoint
+    : paymentResponse.initPoint;
+
+  window.location.href = url;
+}
+
+/**
  * Convenience method to create preference and open checkout
  */
 export async function payForIntention(

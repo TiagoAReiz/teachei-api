@@ -36,7 +36,8 @@ public interface GerenciarPerfilUseCase {
         String instagram,
         String facebook,
         String cidade,
-        String estado
+        String estado,
+        String role
     ) {}
 }
 
