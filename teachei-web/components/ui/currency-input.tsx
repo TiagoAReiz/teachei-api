@@ -22,22 +22,6 @@ function formatCurrencyValue(value: number | null): string {
   });
 }
 
-/**
- * Parse a currency string to number
- * e.g., "50.000,00" -> 50000
- */
-function parseCurrencyValue(value: string): number | null {
-  // Remove all non-numeric characters except comma
-  const cleaned = value.replace(/[^\d,]/g, "");
-  if (!cleaned) return null;
-  
-  // Replace comma with dot for parsing
-  const normalized = cleaned.replace(",", ".");
-  const parsed = parseFloat(normalized);
-  
-  return isNaN(parsed) ? null : parsed;
-}
-
 const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
   ({ className, label, error, value, onChange, placeholder = "R$ 0,00", ...props }, ref) => {
     const [displayValue, setDisplayValue] = useState(() => formatCurrencyValue(value));

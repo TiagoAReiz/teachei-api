@@ -5,28 +5,39 @@ import { useState, useEffect, useCallback } from "react";
 const STORAGE_KEY = "teachei_saved_intentions";
 
 /**
+ * Load saved IDs from localStorage (runs only on client)
+ */
+function getInitialSavedIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.error("Error loading saved intentions:", error);
+  }
+  return [];
+}
+
+/**
  * Hook to manage saved intentions in localStorage
  * Provides persistence across browser sessions
  */
 export function useSavedIntentions() {
-  const [savedIds, setSavedIds] = useState<string[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  // Use lazy initialization to load from localStorage
+  const [savedIds, setSavedIds] = useState<string[]>(getInitialSavedIds);
+  const [isLoaded, setIsLoaded] = useState(() => typeof window !== "undefined");
 
-  // Load saved IDs from localStorage on mount
+  // Mark as loaded on mount (for SSR hydration)
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setSavedIds(parsed);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading saved intentions:", error);
+    if (!isLoaded) {
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
-  }, []);
+  }, [isLoaded]);
 
   // Persist to localStorage whenever savedIds changes
   useEffect(() => {

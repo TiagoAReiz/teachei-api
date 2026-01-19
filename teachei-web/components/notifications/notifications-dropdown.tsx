@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Bell, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { NotificationItem, type Notification } from "./notification-item";
 
 interface NotificationsDropdownProps {

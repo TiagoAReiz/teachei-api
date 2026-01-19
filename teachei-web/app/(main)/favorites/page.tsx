@@ -3,7 +3,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui";
-import { IntentionCard, IntentionGrid } from "@/components/intentions";
+import { IntentionCard } from "@/components/intentions";
 import { useSavedIntentions } from "@/hooks/use-saved-intentions";
 import { getIntentionById } from "@/lib/intentions";
 import Link from "next/link";
