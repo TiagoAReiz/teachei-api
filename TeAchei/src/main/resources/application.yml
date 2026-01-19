@@ -68,7 +68,7 @@ app:
 
 # Payment Configuration
 payment:
-  price-per-ad: ${PAYMENT_PRICE_PER_AD:0.01}
+  price-per-ad: ${PAYMENT_PRICE_PER_AD:2.00}
   intention-expiry-days: ${INTENTION_EXPIRY_DAYS:60}
 
 # Resilience4j Configuration

@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Configuration
 public class BeanConfiguration {
 
-    @Value("${payment.price-per-ad:0.01}")
+    @Value("${payment.price-per-ad:2.00}")
     private BigDecimal precoAnuncio;
 
     @Value("${app.base-url:http://localhost:8080}")

@@ -289,7 +289,7 @@ export default function CreateReviewPage() {
               <p className="text-sm text-muted">Válido por 30 dias</p>
             </div>
             <div className="ml-auto text-right">
-              <p className="text-xl font-bold text-primary">R$ 0,01</p>
+              <p className="text-xl font-bold text-primary">R$ 2,00</p>
             </div>
           </div>
           <ul className="text-sm text-muted space-y-1">
