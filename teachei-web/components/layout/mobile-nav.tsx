@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Bookmark, Plus, MessageCircle, User } from "lucide-react";
+import { Home, Bookmark, Plus, FileText, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -10,7 +10,7 @@ const navItems = [
   { href: "/", label: "Feed", icon: Home },
   { href: "/favorites", label: "Salvos", icon: Bookmark },
   { href: "/create", label: "Criar", icon: Plus, isMain: true },
-  { href: "/messages", label: "Chat", icon: MessageCircle },
+  { href: "/my-intentions", label: "Intenções", icon: FileText },
   { href: "/profile", label: "Perfil", icon: User },
 ];
 
@@ -32,7 +32,7 @@ export function MobileNav() {
           const isMain = item.isMain;
 
           // Require auth for protected routes
-          if (!isAuthenticated && ["/favorites", "/create", "/messages", "/profile"].includes(item.href)) {
+          if (!isAuthenticated && ["/favorites", "/create", "/my-intentions", "/profile"].includes(item.href)) {
             return (
               <Link
                 key={item.href}

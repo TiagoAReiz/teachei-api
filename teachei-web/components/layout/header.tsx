@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Bell, Menu, X, Car } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Search, Plus, Menu, X, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { NotificationsDropdown } from "@/components/notifications";
 import { useAuth } from "@/hooks/use-auth";
 
 interface HeaderProps {
@@ -83,10 +83,14 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
               </Button>
 
               {/* Notifications */}
-              <button className="p-2 rounded-full text-muted hover:text-foreground hover:bg-muted/10 transition-colors relative">
-                <Bell size={22} />
-                <span className="absolute top-1 right-1 h-2 w-2 bg-error rounded-full" />
-              </button>
+              <NotificationsDropdown
+                notifications={[]}
+                onNotificationClick={(notification) => {
+                  if (notification.href) {
+                    router.push(notification.href);
+                  }
+                }}
+              />
 
               {/* User Menu */}
               <div className="relative">

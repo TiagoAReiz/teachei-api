@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Bookmark, MessageCircle, User, Settings, Car, Bike, Truck, Plus } from "lucide-react";
+import { Home, Bookmark, User, Settings, Car, Bike, Truck, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,7 +15,6 @@ interface SidebarProps {
 const navItems = [
   { href: "/", label: "Feed", icon: Home },
   { href: "/favorites", label: "Salvos", icon: Bookmark },
-  { href: "/messages", label: "Mensagens", icon: MessageCircle },
   { href: "/profile", label: "Perfil", icon: User },
 ];
 

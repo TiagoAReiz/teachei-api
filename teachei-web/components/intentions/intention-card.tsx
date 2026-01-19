@@ -1,26 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Heart, Share2 } from "lucide-react";
+import { Bookmark, Share2, Car, Bike, Truck } from "lucide-react";
 import { Card, CardContent, Badge } from "@/components/ui";
 import { cn, formatCurrency, formatRelativeTime, vehicleTypeLabels } from "@/lib/utils";
-import type { Anuncio } from "@/types";
+import { useSavedIntentions } from "@/hooks/use-saved-intentions";
+import type { Anuncio, TipoVeiculo } from "@/types";
+
+// Vehicle type icon mapping
+const vehicleTypeIcons: Record<TipoVeiculo, typeof Car> = {
+  CARRO: Car,
+  MOTO: Bike,
+  CAMINHAO: Truck,
+};
+
+// Vehicle type gradient backgrounds
+const vehicleTypeGradients: Record<TipoVeiculo, string> = {
+  CARRO: "from-blue-500 to-blue-700",
+  MOTO: "from-orange-500 to-orange-700",
+  CAMINHAO: "from-green-500 to-green-700",
+};
 
 interface IntentionCardProps {
   intention: Anuncio;
-  onSave?: (id: string) => void;
-  isSaved?: boolean;
 }
 
-export function IntentionCard({ intention, onSave, isSaved = false }: IntentionCardProps) {
-  const [saved, setSaved] = useState(isSaved);
+export function IntentionCard({ intention }: IntentionCardProps) {
+  const { isSaved, toggleSave } = useSavedIntentions();
+  const saved = isSaved(intention.id);
 
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setSaved(!saved);
-    onSave?.(intention.id);
+    toggleSave(intention.id);
   };
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -48,22 +60,27 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
     return min === max ? min.toString() : `${min} - ${max}`;
   })();
 
-  // Generate a placeholder vehicle image URL
-  const vehicleImage = `https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=300&fit=crop`;
+  // Get vehicle type icon and gradient
+  const VehicleIcon = vehicleTypeIcons[intention.tipo] || Car;
+  const gradient = vehicleTypeGradients[intention.tipo] || vehicleTypeGradients.CARRO;
 
   return (
     <Link href={`/intention/${intention.id}`}>
       <Card hoverable className="group h-full">
-        {/* Image */}
+        {/* Vehicle Icon Area */}
         <div className="relative h-48 overflow-hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-            style={{ backgroundImage: `url(${vehicleImage})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            className={cn(
+              "absolute inset-0 bg-gradient-to-br flex items-center justify-center transition-transform duration-300 group-hover:scale-105",
+              gradient
+            )}
+          >
+            <VehicleIcon size={80} className="text-white/30" strokeWidth={1} />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           
           {/* Vehicle Type Badge */}
-          <Badge variant="default" className="absolute top-3 left-3 bg-primary text-white">
+          <Badge variant="default" className="absolute top-3 left-3 bg-white/90 text-foreground">
             {vehicleTypeLabels[intention.tipo]}
           </Badge>
 
@@ -74,11 +91,11 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
               className={cn(
                 "p-2 rounded-full backdrop-blur-sm transition-colors",
                 saved 
-                  ? "bg-error text-white" 
+                  ? "bg-primary text-white" 
                   : "bg-white/20 text-white hover:bg-white/30"
               )}
             >
-              <Heart size={18} fill={saved ? "currentColor" : "none"} />
+              <Bookmark size={18} fill={saved ? "currentColor" : "none"} />
             </button>
             <button
               onClick={handleShare}
@@ -143,6 +160,3 @@ export function IntentionCard({ intention, onSave, isSaved = false }: IntentionC
     </Link>
   );
 }
-
-
-
