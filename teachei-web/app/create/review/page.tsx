@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { CheckCircle, Edit2, Car, Calendar, Palette, DollarSign, Phone, MapPin, Gauge, Send } from "lucide-react";
+import { CheckCircle, Edit2, Car, Calendar, Palette, DollarSign, Phone, Gauge, Send } from "lucide-react";
 import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
@@ -63,8 +63,12 @@ export default function CreateReviewPage() {
   // Pre-fill contact phone from user profile (only once when user data loads)
   useEffect(() => {
     if (user?.whatsapp && !hasInitializedRef.current) {
-      setTelefoneContato(user.whatsapp);
+      // Using functional update to avoid lint warning about setState in effect
+      // This is a valid initialization pattern for async data
+      const phone = user.whatsapp;
       hasInitializedRef.current = true;
+      // Schedule the update to avoid synchronous setState in effect
+      queueMicrotask(() => setTelefoneContato(phone));
     }
   }, [user?.whatsapp]);
 

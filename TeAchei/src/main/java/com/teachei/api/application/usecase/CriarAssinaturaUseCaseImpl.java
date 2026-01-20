@@ -68,7 +68,7 @@ public class CriarAssinaturaUseCaseImpl implements CriarAssinaturaUseCase {
 
         return new AssinaturaPreferencia(
             saved.getId().toString(),
-            preference.preferenceId(),
+            preference.id(),
             preference.initPoint(),
             preference.sandboxInitPoint(),
             subscriptionConfig.getPriceForPlan(plano)

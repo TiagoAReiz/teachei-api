@@ -9,7 +9,9 @@ import { useMinhaAssinatura } from "@/hooks/use-subscriptions";
 function SubscriptionSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const subscriptionId = searchParams.get("id");
+  // subscriptionId can be used for direct status check in the future
+  const _subscriptionId = searchParams.get("id");
+  void _subscriptionId; // Silence unused variable warning
   const [pollCount, setPollCount] = useState(0);
   const [countdown, setCountdown] = useState(5);
 
