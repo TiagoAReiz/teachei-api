@@ -2,61 +2,43 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Clock, CheckCircle, AlertCircle, CreditCard, Trash2 } from "lucide-react";
+import { Plus, CheckCircle, AlertCircle, Trash2, Calendar } from "lucide-react";
 import { Button, Card, CardContent, Badge, Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui";
 import { useMyIntentions, useDeleteIntention } from "@/hooks/use-intentions";
-import { useCreatePaymentPreference } from "@/hooks/use-payments";
-import { formatCurrency, formatRelativeTime, statusLabels, vehicleTypeLabels } from "@/lib/utils";
+import { formatCurrency, formatRelativeTime, formatExpiration, statusLabels, vehicleTypeLabels } from "@/lib/utils";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast";
-import { redirectToPaymentCheckout } from "@/lib/payments";
 import type { StatusAnuncio } from "@/types";
 
 const statusFilters: { value: StatusAnuncio | ""; label: string }[] = [
   { value: "", label: "Todos" },
   { value: "ATIVO", label: "Ativos" },
-  { value: "PENDENTE_PAGAMENTO", label: "Pendentes" },
   { value: "FINALIZADO", label: "Finalizados" },
+  { value: "EXPIRADO", label: "Expirados" },
 ];
 
-const statusIcons: Record<StatusAnuncio, typeof Clock> = {
+const statusIcons: Record<StatusAnuncio, typeof CheckCircle> = {
   ATIVO: CheckCircle,
-  PENDENTE_PAGAMENTO: Clock,
   FINALIZADO: CheckCircle,
   EXPIRADO: AlertCircle,
+  CANCELADO: AlertCircle,
 };
 
 const statusBadgeVariants: Record<StatusAnuncio, "success" | "warning" | "default" | "error"> = {
   ATIVO: "success",
-  PENDENTE_PAGAMENTO: "warning",
   FINALIZADO: "default",
   EXPIRADO: "error",
+  CANCELADO: "default",
 };
 
 export default function MyIntentionsPage() {
   const router = useRouter();
   const { data: intentions, isLoading } = useMyIntentions();
   const [filter, setFilter] = useState<StatusAnuncio | "">("");
-  const [payingIntentionId, setPayingIntentionId] = useState<string | null>(null);
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null);
   const { error: showError, success: showSuccess } = useToast();
   
-  const { mutate: createPaymentPreference, isPending: isCreatingPayment } = useCreatePaymentPreference();
   const { mutate: deleteIntention, isPending: isDeleting } = useDeleteIntention();
-
-  const handlePayNow = (intentionId: string) => {
-    setPayingIntentionId(intentionId);
-    createPaymentPreference(intentionId, {
-      onSuccess: (preference) => {
-        showSuccess("Redirecionando para pagamento...");
-        redirectToPaymentCheckout(preference);
-      },
-      onError: (err) => {
-        showError(err.message || "Erro ao criar preferência de pagamento");
-        setPayingIntentionId(null);
-      },
-    });
-  };
 
   const handleDelete = () => {
     if (!deleteDialogId) return;
@@ -132,13 +114,17 @@ export default function MyIntentionsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredIntentions?.map((intention) => {
-            const StatusIcon = statusIcons[intention.status];
+            const StatusIcon = statusIcons[intention.status] || CheckCircle;
             const anos = intention.veiculo.anos;
             const anoDisplay = anos.length > 1 
               ? `${Math.min(...anos)} - ${Math.max(...anos)}`
               : anos.length === 1 
                 ? anos[0].toString()
                 : "Qualquer ano";
+            
+            const expirationText = intention.status === "ATIVO" && intention.expiraEm
+              ? formatExpiration(intention.expiraEm)
+              : null;
             
             return (
               <Card key={intention.id} hoverable onClick={() => router.push(`/intention/${intention.id}`)}>
@@ -153,9 +139,9 @@ export default function MyIntentionsPage() {
                         {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
                       </h3>
                     </div>
-                    <Badge variant={statusBadgeVariants[intention.status]} size="sm">
+                    <Badge variant={statusBadgeVariants[intention.status] || "default"} size="sm">
                       <StatusIcon size={12} className="mr-1" />
-                      {statusLabels[intention.status]}
+                      {statusLabels[intention.status] || intention.status}
                     </Badge>
                   </div>
 
@@ -167,6 +153,14 @@ export default function MyIntentionsPage() {
                     )}
                   </div>
 
+                  {/* Expiration for active intentions */}
+                  {expirationText && (
+                    <div className="flex items-center gap-2 text-sm text-warning">
+                      <Calendar size={14} />
+                      <span>{expirationText}</span>
+                    </div>
+                  )}
+
                   {/* Stats */}
                   <div className="flex items-center gap-4 pt-2 border-t border-border text-muted text-sm">
                     <span className="ml-auto">
@@ -174,31 +168,20 @@ export default function MyIntentionsPage() {
                     </span>
                   </div>
 
-                  {/* Actions for pending */}
-                  {intention.status === "PENDENTE_PAGAMENTO" && (
+                  {/* Actions for active intentions */}
+                  {intention.status === "ATIVO" && (
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePayNow(intention.id);
-                        }}
-                        isLoading={isCreatingPayment && payingIntentionId === intention.id}
-                      >
-                        <CreditCard size={16} />
-                        <span>Pagar</span>
-                      </Button>
-                      <Button
-                        size="sm"
                         variant="outline"
+                        className="flex-1 text-error hover:bg-error/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteDialogId(intention.id);
                         }}
-                        className="text-error hover:bg-error/10"
                       >
                         <Trash2 size={16} />
+                        <span>Excluir</span>
                       </Button>
                     </div>
                   )}
@@ -238,6 +221,3 @@ export default function MyIntentionsPage() {
     </div>
   );
 }
-
-
-

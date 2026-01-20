@@ -20,8 +20,7 @@ public record CriarAnuncioRequest(
     @NotEmpty(message = "Pelo menos um ano deve ser selecionado")
     List<Integer> anos,
 
-    @NotEmpty(message = "Pelo menos uma cor deve ser selecionada")
-    List<String> cores,
+    List<String> cores,  // Optional - empty means "any color"
 
     @NotNull(message = "Preço máximo é obrigatório")
     @Positive(message = "Preço máximo deve ser maior que zero")

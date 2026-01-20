@@ -65,9 +65,7 @@ public class VeiculoInfo {
         if (anos == null || anos.isEmpty()) {
             throw new IllegalArgumentException("Pelo menos um ano deve ser selecionado");
         }
-        if (cores == null || cores.isEmpty()) {
-            throw new IllegalArgumentException("Pelo menos uma cor deve ser selecionada");
-        }
+        // cores is optional - empty means "any color"
         if (precoMaximo == null || precoMaximo.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Preço máximo deve ser maior que zero");
         }

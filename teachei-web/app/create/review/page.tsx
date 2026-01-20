@@ -113,11 +113,11 @@ export default function CreateReviewPage() {
         estado,
       },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           success("Sua intenção foi publicada com sucesso!");
           reset();
-          // Redirect to intention detail page
-          router.push(`/intention/${data.id}`);
+          // Redirect to feed page
+          router.push("/");
         },
         onError: (err) => {
           error(err.message || "Erro ao criar intenção");

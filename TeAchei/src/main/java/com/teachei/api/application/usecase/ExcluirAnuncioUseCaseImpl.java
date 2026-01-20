@@ -31,11 +31,10 @@ public class ExcluirAnuncioUseCaseImpl implements ExcluirAnuncioUseCase {
             throw new AcessoNegadoException("Você não pode excluir este anúncio");
         }
 
-        // Check status - can only delete when pending payment
-        if (anuncio.getStatus() != StatusAnuncio.PENDENTE_PAGAMENTO) {
+        // Check status - can only delete when active
+        if (anuncio.getStatus() != StatusAnuncio.ATIVO) {
             throw new AnuncioInvalidoException(
-                "Apenas anúncios pendentes de pagamento podem ser excluídos. " +
-                "Anúncios ativos devem ser finalizados."
+                "Não é possível excluir uma intenção que não está ativa"
             );
         }
 

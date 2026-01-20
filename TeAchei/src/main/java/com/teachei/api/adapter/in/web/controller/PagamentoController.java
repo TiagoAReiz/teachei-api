@@ -1,18 +1,19 @@
 package com.teachei.api.adapter.in.web.controller;
 
-import com.teachei.api.adapter.in.web.dto.response.PagamentoResponse;
 import com.teachei.api.adapter.out.external.mercadopago.MercadoPagoWebhookValidator;
 import com.teachei.api.application.ports.in.ProcessarPagamentoUseCase;
-import com.teachei.api.config.security.CurrentUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Controller for payment webhooks.
+ * Now handles only subscription payment webhooks (intentions are free).
+ */
 @RestController
 @RequestMapping("/v1/pagamentos")
 public class PagamentoController {
@@ -26,22 +27,6 @@ public class PagamentoController {
                                MercadoPagoWebhookValidator webhookValidator) {
         this.processarPagamentoUseCase = processarPagamentoUseCase;
         this.webhookValidator = webhookValidator;
-    }
-
-    @PostMapping("/preferencia/{anuncioId}")
-    public ResponseEntity<PagamentoResponse> criarPreferencia(
-            @AuthenticationPrincipal CurrentUser currentUser,
-            @PathVariable String anuncioId) {
-        
-        var preferencia = processarPagamentoUseCase.criarPreferencia(
-            currentUser.getId(), anuncioId);
-
-        return ResponseEntity.ok(new PagamentoResponse(
-            preferencia.preferenceId(),
-            preferencia.initPoint(),
-            preferencia.sandboxInitPoint(),
-            preferencia.valor()
-        ));
     }
 
     @PostMapping("/webhook")
@@ -62,6 +47,7 @@ public class PagamentoController {
         // Parse data from body if not in query params
         if (type == null && body != null) {
             type = (String) body.get("type");
+            @SuppressWarnings("unchecked")
             var data = (Map<String, Object>) body.get("data");
             if (data != null && data.get("id") != null) {
                 dataId = Long.valueOf(data.get("id").toString());
@@ -105,6 +91,3 @@ public class PagamentoController {
         return ResponseEntity.ok().build();
     }
 }
-
-
-

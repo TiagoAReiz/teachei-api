@@ -9,16 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.math.BigDecimal;
-
 @Configuration
 public class BeanConfiguration {
-
-    @Value("${payment.price-per-ad:2.00}")
-    private BigDecimal precoAnuncio;
-
-    @Value("${app.base-url:http://localhost:8080}")
-    private String appBaseUrl;
 
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
@@ -102,20 +94,13 @@ public class BeanConfiguration {
 
     @Bean
     public ProcessarPagamentoUseCase processarPagamentoUseCase(
-            AnuncioRepositoryPort anuncioRepository,
             PagamentoPort pagamentoPort,
             TransacaoRepositoryPort transacaoRepository,
-            AnuncioService anuncioService,
             AssinaturaRepositoryPort assinaturaRepository) {
         return new ProcessarPagamentoUseCaseImpl(
-            anuncioRepository,
             pagamentoPort,
             transacaoRepository,
-            anuncioService,
-            assinaturaRepository,
-            precoAnuncio,
-            appBaseUrl,
-            frontendUrl
+            assinaturaRepository
         );
     }
 

@@ -135,7 +135,7 @@ export interface PrecoFipeResponse {
 // Intention/Anuncio Types (aligned with AnuncioResponse)
 // ============================================
 
-export type StatusAnuncio = "ATIVO" | "PENDENTE_PAGAMENTO" | "FINALIZADO" | "EXPIRADO";
+export type StatusAnuncio = "ATIVO" | "FINALIZADO" | "EXPIRADO" | "CANCELADO";
 
 // Nested vehicle info in AnuncioResponse
 export interface VeiculoResponse {
@@ -195,17 +195,6 @@ export interface CreateAnuncioRequest {
   dadosManuais?: boolean;
   cidade?: string;
   estado?: string;
-}
-
-// ============================================
-// Payment Types (aligned with PagamentoResponse)
-// ============================================
-
-export interface PagamentoResponse {
-  preferenceId: string;
-  initPoint: string;
-  sandboxInitPoint?: string;
-  valor: number;
 }
 
 // ============================================

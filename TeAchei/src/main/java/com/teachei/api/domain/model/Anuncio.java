@@ -28,26 +28,6 @@ public class Anuncio {
     private static final int DEFAULT_EXPIRY_DAYS = 60;
 
     /**
-     * Creates a new intention with PENDENTE_PAGAMENTO status (legacy).
-     * @deprecated Use {@link #criarAtivo} for new business model
-     */
-    @Deprecated
-    public static Anuncio criar(UUID usuarioId, TipoVeiculo tipo, VeiculoInfo veiculoInfo, 
-                                 ContatoInfo contatoInfo, String observacoes) {
-        Anuncio anuncio = new Anuncio();
-        anuncio.id = UUID.randomUUID().toString();
-        anuncio.usuarioId = usuarioId;
-        anuncio.nicho = Nicho.VEICULO;
-        anuncio.tipo = tipo;
-        anuncio.status = StatusAnuncio.PENDENTE_PAGAMENTO;
-        anuncio.veiculoInfo = veiculoInfo;
-        anuncio.contatoInfo = contatoInfo;
-        anuncio.observacoes = observacoes;
-        anuncio.criadoEm = LocalDateTime.now();
-        return anuncio;
-    }
-
-    /**
      * Creates a new intention with ATIVO status (free for buyers).
      * This is the new business model - intentions are free to create.
      */

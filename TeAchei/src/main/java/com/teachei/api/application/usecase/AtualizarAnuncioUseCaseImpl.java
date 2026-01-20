@@ -31,10 +31,10 @@ public class AtualizarAnuncioUseCaseImpl implements AtualizarAnuncioUseCase {
             throw new AcessoNegadoException("Você não pode editar este anúncio");
         }
 
-        // Check status - can only update when pending payment
-        if (anuncio.getStatus() != StatusAnuncio.PENDENTE_PAGAMENTO) {
+        // Check status - can only update when active
+        if (anuncio.getStatus() != StatusAnuncio.ATIVO) {
             throw new AnuncioInvalidoException(
-                "Apenas anúncios pendentes de pagamento podem ser editados"
+                "Não é possível atualizar uma intenção que não está ativa"
             );
         }
 

@@ -61,17 +61,24 @@ TeAchei is an "inverted marketplace" where **buyers announce purchase intentions
 - **FIPE**: Brazilian vehicle pricing reference table
 
 ### Business Rules
-- Buyers pay to publish intentions (pay-per-ad model)
-- Intentions expire after 30 days from activation
-- Multi-select allowed for anos (years) and cores (colors)
+- **Free for buyers**: Intentions are published immediately without payment
+- **Seller subscriptions**: Sellers pay a monthly/quarterly/annual subscription to view buyer contact info
+- Intentions expire after 60 days from creation
+- Multi-select allowed for anos (years) and cores (colors) - empty means "any"
 - Profile contact info (WhatsApp) is mandatory for active intentions
+- Non-subscribed sellers see only buyer's city/state location
+
+### Subscription Plans
+- **Individual (R$15/month)**: 30 days access, single payment
+- **Trimestral (R$30/quarter)**: 90 days access, auto-renewal
+- **Anual (R$90/year)**: 365 days access, auto-renewal
 
 ## Important Constraints
 - Must support future niches without schema migrations (hence NoSQL for intentions)
 - FIPE API may be unreliable - implement circuit breaker and fallback
 - Payment webhooks must be idempotent
 - JWT tokens: 7 days expiry (no refresh tokens for MVP)
-- Intention expiry: 60 days after payment confirmation
+- Intention expiry: 60 days from creation (automatic status change to EXPIRADO)
 
 ## External Dependencies
 - **FIPE API**: https://deividfortuna.github.io/fipe/ (community) or official

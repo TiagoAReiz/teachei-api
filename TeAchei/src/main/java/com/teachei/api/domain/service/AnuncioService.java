@@ -14,20 +14,6 @@ public class AnuncioService {
     private static final int DEFAULT_EXPIRY_DAYS = 60;
 
     /**
-     * Creates a new purchase intention with validation (legacy - pending payment).
-     * @deprecated Use {@link #criarAnuncioAtivo} for new business model
-     */
-    @Deprecated
-    public Anuncio criarAnuncio(UUID usuarioId, TipoVeiculo tipo, 
-                                 VeiculoInfo veiculoInfo, ContatoInfo contatoInfo,
-                                 String observacoes) {
-        validarVeiculoInfo(veiculoInfo);
-        validarContatoInfo(contatoInfo);
-        
-        return Anuncio.criar(usuarioId, tipo, veiculoInfo, contatoInfo, observacoes);
-    }
-
-    /**
      * Creates a new purchase intention as ATIVO (free for buyers).
      * This is the new business model - intentions are free to create.
      */
@@ -38,17 +24,6 @@ public class AnuncioService {
         validarContatoInfoComLocalizacao(contatoInfo);
         
         return Anuncio.criarAtivo(usuarioId, tipo, veiculoInfo, contatoInfo, observacoes);
-    }
-
-    /**
-     * Activates an intention after payment confirmation.
-     */
-    public void ativarAnuncio(Anuncio anuncio, String transacaoId) {
-        if (anuncio.getStatus() != StatusAnuncio.PENDENTE_PAGAMENTO) {
-            throw new AnuncioInvalidoException(
-                "Anúncio não está pendente de pagamento. Status atual: " + anuncio.getStatus());
-        }
-        anuncio.ativar(transacaoId, DEFAULT_EXPIRY_DAYS);
     }
 
     /**
@@ -69,8 +44,7 @@ public class AnuncioService {
         if (!anuncio.getUsuarioId().equals(usuarioId)) {
             throw new AnuncioInvalidoException("Apenas o dono do anúncio pode cancelá-lo");
         }
-        if (anuncio.getStatus() != StatusAnuncio.ATIVO && 
-            anuncio.getStatus() != StatusAnuncio.PENDENTE_PAGAMENTO) {
+        if (anuncio.getStatus() != StatusAnuncio.ATIVO) {
             throw new AnuncioInvalidoException(
                 "Anúncio não pode ser cancelado. Status atual: " + anuncio.getStatus());
         }

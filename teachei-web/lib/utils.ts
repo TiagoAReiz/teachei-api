@@ -88,18 +88,40 @@ export const vehicleTypeLabels: Record<string, string> = {
 // Status labels
 export const statusLabels: Record<string, string> = {
   ATIVO: "Ativo",
-  PENDENTE_PAGAMENTO: "Pendente",
   FINALIZADO: "Finalizado",
   EXPIRADO: "Expirado",
+  CANCELADO: "Cancelado",
 };
 
 // Status colors
 export const statusColors: Record<string, string> = {
   ATIVO: "bg-success text-white",
-  PENDENTE_PAGAMENTO: "bg-warning text-white",
   FINALIZADO: "bg-muted text-white",
   EXPIRADO: "bg-error text-white",
+  CANCELADO: "bg-muted text-white",
 };
+
+// Format expiration date with days remaining
+export function formatExpiration(expiraEm: string | null | undefined): string {
+  if (!expiraEm) return "";
+  
+  const now = new Date();
+  const expirationDate = new Date(expiraEm);
+  const diffInMs = expirationDate.getTime() - now.getTime();
+  const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays < 0) {
+    return "Expirado";
+  } else if (diffInDays === 0) {
+    return "Expira hoje";
+  } else if (diffInDays === 1) {
+    return "Expira amanhã";
+  } else if (diffInDays <= 7) {
+    return `Expira em ${diffInDays} dias`;
+  } else {
+    return `Expira em ${formatDate(expiraEm)}`;
+  }
+}
 
 // Vehicle colors
 export const vehicleColors = [

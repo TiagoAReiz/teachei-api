@@ -15,7 +15,7 @@ import {
   Phone,
 } from "lucide-react";
 import { Button, Card, CardContent, Badge } from "@/components/ui";
-import { formatCurrency, formatRelativeTime, vehicleTypeLabels, getWhatsAppLink, getInstagramLink } from "@/lib/utils";
+import { formatCurrency, formatRelativeTime, formatExpiration, vehicleTypeLabels, getWhatsAppLink, getInstagramLink } from "@/lib/utils";
 import { useSavedIntentions } from "@/hooks/use-saved-intentions";
 import type { Anuncio } from "@/types";
 
@@ -131,10 +131,18 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
                   <h1 className="text-2xl font-bold text-foreground mb-1">
                     {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
                   </h1>
-                  <p className="text-muted flex items-center gap-2">
-                    <Eye size={16} />
-                    {formatRelativeTime(intention.criadoEm)}
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <p className="text-muted flex items-center gap-2">
+                      <Eye size={16} />
+                      {formatRelativeTime(intention.criadoEm)}
+                    </p>
+                    {intention.status === "ATIVO" && intention.expiraEm && (
+                      <span className="text-sm text-warning flex items-center gap-1">
+                        <Calendar size={14} />
+                        {formatExpiration(intention.expiraEm)}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {intention.veiculo.precoMaximo && (
                   <div className="text-right">
