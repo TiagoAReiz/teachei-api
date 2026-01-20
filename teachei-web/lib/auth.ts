@@ -119,7 +119,6 @@ export function logout(): void {
  */
 export async function getCurrentUser(): Promise<User> {
   const perfil = await api.get<Perfil>(API_ENDPOINTS.PROFILE);
-  const token = getToken();
   // We don't have email stored separately, so we'll leave it empty
   // In a real app, you might want to store the email in a cookie too
   return perfilToUser(perfil);

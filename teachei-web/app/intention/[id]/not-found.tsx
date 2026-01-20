@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Car, Search, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui";
 
 export default function IntentionNotFound() {

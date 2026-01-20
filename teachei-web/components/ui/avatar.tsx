@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 
@@ -8,6 +9,13 @@ interface AvatarProps {
   className?: string;
   fallback?: string;
 }
+
+const sizeMap = {
+  sm: 32,
+  md: 40,
+  lg: 48,
+  xl: 64,
+};
 
 function Avatar({ src, alt, size = "md", className, fallback }: AvatarProps) {
   const sizes = {
@@ -43,10 +51,13 @@ function Avatar({ src, alt, size = "md", className, fallback }: AvatarProps) {
           className
         )}
       >
-        <img
+        <Image
           src={src}
           alt={alt || "Avatar"}
+          width={sizeMap[size]}
+          height={sizeMap[size]}
           className="w-full h-full object-cover"
+          unoptimized
         />
       </div>
     );

@@ -8,10 +8,7 @@ import {
   MessageCircle,
   Shield,
   ArrowRight,
-  CheckCircle,
-  Users,
   Target,
-  Zap,
   Instagram,
   Facebook,
 } from "lucide-react";

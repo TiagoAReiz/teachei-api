@@ -39,19 +39,10 @@ export default function LoginPage() {
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      // Get ID token from Google using the access token
-      try {
-        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const userInfo = await userInfoRes.json();
-        // Send the access token to our backend for verification
-        googleLogin(tokenResponse.access_token, {
-          onError: () => setShowError(true),
-        });
-      } catch {
-        setShowError(true);
-      }
+      // Send the access token to our backend for verification
+      googleLogin(tokenResponse.access_token, {
+        onError: () => setShowError(true),
+      });
     },
     onError: () => setShowError(true),
   });

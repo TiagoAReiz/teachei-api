@@ -27,7 +27,6 @@ export function useSavedIntentions() {
     } catch (error) {
       console.error("Error loading saved intentions:", error);
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, []);
 

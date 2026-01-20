@@ -62,10 +62,9 @@ export default function SettingsPage() {
   }, [user, reset]);
 
   const onSubmit = (data: ProfileFormData) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updateProfile(data as any, {
+    updateProfile(data, {
       onSuccess: () => success("Perfil atualizado com sucesso!"),
-      onError: (err) => error(err.message || "Erro ao atualizar perfil"),
+      onError: (err: Error) => error(err.message || "Erro ao atualizar perfil"),
     });
   };
 

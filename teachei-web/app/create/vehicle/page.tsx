@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { ArrowRight, Search, ChevronRight } from "lucide-react";
-import { Button, Input } from "@/components/ui";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBrands, useModels } from "@/hooks/use-vehicles";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";

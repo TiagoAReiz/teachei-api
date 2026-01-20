@@ -1,61 +1,58 @@
 "use client";
 
-import { Suspense, useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, Home, ArrowRight, Clock, RefreshCw } from "lucide-react";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useIntention } from "@/hooks/use-intentions";
 
-type PaymentState = "checking" | "confirmed" | "pending";
+type InternalState = "checking" | "pending";
 
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const intentionId = searchParams.get("id");
-  const [paymentState, setPaymentState] = useState<PaymentState>("checking");
+  // Only track internal state for checking/pending - confirmed is derived
+  const [internalState, setInternalState] = useState<InternalState>("checking");
   const [pollCount, setPollCount] = useState(0);
   const [countdown, setCountdown] = useState(5);
 
   // Fetch intention to check status
-  const { data: intention, refetch, isLoading } = useIntention(intentionId || "");
+  const { data: intention, refetch } = useIntention(intentionId || "");
+
+  // Derive the actual payment state
+  // If no ID or intention is active, it's confirmed
+  // Otherwise use internal state (checking/pending)
+  const paymentState = useMemo(() => {
+    if (!intentionId) return "confirmed";
+    if (intention?.status === "ATIVO") return "confirmed";
+    return internalState;
+  }, [intentionId, intention?.status, internalState]);
 
   // Poll for status update
   const pollStatus = useCallback(async () => {
-    if (!intentionId) {
-      setPaymentState("confirmed"); // No ID, assume success
-      return;
-    }
+    if (!intentionId) return;
 
     const result = await refetch();
     const status = result.data?.status;
     
-    if (status === "ATIVO") {
-      setPaymentState("confirmed");
-    } else if (pollCount >= 10) {
+    if (status !== "ATIVO" && pollCount >= 10) {
       // Max 10 polls (30 seconds), show pending state
-      setPaymentState("pending");
-    } else {
+      setInternalState("pending");
+    } else if (status !== "ATIVO") {
       setPollCount((prev) => prev + 1);
     }
   }, [intentionId, refetch, pollCount]);
 
-  // Initial check and polling
+  // Polling timer
   useEffect(() => {
-    if (!intentionId) {
-      setPaymentState("confirmed");
+    if (!intentionId || paymentState !== "checking" || pollCount >= 10) {
       return;
     }
 
-    if (intention?.status === "ATIVO") {
-      setPaymentState("confirmed");
-      return;
-    }
-
-    if (paymentState === "checking" && pollCount < 10) {
-      const timer = setTimeout(pollStatus, 3000); // Poll every 3 seconds
-      return () => clearTimeout(timer);
-    }
-  }, [intentionId, intention?.status, paymentState, pollCount, pollStatus]);
+    const timer = setTimeout(pollStatus, 3000); // Poll every 3 seconds
+    return () => clearTimeout(timer);
+  }, [intentionId, paymentState, pollCount, pollStatus]);
 
   // Countdown timer for redirect (only when confirmed)
   useEffect(() => {
@@ -122,7 +119,7 @@ function PaymentSuccessContent() {
               variant="outline" 
               onClick={() => {
                 setPollCount(0);
-                setPaymentState("checking");
+                setInternalState("checking");
               }} 
               className="w-full"
             >
