@@ -27,12 +27,12 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
   const currentModelo = searchParams.get("modelo") || "";
 
   // Fetch brands when vehicle type is selected
-  const { data: marcas, isLoading: isLoadingMarcas } = useMarcas(currentType || undefined);
+  const { data: marcas, isLoading: isLoadingMarcas } = useMarcas(currentType || null);
   
   // Fetch models when brand is selected
   const { data: modelos, isLoading: isLoadingModelos } = useModelos(
-    currentType || undefined,
-    currentMarca || undefined
+    currentType || null,
+    currentMarca || null
   );
 
   const updateFilter = (key: string, value: string) => {
