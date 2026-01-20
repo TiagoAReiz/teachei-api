@@ -19,6 +19,7 @@ interface CreateIntentionState {
   precoMaximo: number | null;
   quilometragemMinima: number | null;
   quilometragemMaxima: number | null;
+  opcionais: string[];
   observacoes: string;
   
   // Step 4: Location
@@ -33,6 +34,7 @@ interface CreateIntentionState {
   setCores: (cores: string[]) => void;
   setPreco: (min: number | null, max: number | null) => void;
   setQuilometragem: (min: number | null, max: number | null) => void;
+  setOpcionais: (opcionais: string[]) => void;
   setObservacoes: (obs: string) => void;
   setLocalizacao: (cidade: string, estado: string) => void;
   reset: () => void;
@@ -51,6 +53,7 @@ const initialState = {
   precoMaximo: null,
   quilometragemMinima: null,
   quilometragemMaxima: null,
+  opcionais: [] as string[],
   observacoes: "",
   cidade: "",
   estado: "",
@@ -66,6 +69,7 @@ export const useCreateIntentionStore = create<CreateIntentionState>((set) => ({
   setCores: (cores) => set({ cores }),
   setPreco: (min, max) => set({ precoMinimo: min, precoMaximo: max }),
   setQuilometragem: (min, max) => set({ quilometragemMinima: min, quilometragemMaxima: max }),
+  setOpcionais: (opcionais) => set({ opcionais }),
   setObservacoes: (obs) => set({ observacoes: obs }),
   setLocalizacao: (cidade, estado) => set({ cidade, estado }),
   reset: () => set(initialState),

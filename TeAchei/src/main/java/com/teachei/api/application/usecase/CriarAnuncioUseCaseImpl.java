@@ -28,6 +28,21 @@ public class CriarAnuncioUseCaseImpl implements CriarAnuncioUseCase {
 
     @Override
     public Anuncio executar(UUID usuarioId, CriarAnuncioCommand command) {
+        // Validate year range
+        Integer anoMinimo = command.anos() != null && !command.anos().isEmpty() 
+            ? command.anos().stream().min(Integer::compareTo).orElse(null)
+            : null;
+        Integer anoMaximo = command.anos() != null && !command.anos().isEmpty()
+            ? command.anos().stream().max(Integer::compareTo).orElse(null)
+            : null;
+        anuncioService.validarRangeAnos(anoMinimo, anoMaximo);
+
+        // Validate mileage range
+        anuncioService.validarRangeQuilometragem(
+            command.quilometragemMinima(), 
+            command.quilometragemMaxima()
+        );
+
         // Get user profile for contact info
         Perfil perfil = perfilRepository.buscarPorUsuarioId(usuarioId)
             .orElseThrow(() -> new UsuarioNaoEncontradoException(usuarioId));
@@ -61,11 +76,16 @@ public class CriarAnuncioUseCaseImpl implements CriarAnuncioUseCase {
         if (command.quilometragemMaxima() != null) {
             veiculoInfo.setQuilometragemMaxima(command.quilometragemMaxima());
         }
+        
+        // Set optional features if provided
+        if (command.opcionais() != null && !command.opcionais().isEmpty()) {
+            veiculoInfo.setOpcionais(command.opcionais());
+        }
 
-        // Create contact info from profile, with optional overrides from command
+        // Create contact info from profile, with overrides from command
         ContatoInfo contatoInfo = ContatoInfo.fromPerfil(perfil);
         
-        // Override location if provided in command
+        // Override location from command (required for new business model)
         if (command.cidade() != null && !command.cidade().isBlank()) {
             contatoInfo.setCidade(command.cidade());
         }
@@ -73,8 +93,8 @@ public class CriarAnuncioUseCaseImpl implements CriarAnuncioUseCase {
             contatoInfo.setEstado(command.estado());
         }
 
-        // Create intention using domain service
-        Anuncio anuncio = anuncioService.criarAnuncio(
+        // Create intention as ATIVO (free for buyers - new business model)
+        Anuncio anuncio = anuncioService.criarAnuncioAtivo(
             usuarioId,
             command.tipo(),
             veiculoInfo,

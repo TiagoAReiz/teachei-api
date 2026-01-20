@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
 import { Button, CurrencyInput, Select, Input } from "@/components/ui";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
 import { useAnos } from "@/hooks/use-vehicles";
 import { vehicleColors } from "@/lib/utils";
+import { vehicleOptions } from "@/lib/vehicle-options";
 import { cn } from "@/lib/utils";
 
 export default function CreateSpecsPage() {
@@ -21,11 +22,13 @@ export default function CreateSpecsPage() {
     precoMaximo,
     quilometragemMinima,
     quilometragemMaxima,
+    opcionais,
     observacoes,
     setAnos,
     setCores,
     setPreco,
     setQuilometragem,
+    setOpcionais,
     setObservacoes,
   } = useCreateIntentionStore();
 
@@ -42,6 +45,23 @@ export default function CreateSpecsPage() {
       router.push("/create");
     }
   }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
+
+  // Validation errors
+  const yearRangeError = useMemo(() => {
+    if (anoMinimo && anoMaximo && anoMinimo > anoMaximo) {
+      return "Ano mínimo não pode ser maior que ano máximo";
+    }
+    return null;
+  }, [anoMinimo, anoMaximo]);
+
+  const mileageRangeError = useMemo(() => {
+    if (quilometragemMinima && quilometragemMaxima && quilometragemMinima > quilometragemMaxima) {
+      return "Quilometragem mínima não pode ser maior que máxima";
+    }
+    return null;
+  }, [quilometragemMinima, quilometragemMaxima]);
+
+  const hasValidationErrors = yearRangeError || mileageRangeError;
 
   // Build year options from FIPE data or fall back to generic range
   const yearOptions = useMemo(() => {
@@ -82,7 +102,16 @@ export default function CreateSpecsPage() {
     }
   };
 
+  const toggleOpcional = (opcionalValue: string) => {
+    if (opcionais.includes(opcionalValue)) {
+      setOpcionais(opcionais.filter((o) => o !== opcionalValue));
+    } else {
+      setOpcionais([...opcionais, opcionalValue]);
+    }
+  };
+
   const handleContinue = () => {
+    if (hasValidationErrors) return;
     router.push("/create/review");
   };
 
@@ -126,6 +155,12 @@ export default function CreateSpecsPage() {
             disabled={isLoadingAnos}
           />
         </div>
+        {yearRangeError && (
+          <div className="flex items-center gap-2 text-error text-sm">
+            <AlertCircle size={16} />
+            <span>{yearRangeError}</span>
+          </div>
+        )}
       </div>
 
       {/* Colors */}
@@ -192,9 +227,56 @@ export default function CreateSpecsPage() {
             )}
           />
         </div>
+        {mileageRangeError && (
+          <div className="flex items-center gap-2 text-error text-sm">
+            <AlertCircle size={16} />
+            <span>{mileageRangeError}</span>
+          </div>
+        )}
         <p className="text-xs text-muted">
           Deixe em branco se não tiver preferência de quilometragem
         </p>
+      </div>
+
+      {/* Optional Features */}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-foreground">
+          Opcionais desejados
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {vehicleOptions.map((option) => {
+            const isSelected = opcionais.includes(option.value);
+            return (
+              <button
+                key={option.value}
+                onClick={() => toggleOpcional(option.value)}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-left",
+                  isSelected
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border hover:border-muted text-foreground"
+                )}
+              >
+                <div className={cn(
+                  "w-4 h-4 rounded border flex items-center justify-center",
+                  isSelected ? "bg-primary border-primary" : "border-muted"
+                )}>
+                  {isSelected && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-sm font-medium">{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        {opcionais.length > 0 && (
+          <p className="text-xs text-success">
+            {opcionais.length} opcional(is) selecionado(s)
+          </p>
+        )}
       </div>
 
       {/* Notes */}
@@ -211,13 +293,15 @@ export default function CreateSpecsPage() {
         />
       </div>
 
-      <Button onClick={handleContinue} className="w-full" size="lg">
+      <Button 
+        onClick={handleContinue} 
+        className="w-full" 
+        size="lg"
+        disabled={!!hasValidationErrors}
+      >
         <span>Continuar</span>
         <ArrowRight size={20} />
       </Button>
     </div>
   );
 }
-
-
-

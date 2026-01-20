@@ -29,6 +29,8 @@ public record CriarAnuncioRequest(
 
     Integer quilometragemMinima,
     Integer quilometragemMaxima,
+    
+    List<String> opcionais,
 
     String observacoes,
     boolean dadosManuais,

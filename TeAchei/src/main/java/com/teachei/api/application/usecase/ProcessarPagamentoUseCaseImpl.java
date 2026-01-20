@@ -2,12 +2,14 @@ package com.teachei.api.application.usecase;
 
 import com.teachei.api.application.ports.in.ProcessarPagamentoUseCase;
 import com.teachei.api.application.ports.out.AnuncioRepositoryPort;
+import com.teachei.api.application.ports.out.AssinaturaRepositoryPort;
 import com.teachei.api.application.ports.out.PagamentoPort;
 import com.teachei.api.application.ports.out.TransacaoRepositoryPort;
 import com.teachei.api.domain.exception.AnuncioNaoEncontradoException;
 import com.teachei.api.domain.exception.AcessoNegadoException;
 import com.teachei.api.domain.exception.PagamentoException;
 import com.teachei.api.domain.model.Anuncio;
+import com.teachei.api.domain.model.Assinatura;
 import com.teachei.api.domain.model.StatusAnuncio;
 import com.teachei.api.domain.model.StatusPagamento;
 import com.teachei.api.domain.service.AnuncioService;
@@ -18,8 +20,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Implementation of the payment processing use case. 
- * bla
+ * Implementation of the payment processing use case.
+ * Handles both intention payments and subscription payments.
  */
 public class ProcessarPagamentoUseCaseImpl implements ProcessarPagamentoUseCase {
 
@@ -29,6 +31,7 @@ public class ProcessarPagamentoUseCaseImpl implements ProcessarPagamentoUseCase 
     private final PagamentoPort pagamentoPort;
     private final TransacaoRepositoryPort transacaoRepository;
     private final AnuncioService anuncioService;
+    private final AssinaturaRepositoryPort assinaturaRepository;
     private final BigDecimal precoAnuncio;
     private final String appBaseUrl;
     private final String frontendUrl;
@@ -37,6 +40,7 @@ public class ProcessarPagamentoUseCaseImpl implements ProcessarPagamentoUseCase 
                                           PagamentoPort pagamentoPort,
                                           TransacaoRepositoryPort transacaoRepository,
                                           AnuncioService anuncioService,
+                                          AssinaturaRepositoryPort assinaturaRepository,
                                           BigDecimal precoAnuncio,
                                           String appBaseUrl,
                                           String frontendUrl) {
@@ -44,6 +48,7 @@ public class ProcessarPagamentoUseCaseImpl implements ProcessarPagamentoUseCase 
         this.pagamentoPort = pagamentoPort;
         this.transacaoRepository = transacaoRepository;
         this.anuncioService = anuncioService;
+        this.assinaturaRepository = assinaturaRepository;
         this.precoAnuncio = precoAnuncio;
         this.appBaseUrl = appBaseUrl;
         this.frontendUrl = frontendUrl;
@@ -115,12 +120,52 @@ public class ProcessarPagamentoUseCaseImpl implements ProcessarPagamentoUseCase 
         PagamentoPort.StatusPagamentoInfo statusInfo = 
             pagamentoPort.consultarStatus(payload.id());
 
-        String anuncioId = statusInfo.externalReference();
-        if (anuncioId == null) {
+        String externalReference = statusInfo.externalReference();
+        if (externalReference == null) {
             log.warn("Payment {} has no external reference", payload.id());
             return;
         }
 
+        // Check if this is a subscription payment
+        if (externalReference.startsWith("sub_")) {
+            processarPagamentoAssinatura(payload, statusInfo, externalReference);
+        } else {
+            processarPagamentoAnuncio(payload, statusInfo, externalReference);
+        }
+    }
+
+    private void processarPagamentoAssinatura(WebhookPayload payload, 
+                                               PagamentoPort.StatusPagamentoInfo statusInfo,
+                                               String externalReference) {
+        // Extract subscription ID from external reference (format: sub_<uuid>)
+        String assinaturaIdStr = externalReference.substring(4);
+        UUID assinaturaId;
+        try {
+            assinaturaId = UUID.fromString(assinaturaIdStr);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid subscription ID in external reference: {}", externalReference);
+            return;
+        }
+
+        Assinatura assinatura = assinaturaRepository.buscarPorId(assinaturaId)
+            .orElse(null);
+        
+        if (assinatura == null) {
+            log.warn("Subscription not found for payment {}: {}", payload.id(), assinaturaId);
+            return;
+        }
+
+        // Activate subscription if payment approved
+        if (statusInfo.status() == StatusPagamento.APROVADO) {
+            assinatura.ativar(payload.id().toString());
+            assinaturaRepository.salvar(assinatura);
+            log.info("Subscription {} activated after payment {}", assinaturaId, payload.id());
+        }
+    }
+
+    private void processarPagamentoAnuncio(WebhookPayload payload,
+                                            PagamentoPort.StatusPagamentoInfo statusInfo,
+                                            String anuncioId) {
         Anuncio anuncio = anuncioRepository.buscarPorId(anuncioId)
             .orElse(null);
         

@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/v1/anuncios/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v1/veiculos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v1/perfil/{usuarioId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v1/assinaturas/planos").permitAll()
                 // Actuator endpoints
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/**").authenticated()

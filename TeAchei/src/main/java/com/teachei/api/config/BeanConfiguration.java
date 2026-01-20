@@ -105,16 +105,49 @@ public class BeanConfiguration {
             AnuncioRepositoryPort anuncioRepository,
             PagamentoPort pagamentoPort,
             TransacaoRepositoryPort transacaoRepository,
-            AnuncioService anuncioService) {
+            AnuncioService anuncioService,
+            AssinaturaRepositoryPort assinaturaRepository) {
         return new ProcessarPagamentoUseCaseImpl(
             anuncioRepository,
             pagamentoPort,
             transacaoRepository,
             anuncioService,
+            assinaturaRepository,
             precoAnuncio,
             appBaseUrl,
             frontendUrl
         );
+    }
+
+    // Subscription Use Cases
+    @Bean
+    public BuscarPlanosUseCase buscarPlanosUseCase(SubscriptionConfig subscriptionConfig) {
+        return new BuscarPlanosUseCaseImpl(subscriptionConfig);
+    }
+
+    @Bean
+    public CriarAssinaturaUseCase criarAssinaturaUseCase(
+            AssinaturaRepositoryPort assinaturaRepository,
+            PagamentoPort pagamentoPort,
+            SubscriptionConfig subscriptionConfig) {
+        return new CriarAssinaturaUseCaseImpl(
+            assinaturaRepository,
+            pagamentoPort,
+            subscriptionConfig,
+            frontendUrl
+        );
+    }
+
+    @Bean
+    public VerificarAssinaturaUseCase verificarAssinaturaUseCase(
+            AssinaturaRepositoryPort assinaturaRepository) {
+        return new VerificarAssinaturaUseCaseImpl(assinaturaRepository);
+    }
+
+    @Bean
+    public CancelarAssinaturaUseCase cancelarAssinaturaUseCase(
+            AssinaturaRepositoryPort assinaturaRepository) {
+        return new CancelarAssinaturaUseCaseImpl(assinaturaRepository);
     }
 }
 

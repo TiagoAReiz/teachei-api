@@ -25,17 +25,20 @@ public class AnuncioController {
     private final AtualizarAnuncioUseCase atualizarAnuncioUseCase;
     private final ExcluirAnuncioUseCase excluirAnuncioUseCase;
     private final FinalizarAnuncioUseCase finalizarAnuncioUseCase;
+    private final VerificarAssinaturaUseCase verificarAssinaturaUseCase;
 
     public AnuncioController(CriarAnuncioUseCase criarAnuncioUseCase,
                              BuscarAnunciosUseCase buscarAnunciosUseCase,
                              AtualizarAnuncioUseCase atualizarAnuncioUseCase,
                              ExcluirAnuncioUseCase excluirAnuncioUseCase,
-                             FinalizarAnuncioUseCase finalizarAnuncioUseCase) {
+                             FinalizarAnuncioUseCase finalizarAnuncioUseCase,
+                             VerificarAssinaturaUseCase verificarAssinaturaUseCase) {
         this.criarAnuncioUseCase = criarAnuncioUseCase;
         this.buscarAnunciosUseCase = buscarAnunciosUseCase;
         this.atualizarAnuncioUseCase = atualizarAnuncioUseCase;
         this.excluirAnuncioUseCase = excluirAnuncioUseCase;
         this.finalizarAnuncioUseCase = finalizarAnuncioUseCase;
+        this.verificarAssinaturaUseCase = verificarAssinaturaUseCase;
     }
 
     @PostMapping
@@ -54,6 +57,7 @@ public class AnuncioController {
             request.precoMaximo(),
             request.quilometragemMinima(),
             request.quilometragemMaxima(),
+            request.opcionais(),
             request.observacoes(),
             request.dadosManuais(),
             request.cidade(),
@@ -67,6 +71,7 @@ public class AnuncioController {
 
     @GetMapping
     public ResponseEntity<PaginaResponse<AnuncioResponse>> listar(
+            @AuthenticationPrincipal CurrentUser currentUser,
             // Accept both 'tipo' and 'tipoVeiculo' parameter names
             @RequestParam(required = false) TipoVeiculo tipo,
             @RequestParam(required = false) TipoVeiculo tipoVeiculo,
@@ -92,8 +97,18 @@ public class AnuncioController {
 
         var resultado = buscarAnunciosUseCase.buscar(filtro, pageFinal, sizeFinal);
 
+        // Check if user has active subscription
+        boolean assinaturaAtiva = currentUser != null && 
+            verificarAssinaturaUseCase.temAssinaturaAtiva(currentUser.getId());
+
         List<AnuncioResponse> content = resultado.items().stream()
-            .map(AnuncioResponse::fromDomain)
+            .map(anuncio -> {
+                // Owner always sees their own contact info
+                boolean isOwner = currentUser != null && 
+                    anuncio.getUsuarioId().equals(currentUser.getId());
+                boolean ocultarContato = !isOwner && !assinaturaAtiva;
+                return AnuncioResponse.fromDomain(anuncio, ocultarContato, assinaturaAtiva);
+            })
             .toList();
 
         return ResponseEntity.ok(PaginaResponse.of(
@@ -106,9 +121,21 @@ public class AnuncioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AnuncioResponse> buscarPorId(@PathVariable String id) {
+    public ResponseEntity<AnuncioResponse> buscarPorId(
+            @AuthenticationPrincipal CurrentUser currentUser,
+            @PathVariable String id) {
         var anuncio = buscarAnunciosUseCase.buscarPorId(id);
-        return ResponseEntity.ok(AnuncioResponse.fromDomain(anuncio));
+        
+        // Check if user has active subscription
+        boolean assinaturaAtiva = currentUser != null && 
+            verificarAssinaturaUseCase.temAssinaturaAtiva(currentUser.getId());
+        
+        // Owner always sees their own contact info
+        boolean isOwner = currentUser != null && 
+            anuncio.getUsuarioId().equals(currentUser.getId());
+        boolean ocultarContato = !isOwner && !assinaturaAtiva;
+        
+        return ResponseEntity.ok(AnuncioResponse.fromDomain(anuncio, ocultarContato, assinaturaAtiva));
     }
 
     @GetMapping("/meus")

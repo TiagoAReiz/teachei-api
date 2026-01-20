@@ -2,16 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Phone, MapPin, Gauge } from "lucide-react";
+import { CheckCircle, Edit2, Car, Calendar, Palette, DollarSign, Phone, MapPin, Gauge, Send } from "lucide-react";
 import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
 import { useCreateIntention } from "@/hooks/use-intentions";
-import { useCreatePaymentPreference } from "@/hooks/use-payments";
 import { useAuth } from "@/hooks/use-auth";
 import { formatCurrency, vehicleTypeLabels } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
-import { redirectToPaymentCheckout } from "@/lib/payments";
 
 export default function CreateReviewPage() {
   const router = useRouter();
@@ -54,13 +52,6 @@ export default function CreateReviewPage() {
   }, [user, setLocalizacao]);
 
   const { mutate: createIntention, isPending: isCreating } = useCreateIntention();
-  const { mutate: createPaymentPreference, isPending: isCreatingPayment } = useCreatePaymentPreference();
-  
-  // Track the created intention ID for payment retry
-  const [createdIntentionId, setCreatedIntentionId] = useState<string | null>(null);
-  const [showPaymentRetry, setShowPaymentRetry] = useState(false);
-
-  const isPending = isCreating || isCreatingPayment;
 
   // Redirect if incomplete
   useEffect(() => {
@@ -70,42 +61,24 @@ export default function CreateReviewPage() {
   }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
 
   // Pre-fill contact phone from user profile (only once when user data loads)
-  // This is a valid pattern for async data initialization
   useEffect(() => {
     if (user?.whatsapp && !hasInitializedRef.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTelefoneContato(user.whatsapp);
       hasInitializedRef.current = true;
     }
   }, [user?.whatsapp]);
 
-  // Proceed with payment after intention is created
-  const proceedWithPayment = (intentionId: string) => {
-    createPaymentPreference(intentionId, {
-      onSuccess: (preference) => {
-        success("Redirecionando para pagamento...");
-        reset();
-        // Redirect to Mercado Pago checkout
-        redirectToPaymentCheckout(preference);
-      },
-      onError: (err) => {
-        error(err.message || "Erro ao criar preferência de pagamento");
-        setCreatedIntentionId(intentionId);
-        setShowPaymentRetry(true);
-      },
-    });
-  };
-
-  // Retry payment for an already created intention
-  const handleRetryPayment = () => {
-    if (createdIntentionId) {
-      setShowPaymentRetry(false);
-      proceedWithPayment(createdIntentionId);
-    }
-  };
+  // Validation for location (required)
+  const isLocationValid = cidade.trim() !== "" && estado.trim() !== "";
 
   const proceedWithCreation = () => {
     if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
+
+    // Validate location
+    if (!isLocationValid) {
+      error("Cidade e estado são obrigatórios");
+      return;
+    }
 
     // Build anos array from anoMinimo and anoMaximo
     const anos: number[] = [];
@@ -132,14 +105,15 @@ export default function CreateReviewPage() {
         quilometragemMinima: quilometragemMinima || undefined,
         quilometragemMaxima: quilometragemMaxima || undefined,
         observacoes: observacoes || undefined,
-        cidade: cidade || undefined,
-        estado: estado || undefined,
+        cidade,
+        estado,
       },
       {
         onSuccess: (data) => {
-          success("Intenção criada! Iniciando pagamento...");
-          // Proceed with payment after intention is created
-          proceedWithPayment(data.id);
+          success("Sua intenção foi publicada com sucesso!");
+          reset();
+          // Redirect to intention detail page
+          router.push(`/intention/${data.id}`);
         },
         onError: (err) => {
           error(err.message || "Erro ao criar intenção");
@@ -185,6 +159,12 @@ export default function CreateReviewPage() {
     // Validate contact phone
     if (!telefoneContato || telefoneContato.trim() === "") {
       error("WhatsApp é obrigatório para contato");
+      return;
+    }
+
+    // Validate location
+    if (!isLocationValid) {
+      error("Cidade e estado são obrigatórios para publicar");
       return;
     }
 
@@ -241,11 +221,6 @@ export default function CreateReviewPage() {
       label: "Quilometragem",
       value: mileageDisplay,
     }] : []),
-    ...((cidade || estado) ? [{
-      icon: MapPin,
-      label: "Localização",
-      value: [cidade, estado].filter(Boolean).join(", "),
-    }] : []),
   ];
 
   return (
@@ -292,7 +267,7 @@ export default function CreateReviewPage() {
       {/* Contact Phone Card */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="font-semibold text-foreground mb-3">Telefone de contato</h3>
+          <h3 className="font-semibold text-foreground mb-3">Telefone de contato *</h3>
           <p className="text-sm text-muted mb-4">
             Os vendedores entrarão em contato por este número via WhatsApp.
           </p>
@@ -309,10 +284,15 @@ export default function CreateReviewPage() {
         </CardContent>
       </Card>
 
-      {/* Location Card */}
-      <Card>
+      {/* Location Card - Required */}
+      <Card className={!isLocationValid ? "border-error/50" : ""}>
         <CardContent className="p-6">
-          <h3 className="font-semibold text-foreground mb-3">Localização</h3>
+          <h3 className="font-semibold text-foreground mb-3">
+            Localização *
+            {!isLocationValid && (
+              <span className="text-error text-sm font-normal ml-2">(obrigatório)</span>
+            )}
+          </h3>
           <p className="text-sm text-muted mb-4">
             Informe sua cidade e estado para os vendedores saberem onde você está.
           </p>
@@ -322,6 +302,7 @@ export default function CreateReviewPage() {
               onChange={(e) => setLocalizacao(e.target.value, estado)}
               label="Cidade"
               placeholder="São Paulo"
+              error={cidade.trim() === "" ? "Obrigatório" : undefined}
             />
             <Input
               value={estado}
@@ -329,6 +310,7 @@ export default function CreateReviewPage() {
               label="Estado"
               placeholder="SP"
               maxLength={2}
+              error={estado.trim() === "" ? "Obrigatório" : undefined}
             />
           </div>
         </CardContent>
@@ -343,19 +325,16 @@ export default function CreateReviewPage() {
         Editar informações
       </button>
 
-      {/* Pricing Info */}
-      <Card variant="outlined" className="border-primary/20 bg-primary/5">
+      {/* Free Publishing Info */}
+      <Card variant="outlined" className="border-success/20 bg-success/5">
         <CardContent className="p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <CreditCard size={20} className="text-primary" />
+            <div className="p-2 bg-success/10 rounded-lg">
+              <CheckCircle size={20} className="text-success" />
             </div>
             <div>
-              <p className="font-semibold text-foreground">Taxa de publicação</p>
-              <p className="text-sm text-muted">Válido por 30 dias</p>
-            </div>
-            <div className="ml-auto text-right">
-              <p className="text-xl font-bold text-primary">R$ 2,00</p>
+              <p className="font-semibold text-foreground">Publicação Gratuita!</p>
+              <p className="text-sm text-muted">Válido por 60 dias</p>
             </div>
           </div>
           <ul className="text-sm text-muted space-y-1">
@@ -369,20 +348,26 @@ export default function CreateReviewPage() {
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle size={14} className="text-success" />
-              Destaque no feed
+              Sem custo para compradores
             </li>
           </ul>
         </CardContent>
       </Card>
 
       {/* Submit Button */}
-      <Button onClick={handleSubmit} className="w-full" size="lg" isLoading={isPending}>
-        <span>Publicar e Pagar</span>
-        <CreditCard size={20} />
+      <Button 
+        onClick={handleSubmit} 
+        className="w-full" 
+        size="lg" 
+        isLoading={isCreating}
+        disabled={!isLocationValid}
+      >
+        <span>Publicar Intenção</span>
+        <Send size={20} />
       </Button>
 
       <p className="text-center text-xs text-muted">
-        Ao continuar, você será redirecionado para o Mercado Pago para concluir o pagamento.
+        Sua intenção ficará visível para vendedores da plataforma.
       </p>
 
       {/* Update Profile Dialog */}
@@ -415,44 +400,6 @@ export default function CreateReviewPage() {
           </Button>
         </DialogFooter>
       </Dialog>
-
-      {/* Payment Retry Dialog */}
-      <Dialog isOpen={showPaymentRetry} onClose={() => setShowPaymentRetry(false)}>
-        <DialogHeader onClose={() => setShowPaymentRetry(false)}>
-          <DialogTitle>Erro no pagamento</DialogTitle>
-          <DialogDescription>
-            Sua intenção foi criada, mas houve um erro ao iniciar o pagamento. Deseja tentar novamente?
-          </DialogDescription>
-        </DialogHeader>
-        <DialogContent>
-          <div className="p-4 bg-error/10 rounded-xl">
-            <p className="text-sm text-error">
-              A intenção está pendente de pagamento. Você pode tentar pagar agora ou acessá-la depois em &quot;Minhas Intenções&quot;.
-            </p>
-          </div>
-        </DialogContent>
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setShowPaymentRetry(false);
-              reset();
-              router.push("/my-intentions");
-            }}
-          >
-            Ver minhas intenções
-          </Button>
-          <Button 
-            onClick={handleRetryPayment}
-            isLoading={isCreatingPayment}
-          >
-            Tentar novamente
-          </Button>
-        </DialogFooter>
-      </Dialog>
     </div>
   );
 }
-
-
-

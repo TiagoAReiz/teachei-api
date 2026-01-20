@@ -132,6 +132,9 @@ public class AnuncioDocument {
         private List<String> cores;
         private BigDecimal precoMaximo;
         private BigDecimal precoFipeReferencia;
+        private Integer quilometragemMinima;
+        private Integer quilometragemMaxima;
+        private List<String> opcionais;
         private boolean dadosManuais;
 
         // Getters and Setters
@@ -205,6 +208,30 @@ public class AnuncioDocument {
 
         public void setDadosManuais(boolean dadosManuais) {
             this.dadosManuais = dadosManuais;
+        }
+
+        public Integer getQuilometragemMinima() {
+            return quilometragemMinima;
+        }
+
+        public void setQuilometragemMinima(Integer quilometragemMinima) {
+            this.quilometragemMinima = quilometragemMinima;
+        }
+
+        public Integer getQuilometragemMaxima() {
+            return quilometragemMaxima;
+        }
+
+        public void setQuilometragemMaxima(Integer quilometragemMaxima) {
+            this.quilometragemMaxima = quilometragemMaxima;
+        }
+
+        public List<String> getOpcionais() {
+            return opcionais;
+        }
+
+        public void setOpcionais(List<String> opcionais) {
+            this.opcionais = opcionais;
         }
     }
 

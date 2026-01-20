@@ -76,6 +76,9 @@ public class AnuncioDocumentMapper {
         info.setCores(doc.getCores() != null ? new ArrayList<>(doc.getCores()) : new ArrayList<>());
         info.setPrecoMaximo(doc.getPrecoMaximo());
         info.setPrecoFipeReferencia(doc.getPrecoFipeReferencia());
+        info.setQuilometragemMinima(doc.getQuilometragemMinima());
+        info.setQuilometragemMaxima(doc.getQuilometragemMaxima());
+        info.setOpcionais(doc.getOpcionais() != null ? new ArrayList<>(doc.getOpcionais()) : new ArrayList<>());
         info.setDadosManuais(doc.isDadosManuais());
         return info;
     }
@@ -90,6 +93,9 @@ public class AnuncioDocumentMapper {
         doc.setCores(new ArrayList<>(info.getCores()));
         doc.setPrecoMaximo(info.getPrecoMaximo());
         doc.setPrecoFipeReferencia(info.getPrecoFipeReferencia());
+        doc.setQuilometragemMinima(info.getQuilometragemMinima());
+        doc.setQuilometragemMaxima(info.getQuilometragemMaxima());
+        doc.setOpcionais(info.getOpcionais() != null ? new ArrayList<>(info.getOpcionais()) : new ArrayList<>());
         doc.setDadosManuais(info.isDadosManuais());
         return doc;
     }

@@ -14,8 +14,10 @@ public class AnuncioService {
     private static final int DEFAULT_EXPIRY_DAYS = 60;
 
     /**
-     * Creates a new purchase intention with validation.
+     * Creates a new purchase intention with validation (legacy - pending payment).
+     * @deprecated Use {@link #criarAnuncioAtivo} for new business model
      */
+    @Deprecated
     public Anuncio criarAnuncio(UUID usuarioId, TipoVeiculo tipo, 
                                  VeiculoInfo veiculoInfo, ContatoInfo contatoInfo,
                                  String observacoes) {
@@ -23,6 +25,19 @@ public class AnuncioService {
         validarContatoInfo(contatoInfo);
         
         return Anuncio.criar(usuarioId, tipo, veiculoInfo, contatoInfo, observacoes);
+    }
+
+    /**
+     * Creates a new purchase intention as ATIVO (free for buyers).
+     * This is the new business model - intentions are free to create.
+     */
+    public Anuncio criarAnuncioAtivo(UUID usuarioId, TipoVeiculo tipo, 
+                                      VeiculoInfo veiculoInfo, ContatoInfo contatoInfo,
+                                      String observacoes) {
+        validarVeiculoInfo(veiculoInfo);
+        validarContatoInfoComLocalizacao(contatoInfo);
+        
+        return Anuncio.criarAtivo(usuarioId, tipo, veiculoInfo, contatoInfo, observacoes);
     }
 
     /**
@@ -93,6 +108,34 @@ public class AnuncioService {
         }
         if (contatoInfo.getWhatsapp() == null || contatoInfo.getWhatsapp().isBlank()) {
             throw new AnuncioInvalidoException("WhatsApp é obrigatório para contato");
+        }
+    }
+
+    private void validarContatoInfoComLocalizacao(ContatoInfo contatoInfo) {
+        validarContatoInfo(contatoInfo);
+        if (contatoInfo.getCidade() == null || contatoInfo.getCidade().isBlank()) {
+            throw new AnuncioInvalidoException("Cidade é obrigatória para publicar a intenção");
+        }
+        if (contatoInfo.getEstado() == null || contatoInfo.getEstado().isBlank()) {
+            throw new AnuncioInvalidoException("Estado é obrigatório para publicar a intenção");
+        }
+    }
+
+    /**
+     * Validates year range: anoMinimo <= anoMaximo
+     */
+    public void validarRangeAnos(Integer anoMinimo, Integer anoMaximo) {
+        if (anoMinimo != null && anoMaximo != null && anoMinimo > anoMaximo) {
+            throw new AnuncioInvalidoException("Ano mínimo não pode ser maior que ano máximo");
+        }
+    }
+
+    /**
+     * Validates mileage range: kmMinima <= kmMaxima
+     */
+    public void validarRangeQuilometragem(Integer kmMinima, Integer kmMaxima) {
+        if (kmMinima != null && kmMaxima != null && kmMinima > kmMaxima) {
+            throw new AnuncioInvalidoException("Quilometragem mínima não pode ser maior que máxima");
         }
     }
 }

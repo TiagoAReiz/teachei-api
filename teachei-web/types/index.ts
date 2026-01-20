@@ -149,6 +149,7 @@ export interface VeiculoResponse {
   precoFipeReferencia?: number;
   quilometragemMinima?: number;
   quilometragemMaxima?: number;
+  opcionais?: string[];
   dadosManuais: boolean;
 }
 
@@ -173,6 +174,8 @@ export interface Anuncio {
   observacoes?: string;
   criadoEm: string;
   expiraEm?: string;
+  contatoOculto?: boolean;
+  assinaturaAtiva?: boolean;
 }
 
 // Request to create an intention (matches CriarAnuncioRequest)
@@ -187,6 +190,7 @@ export interface CreateAnuncioRequest {
   precoMaximo: number;
   quilometragemMinima?: number;
   quilometragemMaxima?: number;
+  opcionais?: string[];
   observacoes?: string;
   dadosManuais?: boolean;
   cidade?: string;

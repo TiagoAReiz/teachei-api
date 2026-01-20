@@ -21,11 +21,13 @@ public class VeiculoInfo {
     private BigDecimal precoFipeReferencia;
     private Integer quilometragemMinima;
     private Integer quilometragemMaxima;
+    private List<String> opcionais;
     private boolean dadosManuais;
 
     public VeiculoInfo() {
         this.anos = new ArrayList<>();
         this.cores = new ArrayList<>();
+        this.opcionais = new ArrayList<>();
     }
 
     public VeiculoInfo(String marcaCodigo, String marcaNome, String modeloCodigo, String modeloNome,
@@ -178,6 +180,14 @@ public class VeiculoInfo {
 
     public void setQuilometragemMaxima(Integer quilometragemMaxima) {
         this.quilometragemMaxima = quilometragemMaxima;
+    }
+
+    public List<String> getOpcionais() {
+        return opcionais != null ? Collections.unmodifiableList(opcionais) : Collections.emptyList();
+    }
+
+    public void setOpcionais(List<String> opcionais) {
+        this.opcionais = opcionais != null ? new ArrayList<>(opcionais) : new ArrayList<>();
     }
 }
 

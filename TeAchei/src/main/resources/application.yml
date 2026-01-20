@@ -71,6 +71,22 @@ payment:
   price-per-ad: ${PAYMENT_PRICE_PER_AD:2.00}
   intention-expiry-days: ${INTENTION_EXPIRY_DAYS:60}
 
+# Subscription Plans Configuration (prices in centavos)
+subscription:
+  plans:
+    individual:
+      price: ${SUBSCRIPTION_INDIVIDUAL_PRICE:1500}
+      duration-days: 30
+      recurring: false
+    quarterly:
+      price: ${SUBSCRIPTION_QUARTERLY_PRICE:3000}
+      duration-days: 90
+      recurring: true
+    annual:
+      price: ${SUBSCRIPTION_ANNUAL_PRICE:9000}
+      duration-days: 365
+      recurring: true
+
 # Resilience4j Configuration
 resilience4j:
   circuitbreaker:

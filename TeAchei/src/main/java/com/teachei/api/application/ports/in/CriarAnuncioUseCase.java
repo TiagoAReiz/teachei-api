@@ -35,6 +35,7 @@ public interface CriarAnuncioUseCase {
         BigDecimal precoMaximo,
         Integer quilometragemMinima,
         Integer quilometragemMaxima,
+        List<String> opcionais,
         String observacoes,
         boolean dadosManuais,
         String cidade,

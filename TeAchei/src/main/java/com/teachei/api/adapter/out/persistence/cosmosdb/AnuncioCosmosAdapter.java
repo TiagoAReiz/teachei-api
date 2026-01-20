@@ -88,7 +88,9 @@ public class AnuncioCosmosAdapter implements AnuncioRepositoryPort {
 
     @Override
     public void deletar(String id) {
-        repository.deleteById(id);
+        // Cosmos DB requires partition key for delete operations.
+        // We need to find the document first to get the usuarioId (partition key)
+        repository.findById(id).ifPresent(repository::delete);
     }
 }
 

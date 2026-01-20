@@ -17,19 +17,45 @@ public record AnuncioResponse(
     ContatoResponse contato,
     String observacoes,
     LocalDateTime criadoEm,
-    LocalDateTime expiraEm
+    LocalDateTime expiraEm,
+    boolean contatoOculto,
+    boolean assinaturaAtiva
 ) {
+    /**
+     * Creates response with full contact info visible (for owners or subscribers).
+     */
     public static AnuncioResponse fromDomain(Anuncio anuncio) {
+        return fromDomain(anuncio, false, true);
+    }
+
+    /**
+     * Creates response with contact visibility based on subscription status.
+     * 
+     * @param anuncio the intention
+     * @param ocultarContato whether to hide contact info (true for non-subscribers viewing others' intentions)
+     * @param assinaturaAtiva whether the requesting user has an active subscription
+     */
+    public static AnuncioResponse fromDomain(Anuncio anuncio, boolean ocultarContato, boolean assinaturaAtiva) {
+        ContatoResponse contato;
+        if (ocultarContato) {
+            // Show only location for non-subscribers
+            contato = ContatoResponse.apenasLocalizacao(anuncio.getContatoInfo());
+        } else {
+            contato = ContatoResponse.from(anuncio.getContatoInfo());
+        }
+
         return new AnuncioResponse(
             anuncio.getId(),
             anuncio.getUsuarioId().toString(),
             anuncio.getTipo(),
             anuncio.getStatus(),
             VeiculoResponse.from(anuncio.getVeiculoInfo()),
-            ContatoResponse.from(anuncio.getContatoInfo()),
+            contato,
             anuncio.getObservacoes(),
             anuncio.getCriadoEm(),
-            anuncio.getExpiraEm()
+            anuncio.getExpiraEm(),
+            ocultarContato,
+            assinaturaAtiva
         );
     }
 
@@ -44,6 +70,7 @@ public record AnuncioResponse(
         BigDecimal precoFipeReferencia,
         Integer quilometragemMinima,
         Integer quilometragemMaxima,
+        List<String> opcionais,
         boolean dadosManuais
     ) {
         public static VeiculoResponse from(com.teachei.api.domain.model.VeiculoInfo info) {
@@ -59,6 +86,7 @@ public record AnuncioResponse(
                 info.getPrecoFipeReferencia(),
                 info.getQuilometragemMinima(),
                 info.getQuilometragemMaxima(),
+                info.getOpcionais(),
                 info.isDadosManuais()
             );
         }
@@ -78,6 +106,21 @@ public record AnuncioResponse(
                 info.getWhatsapp(),
                 info.getWhatsappLink(),
                 info.getInstagram(),
+                info.getCidade(),
+                info.getEstado(),
+                info.getLocalizacao()
+            );
+        }
+
+        /**
+         * Creates a response with only location visible (for non-subscribers).
+         */
+        public static ContatoResponse apenasLocalizacao(com.teachei.api.domain.model.ContatoInfo info) {
+            if (info == null) return null;
+            return new ContatoResponse(
+                null,  // whatsapp hidden
+                null,  // whatsappLink hidden
+                null,  // instagram hidden
                 info.getCidade(),
                 info.getEstado(),
                 info.getLocalizacao()

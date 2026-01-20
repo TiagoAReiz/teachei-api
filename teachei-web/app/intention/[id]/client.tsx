@@ -182,6 +182,7 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
               <CardContent className="p-6">
                 <h2 className="font-semibold text-foreground mb-4">Contato</h2>
                 
+                {/* Location - always visible */}
                 {(intention.contato.cidade || intention.contato.estado) && (
                   <p className="text-muted flex items-center gap-2 mb-4">
                     <MapPin size={16} />
@@ -189,19 +190,38 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
                   </p>
                 )}
 
-                {/* Social Links */}
-                <div className="flex items-center gap-3">
-                  {intention.contato.instagram && (
-                    <a
-                      href={getInstagramLink(intention.contato.instagram)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
-                    >
-                      <Instagram size={20} />
+                {/* Contact info hidden - show subscription CTA */}
+                {intention.contatoOculto && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+                    <p className="text-foreground font-medium mb-2">
+                      Informações de contato ocultas
+                    </p>
+                    <p className="text-sm text-muted mb-4">
+                      Assine para ver o WhatsApp e Instagram do comprador e enviar sua proposta.
+                    </p>
+                    <a href="/assinatura">
+                      <Button variant="primary" className="w-full">
+                        Ver planos de assinatura
+                      </Button>
                     </a>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {/* Contact info visible - show social links */}
+                {!intention.contatoOculto && (
+                  <div className="flex items-center gap-3">
+                    {intention.contato.instagram && (
+                      <a
+                        href={getInstagramLink(intention.contato.instagram)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-full bg-muted/10 text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <Instagram size={20} />
+                      </a>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -210,41 +230,52 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
         {/* Fixed CTA */}
         <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border p-4 z-50">
           <div className="max-w-4xl mx-auto flex gap-3">
-            {intention.contato?.whatsappLink ? (
-              <a
-                href={intention.contato.whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1"
-              >
-                <Button variant="whatsapp" className="w-full" size="lg">
-                  <MessageCircle size={20} />
-                  Enviar proposta
+            {/* Contact hidden - show subscription CTA */}
+            {intention.contatoOculto ? (
+              <a href="/assinatura" className="flex-1">
+                <Button variant="primary" className="w-full" size="lg">
+                  Assine para ver contato
                 </Button>
               </a>
-            ) : intention.contato?.whatsapp && (
-              <a
-                href={getWhatsAppLink(intention.contato.whatsapp, whatsappMessage)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1"
-              >
-                <Button variant="whatsapp" className="w-full" size="lg">
-                  <MessageCircle size={20} />
-                  Enviar proposta
-                </Button>
-              </a>
-            )}
-            {intention.contato?.whatsapp && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => {
-                  window.location.href = `tel:${intention.contato.whatsapp}`;
-                }}
-              >
-                <Phone size={20} />
-              </Button>
+            ) : (
+              <>
+                {intention.contato?.whatsappLink ? (
+                  <a
+                    href={intention.contato.whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1"
+                  >
+                    <Button variant="whatsapp" className="w-full" size="lg">
+                      <MessageCircle size={20} />
+                      Enviar proposta
+                    </Button>
+                  </a>
+                ) : intention.contato?.whatsapp && (
+                  <a
+                    href={getWhatsAppLink(intention.contato.whatsapp, whatsappMessage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1"
+                  >
+                    <Button variant="whatsapp" className="w-full" size="lg">
+                      <MessageCircle size={20} />
+                      Enviar proposta
+                    </Button>
+                  </a>
+                )}
+                {intention.contato?.whatsapp && (
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      window.location.href = `tel:${intention.contato.whatsapp}`;
+                    }}
+                  >
+                    <Phone size={20} />
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
