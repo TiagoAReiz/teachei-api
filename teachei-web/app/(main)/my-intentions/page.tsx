@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Clock, CheckCircle, AlertCircle, CreditCard } from "lucide-react";
-import { Button, Card, CardContent, Badge } from "@/components/ui";
-import { useMyIntentions } from "@/hooks/use-intentions";
+import { Plus, Clock, CheckCircle, AlertCircle, CreditCard, Trash2 } from "lucide-react";
+import { Button, Card, CardContent, Badge, Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui";
+import { useMyIntentions, useDeleteIntention } from "@/hooks/use-intentions";
 import { useCreatePaymentPreference } from "@/hooks/use-payments";
 import { formatCurrency, formatRelativeTime, statusLabels, vehicleTypeLabels } from "@/lib/utils";
 import { SkeletonCard } from "@/components/ui/skeleton";
@@ -38,9 +38,11 @@ export default function MyIntentionsPage() {
   const { data: intentions, isLoading } = useMyIntentions();
   const [filter, setFilter] = useState<StatusAnuncio | "">("");
   const [payingIntentionId, setPayingIntentionId] = useState<string | null>(null);
+  const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null);
   const { error: showError, success: showSuccess } = useToast();
   
   const { mutate: createPaymentPreference, isPending: isCreatingPayment } = useCreatePaymentPreference();
+  const { mutate: deleteIntention, isPending: isDeleting } = useDeleteIntention();
 
   const handlePayNow = (intentionId: string) => {
     setPayingIntentionId(intentionId);
@@ -52,6 +54,20 @@ export default function MyIntentionsPage() {
       onError: (err) => {
         showError(err.message || "Erro ao criar preferência de pagamento");
         setPayingIntentionId(null);
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (!deleteDialogId) return;
+    
+    deleteIntention(deleteDialogId, {
+      onSuccess: () => {
+        showSuccess("Intenção excluída com sucesso");
+        setDeleteDialogId(null);
+      },
+      onError: (err) => {
+        showError(err.message || "Erro ao excluir intenção");
       },
     });
   };
@@ -160,18 +176,31 @@ export default function MyIntentionsPage() {
 
                   {/* Actions for pending */}
                   {intention.status === "PENDENTE_PAGAMENTO" && (
-                    <Button
-                      size="sm"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePayNow(intention.id);
-                      }}
-                      isLoading={isCreatingPayment && payingIntentionId === intention.id}
-                    >
-                      <CreditCard size={16} />
-                      <span>Pagar Agora</span>
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePayNow(intention.id);
+                        }}
+                        isLoading={isCreatingPayment && payingIntentionId === intention.id}
+                      >
+                        <CreditCard size={16} />
+                        <span>Pagar</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteDialogId(intention.id);
+                        }}
+                        className="text-error hover:bg-error/10"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -179,6 +208,33 @@ export default function MyIntentionsPage() {
           })}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog isOpen={!!deleteDialogId} onClose={() => setDeleteDialogId(null)}>
+        <DialogHeader onClose={() => setDeleteDialogId(null)}>
+          <DialogTitle>Excluir Intenção</DialogTitle>
+          <DialogDescription>
+            Tem certeza que deseja excluir esta intenção de compra? Esta ação não pode ser desfeita.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setDeleteDialogId(null)}
+            disabled={isDeleting}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleDelete}
+            isLoading={isDeleting}
+            className="bg-error hover:bg-error/90"
+          >
+            Excluir
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }

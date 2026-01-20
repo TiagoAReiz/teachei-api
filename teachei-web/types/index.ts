@@ -147,6 +147,8 @@ export interface VeiculoResponse {
   cores: string[];
   precoMaximo: number;
   precoFipeReferencia?: number;
+  quilometragemMinima?: number;
+  quilometragemMaxima?: number;
   dadosManuais: boolean;
 }
 
@@ -183,8 +185,12 @@ export interface CreateAnuncioRequest {
   anos: number[];
   cores: string[];
   precoMaximo: number;
+  quilometragemMinima?: number;
+  quilometragemMaxima?: number;
   observacoes?: string;
   dadosManuais?: boolean;
+  cidade?: string;
+  estado?: string;
 }
 
 // ============================================
@@ -206,6 +212,8 @@ export interface IntentionFilters {
   tipoVeiculo?: TipoVeiculo;
   search?: string;
   status?: StatusAnuncio;
+  marcaCodigo?: string;
+  modeloCodigo?: string;
   page?: number;
   size?: number;
 }

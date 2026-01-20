@@ -42,6 +42,8 @@ public record AnuncioResponse(
         List<String> cores,
         BigDecimal precoMaximo,
         BigDecimal precoFipeReferencia,
+        Integer quilometragemMinima,
+        Integer quilometragemMaxima,
         boolean dadosManuais
     ) {
         public static VeiculoResponse from(com.teachei.api.domain.model.VeiculoInfo info) {
@@ -55,6 +57,8 @@ public record AnuncioResponse(
                 info.getCores(),
                 info.getPrecoMaximo(),
                 info.getPrecoFipeReferencia(),
+                info.getQuilometragemMinima(),
+                info.getQuilometragemMaxima(),
                 info.isDadosManuais()
             );
         }

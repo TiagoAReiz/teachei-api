@@ -18,6 +18,8 @@ export async function getIntentions(
   if (filters.tipoVeiculo) params.append("tipoVeiculo", filters.tipoVeiculo);
   if (filters.search) params.append("search", filters.search);
   if (filters.status) params.append("status", filters.status);
+  if (filters.marcaCodigo) params.append("marcaCodigo", filters.marcaCodigo);
+  if (filters.modeloCodigo) params.append("modeloCodigo", filters.modeloCodigo);
   if (filters.page !== undefined) params.append("page", filters.page.toString());
   if (filters.size !== undefined) params.append("size", filters.size.toString());
 

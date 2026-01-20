@@ -52,8 +52,12 @@ public class AnuncioController {
             request.anos(),
             request.cores(),
             request.precoMaximo(),
+            request.quilometragemMinima(),
+            request.quilometragemMaxima(),
             request.observacoes(),
-            request.dadosManuais()
+            request.dadosManuais(),
+            request.cidade(),
+            request.estado()
         );
 
         var anuncio = criarAnuncioUseCase.executar(currentUser.getId(), command);

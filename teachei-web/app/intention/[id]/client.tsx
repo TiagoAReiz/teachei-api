@@ -1,27 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Heart,
+  Bookmark,
   Share2,
   MessageCircle,
   Calendar,
   Palette,
   DollarSign,
-  Settings,
-  Fuel,
   Eye,
   MapPin,
-  Verified,
   Instagram,
-  Facebook,
   Phone,
 } from "lucide-react";
-import { Button, Card, CardContent, Badge, Avatar } from "@/components/ui";
+import { Button, Card, CardContent, Badge } from "@/components/ui";
 import { formatCurrency, formatRelativeTime, vehicleTypeLabels, getWhatsAppLink, getInstagramLink } from "@/lib/utils";
+import { useSavedIntentions } from "@/hooks/use-saved-intentions";
 import type { Anuncio } from "@/types";
 
 interface IntentionDetailsClientProps {
@@ -30,8 +25,9 @@ interface IntentionDetailsClientProps {
 
 export function IntentionDetailsClient({ initialData }: IntentionDetailsClientProps) {
   const router = useRouter();
-  const [isSaved, setIsSaved] = useState(false);
+  const { isSaved, toggleSave } = useSavedIntentions();
   const intention = initialData;
+  const saved = isSaved(intention.id);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -92,12 +88,12 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
           
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsSaved(!isSaved)}
+              onClick={() => toggleSave(intention.id)}
               className={`p-2 rounded-full transition-colors ${
-                isSaved ? "bg-error text-white" : "text-muted hover:text-foreground hover:bg-muted/10"
+                saved ? "bg-primary text-white" : "text-muted hover:text-foreground hover:bg-muted/10"
               }`}
             >
-              <Heart size={22} fill={isSaved ? "currentColor" : "none"} />
+              <Bookmark size={22} fill={saved ? "currentColor" : "none"} />
             </button>
             <button
               onClick={handleShare}

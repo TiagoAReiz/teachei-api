@@ -33,8 +33,12 @@ public interface CriarAnuncioUseCase {
         List<Integer> anos,
         List<String> cores,
         BigDecimal precoMaximo,
+        Integer quilometragemMinima,
+        Integer quilometragemMaxima,
         String observacoes,
-        boolean dadosManuais
+        boolean dadosManuais,
+        String cidade,
+        String estado
     ) {
         public CriarAnuncioCommand {
             if (tipo == null) {

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { ArrowRight } from "lucide-react";
-import { Button, CurrencyInput, Select } from "@/components/ui";
+import { Button, CurrencyInput, Select, Input } from "@/components/ui";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
 import { useAnos } from "@/hooks/use-vehicles";
 import { vehicleColors } from "@/lib/utils";
@@ -19,10 +19,13 @@ export default function CreateSpecsPage() {
     anoMaximo,
     cores,
     precoMaximo,
+    quilometragemMinima,
+    quilometragemMaxima,
     observacoes,
     setAnos,
     setCores,
     setPreco,
+    setQuilometragem,
     setObservacoes,
   } = useCreateIntentionStore();
 
@@ -163,6 +166,36 @@ export default function CreateSpecsPage() {
         value={precoMaximo}
         onChange={(value) => setPreco(null, value)}
       />
+
+      {/* Mileage Range */}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-foreground">
+          Quilometragem (opcional)
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            type="number"
+            placeholder="Mínima (km)"
+            value={quilometragemMinima?.toString() || ""}
+            onChange={(e) => setQuilometragem(
+              e.target.value ? parseInt(e.target.value) : null,
+              quilometragemMaxima
+            )}
+          />
+          <Input
+            type="number"
+            placeholder="Máxima (km)"
+            value={quilometragemMaxima?.toString() || ""}
+            onChange={(e) => setQuilometragem(
+              quilometragemMinima,
+              e.target.value ? parseInt(e.target.value) : null
+            )}
+          />
+        </div>
+        <p className="text-xs text-muted">
+          Deixe em branco se não tiver preferência de quilometragem
+        </p>
+      </div>
 
       {/* Notes */}
       <div className="space-y-3">

@@ -52,8 +52,12 @@ public class PagamentoController {
             @RequestParam(required = false, name = "data.id") Long dataId,
             @RequestBody(required = false) Map<String, Object> body) {
         
-        log.info("Received Mercado Pago webhook: type={}, dataId={}, hasSignature={}", 
-                 type, dataId, xSignature != null);
+        log.info("=== MERCADO PAGO WEBHOOK RECEIVED ===");
+        log.info("Headers: x-signature={}, x-request-id={}", 
+                 xSignature != null ? "[PRESENT]" : "[MISSING]", 
+                 xRequestId != null ? xRequestId : "[MISSING]");
+        log.info("Query params: type={}, data.id={}", type, dataId);
+        log.info("Request body: {}", body);
 
         // Parse data from body if not in query params
         if (type == null && body != null) {
@@ -62,27 +66,41 @@ public class PagamentoController {
             if (data != null && data.get("id") != null) {
                 dataId = Long.valueOf(data.get("id").toString());
             }
+            log.info("Parsed from body: type={}, dataId={}", type, dataId);
         }
 
         // Validate webhook signature (security)
         String dataIdStr = dataId != null ? dataId.toString() : null;
-        if (!webhookValidator.validateSignature(xSignature, xRequestId, dataIdStr)) {
+        boolean signatureValid = webhookValidator.validateSignature(xSignature, xRequestId, dataIdStr);
+        log.info("Signature validation result: {}", signatureValid ? "VALID" : "INVALID/SKIPPED");
+        
+        if (!signatureValid) {
             log.warn("Invalid webhook signature - rejecting request");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         // Process the webhook
         if (type != null && dataId != null) {
-            var payload = new ProcessarPagamentoUseCase.WebhookPayload(
-                type,
-                null,
-                dataId,
-                null,
-                null
-            );
-            processarPagamentoUseCase.processarWebhook(payload);
+            log.info("Processing webhook: type={}, dataId={}", type, dataId);
+            try {
+                var payload = new ProcessarPagamentoUseCase.WebhookPayload(
+                    type,
+                    null,
+                    dataId,
+                    null,
+                    null
+                );
+                processarPagamentoUseCase.processarWebhook(payload);
+                log.info("Webhook processed successfully");
+            } catch (Exception e) {
+                log.error("Error processing webhook: {}", e.getMessage(), e);
+                // Still return 200 to avoid Mercado Pago retries for application errors
+            }
+        } else {
+            log.warn("Webhook ignored: type or dataId is null");
         }
 
+        log.info("=== WEBHOOK PROCESSING COMPLETE ===");
         // Always return 200 quickly to acknowledge receipt
         return ResponseEntity.ok().build();
     }

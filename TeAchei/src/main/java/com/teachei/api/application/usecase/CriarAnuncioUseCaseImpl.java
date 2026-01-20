@@ -53,9 +53,25 @@ public class CriarAnuncioUseCaseImpl implements CriarAnuncioUseCase {
                 command.precoMaximo()
             );
         }
+        
+        // Set mileage if provided
+        if (command.quilometragemMinima() != null) {
+            veiculoInfo.setQuilometragemMinima(command.quilometragemMinima());
+        }
+        if (command.quilometragemMaxima() != null) {
+            veiculoInfo.setQuilometragemMaxima(command.quilometragemMaxima());
+        }
 
-        // Create contact info from profile
+        // Create contact info from profile, with optional overrides from command
         ContatoInfo contatoInfo = ContatoInfo.fromPerfil(perfil);
+        
+        // Override location if provided in command
+        if (command.cidade() != null && !command.cidade().isBlank()) {
+            contatoInfo.setCidade(command.cidade());
+        }
+        if (command.estado() != null && !command.estado().isBlank()) {
+            contatoInfo.setEstado(command.estado());
+        }
 
         // Create intention using domain service
         Anuncio anuncio = anuncioService.criarAnuncio(

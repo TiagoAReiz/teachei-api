@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Phone } from "lucide-react";
+import { CheckCircle, Edit2, CreditCard, Car, Calendar, Palette, DollarSign, Phone, MapPin, Gauge } from "lucide-react";
 import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
@@ -33,9 +33,25 @@ export default function CreateReviewPage() {
     anoMaximo,
     cores,
     precoMaximo,
+    quilometragemMinima,
+    quilometragemMaxima,
     observacoes,
+    cidade,
+    estado,
+    setLocalizacao,
     reset,
   } = useCreateIntentionStore();
+
+  // Initialize location from user profile
+  const hasInitializedLocationRef = useRef(false);
+  useEffect(() => {
+    if (user && !hasInitializedLocationRef.current) {
+      if (user.cidade || user.estado) {
+        setLocalizacao(user.cidade || "", user.estado || "");
+        hasInitializedLocationRef.current = true;
+      }
+    }
+  }, [user, setLocalizacao]);
 
   const { mutate: createIntention, isPending: isCreating } = useCreateIntention();
   const { mutate: createPaymentPreference, isPending: isCreatingPayment } = useCreatePaymentPreference();
@@ -113,7 +129,11 @@ export default function CreateReviewPage() {
         anos,
         cores,
         precoMaximo,
+        quilometragemMinima: quilometragemMinima || undefined,
+        quilometragemMaxima: quilometragemMaxima || undefined,
         observacoes: observacoes || undefined,
+        cidade: cidade || undefined,
+        estado: estado || undefined,
       },
       {
         onSuccess: (data) => {
@@ -179,6 +199,17 @@ export default function CreateReviewPage() {
 
   if (!tipoVeiculo || !marcaNome || !modeloNome) return null;
 
+  // Format mileage display
+  const formatMileage = (km: number | null) => km ? `${km.toLocaleString("pt-BR")} km` : null;
+  const mileageDisplay = (() => {
+    if (quilometragemMinima && quilometragemMaxima) {
+      return `${formatMileage(quilometragemMinima)} - ${formatMileage(quilometragemMaxima)}`;
+    }
+    if (quilometragemMinima) return `A partir de ${formatMileage(quilometragemMinima)}`;
+    if (quilometragemMaxima) return `Até ${formatMileage(quilometragemMaxima)}`;
+    return null;
+  })();
+
   const summaryItems = [
     {
       icon: Car,
@@ -205,6 +236,16 @@ export default function CreateReviewPage() {
       label: "Preço máximo",
       value: precoMaximo ? formatCurrency(precoMaximo) : "Sem limite",
     },
+    ...(mileageDisplay ? [{
+      icon: Gauge,
+      label: "Quilometragem",
+      value: mileageDisplay,
+    }] : []),
+    ...((cidade || estado) ? [{
+      icon: MapPin,
+      label: "Localização",
+      value: [cidade, estado].filter(Boolean).join(", "),
+    }] : []),
   ];
 
   return (
@@ -265,6 +306,31 @@ export default function CreateReviewPage() {
           <p className="text-xs text-muted mt-2">
             Use o formato internacional com código do país (ex: +5511999998888)
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Location Card */}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold text-foreground mb-3">Localização</h3>
+          <p className="text-sm text-muted mb-4">
+            Informe sua cidade e estado para os vendedores saberem onde você está.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              value={cidade}
+              onChange={(e) => setLocalizacao(e.target.value, estado)}
+              label="Cidade"
+              placeholder="São Paulo"
+            />
+            <Input
+              value={estado}
+              onChange={(e) => setLocalizacao(cidade, e.target.value)}
+              label="Estado"
+              placeholder="SP"
+              maxLength={2}
+            />
+          </div>
         </CardContent>
       </Card>
 

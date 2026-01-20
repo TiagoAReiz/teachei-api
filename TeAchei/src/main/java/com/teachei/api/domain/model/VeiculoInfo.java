@@ -19,6 +19,8 @@ public class VeiculoInfo {
     private List<String> cores;
     private BigDecimal precoMaximo;
     private BigDecimal precoFipeReferencia;
+    private Integer quilometragemMinima;
+    private Integer quilometragemMaxima;
     private boolean dadosManuais;
 
     public VeiculoInfo() {
@@ -160,6 +162,22 @@ public class VeiculoInfo {
 
     public void setDadosManuais(boolean dadosManuais) {
         this.dadosManuais = dadosManuais;
+    }
+
+    public Integer getQuilometragemMinima() {
+        return quilometragemMinima;
+    }
+
+    public void setQuilometragemMinima(Integer quilometragemMinima) {
+        this.quilometragemMinima = quilometragemMinima;
+    }
+
+    public Integer getQuilometragemMaxima() {
+        return quilometragemMaxima;
+    }
+
+    public void setQuilometragemMaxima(Integer quilometragemMaxima) {
+        this.quilometragemMaxima = quilometragemMaxima;
     }
 }
 

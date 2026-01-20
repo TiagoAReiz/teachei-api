@@ -27,8 +27,14 @@ public record CriarAnuncioRequest(
     @Positive(message = "Preço máximo deve ser maior que zero")
     BigDecimal precoMaximo,
 
+    Integer quilometragemMinima,
+    Integer quilometragemMaxima,
+
     String observacoes,
-    boolean dadosManuais
+    boolean dadosManuais,
+    
+    String cidade,
+    String estado
 ) {}
 
 

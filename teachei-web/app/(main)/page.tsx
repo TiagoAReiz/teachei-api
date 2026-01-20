@@ -12,6 +12,8 @@ function HomeContent() {
   const filters: Omit<Filters, "page"> = {
     tipoVeiculo: (searchParams.get("tipo") as TipoVeiculo) || undefined,
     search: searchParams.get("search") || undefined,
+    marcaCodigo: searchParams.get("marca") || undefined,
+    modeloCodigo: searchParams.get("modelo") || undefined,
   };
 
   const {
