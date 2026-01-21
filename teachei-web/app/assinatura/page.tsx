@@ -113,7 +113,7 @@ export default function AssinaturaPage() {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8 pt-6 items-end">
+        <div className="grid md:grid-cols-3 gap-4 mb-8 pt-4">
           {planos?.map((plano) => {
             const isSelected = selectedPlan === plano.id;
             const highlight = planHighlights[plano.id];
@@ -128,12 +128,12 @@ export default function AssinaturaPage() {
                   isSelected
                     ? "border-primary ring-2 ring-primary/20"
                     : "hover:border-muted",
-                  isBestValue && "md:-translate-y-2"
+                  isBestValue && "border-primary/50 shadow-lg"
                 )}
                 onClick={() => handleSelectPlan(plano.id)}
               >
                 {isBestValue && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
                     Recomendado
                   </div>
                 )}
