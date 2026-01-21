@@ -4,6 +4,7 @@ import type {
   TipoVeiculo,
   Marca,
   Modelo,
+  ModeloAgrupado,
   Ano,
   MarcasResponse,
   ModelosResponse,
@@ -71,6 +72,50 @@ export async function getPrecoFipe(
     API_ENDPOINTS.VEHICLE_PRICE(tipo, marcaCodigo, modeloCodigo, anoCodigo),
     { requireAuth: false }
   );
+}
+
+/**
+ * Group models by their base name (first word).
+ * 
+ * Example:
+ * - "Onix 1.0 LT 5p" -> baseName: "Onix", version: "1.0 LT 5p"
+ * - "Onix 1.0 LTZ 5p" -> baseName: "Onix", version: "1.0 LTZ 5p"
+ * - "HB20 1.0 Comfort" -> baseName: "HB20", version: "1.0 Comfort"
+ * 
+ * @param modelos - Array of models from FIPE API
+ * @returns Array of grouped models with base name and versions
+ */
+export function groupModelsByBase(modelos: Modelo[]): ModeloAgrupado[] {
+  const groups = new Map<string, Modelo[]>();
+  
+  for (const modelo of modelos) {
+    // First word is the base name
+    const baseName = modelo.nome.split(" ")[0];
+    if (!groups.has(baseName)) {
+      groups.set(baseName, []);
+    }
+    groups.get(baseName)!.push(modelo);
+  }
+  
+  // Sort groups alphabetically by base name
+  return Array.from(groups.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([baseName, versoes]) => ({
+      baseName,
+      versoes,
+    }));
+}
+
+/**
+ * Get the version name from a full model name by removing the base name.
+ * 
+ * @param fullName - Full model name (e.g., "Onix 1.0 LT 5p")
+ * @param baseName - Base model name (e.g., "Onix")
+ * @returns Version name (e.g., "1.0 LT 5p")
+ */
+export function getVersionName(fullName: string, baseName: string): string {
+  const version = fullName.replace(baseName, "").trim();
+  return version || fullName;
 }
 
 

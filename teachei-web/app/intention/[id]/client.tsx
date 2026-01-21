@@ -13,7 +13,18 @@ import {
   MapPin,
   Instagram,
   Phone,
+  Car,
+  Bike,
+  Truck,
 } from "lucide-react";
+import type { TipoVeiculo } from "@/types";
+
+// Vehicle type icon mapping
+const vehicleTypeIcons: Record<TipoVeiculo, typeof Car> = {
+  CARRO: Car,
+  MOTO: Bike,
+  CAMINHAO: Truck,
+};
 import { Button, Card, CardContent, Badge } from "@/components/ui";
 import { formatCurrency, formatRelativeTime, formatExpiration, vehicleTypeLabels, getWhatsAppLink, getInstagramLink } from "@/lib/utils";
 import { useSavedIntentions } from "@/hooks/use-saved-intentions";
@@ -43,8 +54,8 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
 
   const whatsappMessage = `Olá! Vi sua intenção de compra do ${intention.veiculo.marcaNome} ${intention.veiculo.modeloNome} no TeAchei e gostaria de fazer uma proposta.`;
 
-  // Placeholder image
-  const vehicleImage = "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&h=600&fit=crop";
+  // Get vehicle type icon
+  const VehicleIcon = vehicleTypeIcons[intention.tipo] || Car;
 
   // Format anos display
   const anosDisplay = (() => {
@@ -106,12 +117,11 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
       </header>
 
       <main className="max-w-4xl mx-auto pb-24">
-        {/* Hero Image */}
-        <div className="relative h-64 lg:h-80">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${vehicleImage})` }}
-          />
+        {/* Vehicle Icon Header */}
+        <div className="relative h-48 lg:h-56 overflow-hidden">
+          <div className="absolute inset-0 bg-muted/30 flex items-center justify-center">
+            <VehicleIcon size={120} className="text-primary/40" strokeWidth={1} />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
           
           {/* Badges */}

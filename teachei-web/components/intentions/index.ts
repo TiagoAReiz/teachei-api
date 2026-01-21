@@ -2,6 +2,8 @@
 export { IntentionCard } from "./intention-card";
 export { IntentionGrid } from "./intention-grid";
 export { IntentionFilters } from "./intention-filters";
+export { FilterSidebar } from "./filter-sidebar";
+export type { FilterState } from "./filter-sidebar";
 
 
 

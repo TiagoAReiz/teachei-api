@@ -27,6 +27,9 @@ export default function CreateReviewPage() {
     marcaNome,
     modeloCodigo,
     modeloNome,
+    modeloBaseNome,
+    versoesSelecionadas,
+    todasVersoes,
     anoMinimo,
     anoMaximo,
     cores,
@@ -38,6 +41,7 @@ export default function CreateReviewPage() {
     estado,
     setLocalizacao,
     reset,
+    getVersionsText,
   } = useCreateIntentionStore();
 
   // Initialize location from user profile
@@ -55,10 +59,12 @@ export default function CreateReviewPage() {
 
   // Redirect if incomplete
   useEffect(() => {
-    if (!tipoVeiculo || !marcaCodigo || !modeloCodigo) {
+    // Check for both old (modeloCodigo) and new (versoesSelecionadas) flow
+    const hasModel = modeloCodigo || versoesSelecionadas.length > 0;
+    if (!tipoVeiculo || !marcaCodigo || !hasModel) {
       router.push("/create");
     }
-  }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
+  }, [tipoVeiculo, marcaCodigo, modeloCodigo, versoesSelecionadas, router]);
 
   // Pre-fill contact phone from user profile (only once when user data loads)
   useEffect(() => {
@@ -96,6 +102,13 @@ export default function CreateReviewPage() {
       anos.push(anoMaximo);
     }
 
+    // Build observacoes with versions info
+    const versionsText = getVersionsText();
+    let finalObservacoes = observacoes || "";
+    if (versionsText) {
+      finalObservacoes = versionsText + (observacoes ? `\n\n${observacoes}` : "");
+    }
+
     createIntention(
       {
         tipo: tipoVeiculo,
@@ -108,7 +121,7 @@ export default function CreateReviewPage() {
         precoMaximo,
         quilometragemMinima: quilometragemMinima || undefined,
         quilometragemMaxima: quilometragemMaxima || undefined,
-        observacoes: observacoes || undefined,
+        observacoes: finalObservacoes || undefined,
         cidade,
         estado,
       },
@@ -181,7 +194,10 @@ export default function CreateReviewPage() {
     proceedWithCreation();
   };
 
-  if (!tipoVeiculo || !marcaNome || !modeloNome) return null;
+  // Show display name - use base model name if available, otherwise full model name
+  const displayModelName = modeloBaseNome || modeloNome;
+  
+  if (!tipoVeiculo || !marcaNome || !displayModelName) return null;
 
   // Format mileage display
   const formatMileage = (km: number | null) => km ? `${km.toLocaleString("pt-BR")} km` : null;
@@ -194,11 +210,23 @@ export default function CreateReviewPage() {
     return null;
   })();
 
+  // Build vehicle display string
+  const vehicleDisplay = (() => {
+    const base = `${marcaNome} ${displayModelName}`;
+    if (todasVersoes) {
+      return `${base} (todas as versões)`;
+    }
+    if (versoesSelecionadas.length > 1) {
+      return `${base} (${versoesSelecionadas.length} versões)`;
+    }
+    return base;
+  })();
+
   const summaryItems = [
     {
       icon: Car,
       label: "Veículo",
-      value: `${marcaNome} ${modeloNome}`,
+      value: vehicleDisplay,
       badge: vehicleTypeLabels[tipoVeiculo],
     },
     {

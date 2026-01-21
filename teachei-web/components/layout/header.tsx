@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Plus, Menu, X, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { NotificationsDropdown } from "@/components/notifications";
 import { useAuth } from "@/hooks/use-auth";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -16,16 +17,33 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isAuthenticated, logout } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // Debounce search query by 200ms
+  const debouncedSearch = useDebounce(searchQuery, 200);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+  // Trigger search when debounced value changes
+  useEffect(() => {
+    const currentSearch = searchParams.get("search") || "";
+    
+    // Only update if the debounced value is different from current URL
+    if (debouncedSearch !== currentSearch) {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      if (debouncedSearch.trim().length >= 2) {
+        params.set("search", debouncedSearch.trim());
+      } else {
+        params.delete("search");
+      }
+      
+      // Navigate to update URL with new search params
+      const queryString = params.toString();
+      router.push(queryString ? `/?${queryString}` : "/");
     }
-  };
+  }, [debouncedSearch, searchParams, router]);
 
   return (
     <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-sm border-b border-border">
@@ -45,7 +63,7 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
         </Link>
 
         {/* Search Bar (Desktop) */}
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">
+        <div className="hidden md:flex flex-1 max-w-md mx-4">
           <div className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted group-focus-within:text-primary transition-colors">
               <Search size={20} />
@@ -58,7 +76,7 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
               className="w-full bg-background border-0 ring-1 ring-border text-foreground placeholder:text-muted rounded-full h-10 pl-11 pr-4 focus:ring-2 focus:ring-primary transition-all text-sm"
             />
           </div>
-        </form>
+        </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 ml-auto">
@@ -162,7 +180,7 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
       </div>
 
       {/* Mobile Search */}
-      <form onSubmit={handleSearch} className="md:hidden px-4 pb-3">
+      <div className="md:hidden px-4 pb-3">
         <div className="relative w-full group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted group-focus-within:text-primary transition-colors">
             <Search size={20} />
@@ -175,7 +193,7 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
             className="w-full bg-background border-0 ring-1 ring-border text-foreground placeholder:text-muted rounded-full h-10 pl-11 pr-4 focus:ring-2 focus:ring-primary transition-all text-sm"
           />
         </div>
-      </form>
+      </div>
     </header>
   );
 }

@@ -103,6 +103,18 @@ export interface Modelo {
   nome: string;
 }
 
+// Grouped model for base model + versions selection
+export interface ModeloAgrupado {
+  baseName: string;
+  versoes: Modelo[];
+}
+
+// Selected version for multi-select
+export interface VersaoSelecionada {
+  codigo: string;
+  nome: string;
+}
+
 export interface Ano {
   codigo: string;
   nome: string;

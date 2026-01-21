@@ -1,18 +1,18 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Car, Bike, Truck, X, Filter } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Select } from "@/components/ui";
-import { useMarcas, useModelos } from "@/hooks/use-vehicles";
+import { Button } from "@/components/ui";
+import { FilterSidebar, type FilterState } from "./filter-sidebar";
 import type { TipoVeiculo } from "@/types";
 
-const vehicleTypes: { value: TipoVeiculo | ""; label: string; icon: typeof Car }[] = [
-  { value: "", label: "Todos", icon: Car },
-  { value: "CARRO", label: "Carros", icon: Car },
-  { value: "MOTO", label: "Motos", icon: Bike },
-  { value: "CAMINHAO", label: "Caminhões", icon: Truck },
-];
+const vehicleTypeLabels: Record<string, string> = {
+  CARRO: "Carros",
+  MOTO: "Motos",
+  CAMINHAO: "Caminhões",
+};
 
 interface IntentionFiltersProps {
   className?: string;
@@ -21,27 +21,69 @@ interface IntentionFiltersProps {
 export function IntentionFilters({ className }: IntentionFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentType = (searchParams.get("tipo") as TipoVeiculo) || "";
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Parse current filters from URL
+  const currentFilters: FilterState = useMemo(() => ({
+    tipo: (searchParams.get("tipo") as TipoVeiculo) || "",
+    marca: searchParams.get("marca") || "",
+    modelo: searchParams.get("modelo") || "",
+    opcionais: searchParams.get("opcionais")?.split(",").filter(Boolean) || [],
+    precoMin: searchParams.get("precoMin") ? parseInt(searchParams.get("precoMin")!) : null,
+    precoMax: searchParams.get("precoMax") ? parseInt(searchParams.get("precoMax")!) : null,
+    anoMin: searchParams.get("anoMin") ? parseInt(searchParams.get("anoMin")!) : null,
+    anoMax: searchParams.get("anoMax") ? parseInt(searchParams.get("anoMax")!) : null,
+  }), [searchParams]);
+
   const currentSearch = searchParams.get("search") || "";
-  const currentMarca = searchParams.get("marca") || "";
-  const currentModelo = searchParams.get("modelo") || "";
 
-  // Fetch brands when vehicle type is selected
-  const { data: marcas, isLoading: isLoadingMarcas } = useMarcas(currentType || null);
-  
-  // Fetch models when brand is selected
-  const { data: modelos, isLoading: isLoadingModelos } = useModelos(
-    currentType || null,
-    currentMarca || null
-  );
+  // Count active filters (excluding search)
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (currentFilters.tipo) count++;
+    if (currentFilters.marca) count++;
+    if (currentFilters.modelo) count++;
+    if (currentFilters.opcionais.length > 0) count++;
+    if (currentFilters.precoMin !== null || currentFilters.precoMax !== null) count++;
+    if (currentFilters.anoMin !== null || currentFilters.anoMax !== null) count++;
+    return count;
+  }, [currentFilters]);
 
-  const updateFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
+  const hasFilters = activeFilterCount > 0 || currentSearch;
+
+  const handleApplyFilters = (filters: FilterState) => {
+    const params = new URLSearchParams();
+    
+    // Preserve search
+    if (currentSearch) {
+      params.set("search", currentSearch);
     }
+    
+    // Apply new filters
+    if (filters.tipo) params.set("tipo", filters.tipo);
+    if (filters.marca) params.set("marca", filters.marca);
+    if (filters.modelo) params.set("modelo", filters.modelo);
+    if (filters.opcionais.length > 0) params.set("opcionais", filters.opcionais.join(","));
+    if (filters.precoMin !== null) params.set("precoMin", filters.precoMin.toString());
+    if (filters.precoMax !== null) params.set("precoMax", filters.precoMax.toString());
+    if (filters.anoMin !== null) params.set("anoMin", filters.anoMin.toString());
+    if (filters.anoMax !== null) params.set("anoMax", filters.anoMax.toString());
+
+    const queryString = params.toString();
+    router.push(queryString ? `/?${queryString}` : "/");
+  };
+
+  const clearFilters = () => {
+    if (currentSearch) {
+      router.push(`/?search=${encodeURIComponent(currentSearch)}`);
+    } else {
+      router.push("/");
+    }
+  };
+
+  const removeFilter = (key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
     
     // Clear dependent filters
     if (key === "tipo") {
@@ -52,86 +94,46 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
       params.delete("modelo");
     }
     
-    router.push(`/?${params.toString()}`);
+    const queryString = params.toString();
+    router.push(queryString ? `/?${queryString}` : "/");
   };
-
-  const clearFilters = () => {
-    router.push("/");
-  };
-
-  const hasFilters = currentType || currentSearch || currentMarca || currentModelo;
-  
-  // Build brand options
-  const marcaOptions = [
-    { value: "", label: "Todas as marcas" },
-    ...(marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ];
-  
-  // Build model options
-  const modeloOptions = [
-    { value: "", label: "Todos os modelos" },
-    ...(modelos?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ];
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Vehicle Type Chips */}
-      <div className="flex flex-wrap gap-2">
-        {vehicleTypes.map((type) => {
-          const Icon = type.icon;
-          const isActive = currentType === type.value;
+      {/* Filter Button */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          onClick={() => setIsSidebarOpen(true)}
+          className="relative"
+        >
+          <Filter size={18} />
+          <span>Filtrar</span>
+          {activeFilterCount > 0 && (
+            <span className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-full px-1">
+              {activeFilterCount}
+            </span>
+          )}
+        </Button>
 
-          return (
-            <button
-              key={type.value}
-              onClick={() => updateFilter("tipo", type.value)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm transition-colors",
-                isActive
-                  ? "bg-primary text-white"
-                  : "bg-surface border border-border text-foreground hover:bg-muted/10"
-              )}
-            >
-              <Icon size={16} />
-              <span>{type.label}</span>
-            </button>
-          );
-        })}
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="text-sm text-muted hover:text-foreground transition-colors"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
 
-      {/* Brand and Model Filters - show when vehicle type is selected */}
-      {currentType && (
-        <div className="flex flex-wrap gap-3 items-center">
-          <Filter size={16} className="text-muted" />
-          <Select
-            options={marcaOptions}
-            value={currentMarca}
-            onChange={(e) => updateFilter("marca", e.target.value)}
-            disabled={isLoadingMarcas}
-            className="min-w-[160px]"
-          />
-          {currentMarca && (
-            <Select
-              options={modeloOptions}
-              value={currentModelo}
-              onChange={(e) => updateFilter("modelo", e.target.value)}
-              disabled={isLoadingModelos}
-              className="min-w-[180px]"
-            />
-          )}
-        </div>
-      )}
-
-      {/* Active Filters */}
+      {/* Active Filters Display */}
       {hasFilters && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-muted">Filtros ativos:</span>
-          
-          {currentType && (
+          {currentFilters.tipo && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
-              {vehicleTypes.find((t) => t.value === currentType)?.label}
+              {vehicleTypeLabels[currentFilters.tipo] || currentFilters.tipo}
               <button
-                onClick={() => updateFilter("tipo", "")}
+                onClick={() => removeFilter("tipo")}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />
@@ -139,11 +141,11 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
             </span>
           )}
           
-          {currentMarca && (
+          {currentFilters.marca && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
-              {marcas?.find((m) => m.codigo === currentMarca)?.nome || currentMarca}
+              Marca selecionada
               <button
-                onClick={() => updateFilter("marca", "")}
+                onClick={() => removeFilter("marca")}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />
@@ -151,11 +153,53 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
             </span>
           )}
           
-          {currentModelo && (
+          {currentFilters.modelo && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
-              {modelos?.find((m) => m.codigo === currentModelo)?.nome || currentModelo}
+              Modelo selecionado
               <button
-                onClick={() => updateFilter("modelo", "")}
+                onClick={() => removeFilter("modelo")}
+                className="hover:bg-primary/20 rounded-full p-0.5"
+              >
+                <X size={14} />
+              </button>
+            </span>
+          )}
+
+          {currentFilters.opcionais.length > 0 && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
+              {currentFilters.opcionais.length} opcional(is)
+              <button
+                onClick={() => removeFilter("opcionais")}
+                className="hover:bg-primary/20 rounded-full p-0.5"
+              >
+                <X size={14} />
+              </button>
+            </span>
+          )}
+
+          {(currentFilters.precoMin !== null || currentFilters.precoMax !== null) && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
+              Faixa de preço
+              <button
+                onClick={() => {
+                  removeFilter("precoMin");
+                  removeFilter("precoMax");
+                }}
+                className="hover:bg-primary/20 rounded-full p-0.5"
+              >
+                <X size={14} />
+              </button>
+            </span>
+          )}
+
+          {(currentFilters.anoMin !== null || currentFilters.anoMax !== null) && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
+              Faixa de ano
+              <button
+                onClick={() => {
+                  removeFilter("anoMin");
+                  removeFilter("anoMax");
+                }}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />
@@ -167,25 +211,23 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
               &quot;{currentSearch}&quot;
               <button
-                onClick={() => updateFilter("search", "")}
+                onClick={() => removeFilter("search")}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />
               </button>
             </span>
           )}
-
-          <button
-            onClick={clearFilters}
-            className="text-muted hover:text-foreground transition-colors ml-2"
-          >
-            Limpar tudo
-          </button>
         </div>
       )}
+
+      {/* Filter Sidebar */}
+      <FilterSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        initialFilters={currentFilters}
+        onApply={handleApplyFilters}
+      />
     </div>
   );
 }
-
-
-
