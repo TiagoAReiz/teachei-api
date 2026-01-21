@@ -48,23 +48,31 @@ export interface StatusResponse {
  * Fetch available subscription plans (public endpoint).
  */
 export async function fetchPlanos(): Promise<PlanoResponse[]> {
-  const response = await api.get<PlanoResponse[]>("/v1/assinaturas/planos");
+  const response = await api.get<PlanoResponse[]>("/api/v1/assinaturas/planos", {
+    requireAuth: false, // Public endpoint - no auth required
+  });
   return response;
 }
 
 /**
  * Fetch current user's subscription status.
+ * Returns null if user is not authenticated.
  */
 export async function fetchMinhaAssinatura(): Promise<AssinaturaResponse | null> {
-  const response = await api.get<AssinaturaResponse | null>("/v1/assinaturas/minha");
-  return response;
+  try {
+    const response = await api.get<AssinaturaResponse | null>("/api/v1/assinaturas/minha");
+    return response;
+  } catch {
+    // Return null if not authenticated - don't redirect
+    return null;
+  }
 }
 
 /**
  * Check if current user has active subscription.
  */
 export async function checkAssinaturaAtiva(): Promise<boolean> {
-  const response = await api.get<StatusResponse>("/v1/assinaturas/status");
+  const response = await api.get<StatusResponse>("/api/v1/assinaturas/status");
   return response.assinaturaAtiva;
 }
 
@@ -72,7 +80,7 @@ export async function checkAssinaturaAtiva(): Promise<boolean> {
  * Create a new subscription and get payment URL.
  */
 export async function criarAssinatura(plano: PlanoAssinatura): Promise<AssinaturaPreferenciaResponse> {
-  const response = await api.post<AssinaturaPreferenciaResponse>("/v1/assinaturas", { plano });
+  const response = await api.post<AssinaturaPreferenciaResponse>("/api/v1/assinaturas", { plano });
   return response;
 }
 
@@ -80,7 +88,7 @@ export async function criarAssinatura(plano: PlanoAssinatura): Promise<Assinatur
  * Cancel a subscription.
  */
 export async function cancelarAssinatura(id: string): Promise<void> {
-  await api.delete(`/v1/assinaturas/${id}`);
+  await api.delete(`/api/v1/assinaturas/${id}`);
 }
 
 /**
