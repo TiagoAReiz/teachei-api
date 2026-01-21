@@ -113,7 +113,7 @@ export default function AssinaturaPage() {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-3 gap-4 mb-8 pt-6 items-end">
           {planos?.map((plano) => {
             const isSelected = selectedPlan === plano.id;
             const highlight = planHighlights[plano.id];
