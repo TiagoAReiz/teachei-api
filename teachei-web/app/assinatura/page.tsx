@@ -121,22 +121,22 @@ export default function AssinaturaPage() {
             const isBestValue = plano.id === "TRIMESTRAL";
 
             return (
-              <Card
-                key={plano.id}
-                className={cn(
-                  "cursor-pointer transition-all relative",
-                  isSelected
-                    ? "border-primary ring-2 ring-primary/20"
-                    : "hover:border-muted",
-                  isBestValue && "border-primary/50 shadow-lg"
-                )}
-                onClick={() => handleSelectPlan(plano.id)}
-              >
+              <div key={plano.id} className="relative">
                 {isBestValue && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
                     Recomendado
                   </div>
                 )}
+                <Card
+                  className={cn(
+                    "cursor-pointer transition-all h-full",
+                    isSelected
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "hover:border-muted",
+                    isBestValue && "border-primary/50 shadow-lg"
+                  )}
+                  onClick={() => handleSelectPlan(plano.id)}
+                >
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <div className={cn(
@@ -178,7 +178,8 @@ export default function AssinaturaPage() {
                     )}
                   </div>
                 </CardContent>
-              </Card>
+                </Card>
+              </div>
             );
           })}
         </div>
