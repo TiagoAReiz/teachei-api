@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FilterPanel } from "./filter-panel";
@@ -13,17 +13,16 @@ interface SidebarProps {
 // Pages that should show the filter sidebar
 const FILTER_PAGES = ["/", "/feed"];
 
+// Helper to get initial collapsed state from localStorage
+function getInitialCollapsedState(): boolean {
+  if (typeof window === "undefined") return false;
+  const saved = localStorage.getItem("sidebar-collapsed");
+  return saved === "true";
+}
+
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Load collapsed state from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("sidebar-collapsed");
-    if (saved !== null) {
-      setIsCollapsed(saved === "true");
-    }
-  }, []);
+  const [isCollapsed, setIsCollapsed] = useState(getInitialCollapsedState);
 
   // Save collapsed state to localStorage
   const handleToggleCollapse = () => {

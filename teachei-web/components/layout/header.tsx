@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Plus, Menu, X, Car, Home, Heart, FileText, Settings } from "lucide-react";
+import { Plus, Menu, X, Car, Home, Heart, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { NotificationsDropdown } from "@/components/notifications";

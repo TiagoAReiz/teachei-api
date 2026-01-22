@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Car, Bike, Truck, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, Select, CurrencyInput } from "@/components/ui";
