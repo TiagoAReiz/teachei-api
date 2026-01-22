@@ -16,6 +16,9 @@ public record CriarAnuncioRequest(
     String marcaNome,
     String modeloCodigo,
     String modeloNome,
+    String modeloBaseNome,           // Base model name (e.g., "Onix")
+    List<VersaoRequest> versoes,     // Selected versions [{codigo, nome}]
+    boolean todasVersoes,            // True if "accept any version"
 
     @NotEmpty(message = "Pelo menos um ano deve ser selecionado")
     List<Integer> anos,
@@ -36,7 +39,12 @@ public record CriarAnuncioRequest(
     
     String cidade,
     String estado
-) {}
+) {
+    public record VersaoRequest(
+        String codigo,
+        String nome
+    ) {}
+}
 
 
 

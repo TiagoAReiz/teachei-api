@@ -14,6 +14,11 @@ function HomeContent() {
     search: searchParams.get("search") || undefined,
     marcaCodigo: searchParams.get("marca") || undefined,
     modeloCodigo: searchParams.get("modelo") || undefined,
+    anoMin: searchParams.get("anoMin") ? parseInt(searchParams.get("anoMin")!) : undefined,
+    anoMax: searchParams.get("anoMax") ? parseInt(searchParams.get("anoMax")!) : undefined,
+    precoMin: searchParams.get("precoMin") ? parseInt(searchParams.get("precoMin")!) : undefined,
+    precoMax: searchParams.get("precoMax") ? parseInt(searchParams.get("precoMax")!) : undefined,
+    opcionais: searchParams.get("opcionais")?.split(",").filter(Boolean) || undefined,
   };
 
   const {

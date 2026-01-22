@@ -128,6 +128,9 @@ public class AnuncioDocument {
         private String marcaNome;
         private String modeloCodigo;
         private String modeloNome;
+        private String modeloBaseNome;
+        private List<VersaoInfoDocument> versoes;
+        private boolean todasVersoes;
         private List<Integer> anos;
         private List<String> cores;
         private BigDecimal precoMaximo;
@@ -232,6 +235,58 @@ public class AnuncioDocument {
 
         public void setOpcionais(List<String> opcionais) {
             this.opcionais = opcionais;
+        }
+
+        public String getModeloBaseNome() {
+            return modeloBaseNome;
+        }
+
+        public void setModeloBaseNome(String modeloBaseNome) {
+            this.modeloBaseNome = modeloBaseNome;
+        }
+
+        public List<VersaoInfoDocument> getVersoes() {
+            return versoes;
+        }
+
+        public void setVersoes(List<VersaoInfoDocument> versoes) {
+            this.versoes = versoes;
+        }
+
+        public boolean isTodasVersoes() {
+            return todasVersoes;
+        }
+
+        public void setTodasVersoes(boolean todasVersoes) {
+            this.todasVersoes = todasVersoes;
+        }
+    }
+
+    public static class VersaoInfoDocument {
+        private String codigo;
+        private String nome;
+
+        public VersaoInfoDocument() {}
+
+        public VersaoInfoDocument(String codigo, String nome) {
+            this.codigo = codigo;
+            this.nome = nome;
+        }
+
+        public String getCodigo() {
+            return codigo;
+        }
+
+        public void setCodigo(String codigo) {
+            this.codigo = codigo;
+        }
+
+        public String getNome() {
+            return nome;
+        }
+
+        public void setNome(String nome) {
+            this.nome = nome;
         }
     }
 

@@ -1,27 +1,45 @@
 "use client";
 
-import Link from "next/link";
+import { useState, useEffect, Suspense } from "react";
 import { usePathname } from "next/navigation";
-import { Home, Bookmark, User, Settings, FileText, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { FilterPanel } from "./filter-panel";
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
-const navItems = [
-  { href: "/", label: "Feed", icon: Home },
-  { href: "/my-intentions", label: "Minhas Intenções", icon: FileText },
-  { href: "/favorites", label: "Salvos", icon: Bookmark },
-  { href: "/profile", label: "Perfil", icon: User },
-];
+// Pages that should show the filter sidebar
+const FILTER_PAGES = ["/", "/feed"];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Load collapsed state from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved !== null) {
+      setIsCollapsed(saved === "true");
+    }
+  }, []);
+
+  // Save collapsed state to localStorage
+  const handleToggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem("sidebar-collapsed", String(newState));
+  };
+
+  // Only show filter sidebar on filter-enabled pages
+  const showFilters = FILTER_PAGES.some(
+    (page) => pathname === page || (page !== "/" && pathname.startsWith(page))
+  );
+
+  if (!showFilters) {
+    return null;
+  }
 
   return (
     <>
@@ -33,66 +51,37 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Desktop */}
       <aside
         className={cn(
-          "fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-surface border-r border-border z-50 transition-transform duration-300 lg:translate-x-0 lg:z-30",
+          "fixed top-16 left-0 h-[calc(100vh-4rem)] z-50 transition-all duration-300 lg:z-30",
+          "hidden lg:block",
+          isCollapsed ? "w-12" : "w-72"
+        )}
+      >
+        <Suspense fallback={<div className="w-72 h-full bg-surface animate-pulse" />}>
+          <FilterPanel 
+            isCollapsed={isCollapsed} 
+            onToggleCollapse={handleToggleCollapse}
+            className="h-full"
+          />
+        </Suspense>
+      </aside>
+
+      {/* Sidebar - Mobile (Drawer) */}
+      <aside
+        className={cn(
+          "fixed top-16 left-0 h-[calc(100vh-4rem)] z-50 transition-transform duration-300 lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col h-full p-4">
-          {/* Main Navigation */}
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-white"
-                      : "text-foreground hover:bg-muted/10"
-                  )}
-                >
-                  <Icon size={22} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Create CTA */}
-          {isAuthenticated && (
-            <Link href="/create" onClick={onClose} className="mt-4">
-              <Button className="w-full">
-                <Plus size={20} />
-                Nova Intenção
-              </Button>
-            </Link>
-          )}
-
-          {/* Settings Link */}
-          <div className="mt-auto pt-4 border-t border-border">
-            <Link
-              href="/settings"
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors",
-                pathname === "/settings"
-                  ? "bg-primary text-white"
-                  : "text-foreground hover:bg-muted/10"
-              )}
-            >
-              <Settings size={22} />
-              <span>Configurações</span>
-            </Link>
-          </div>
-        </div>
+        <Suspense fallback={<div className="w-72 h-full bg-surface animate-pulse" />}>
+          <FilterPanel 
+            isCollapsed={false} 
+            onToggleCollapse={() => onClose?.()}
+            className="h-full"
+          />
+        </Suspense>
       </aside>
     </>
   );

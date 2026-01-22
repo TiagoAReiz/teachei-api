@@ -30,6 +30,9 @@ public interface CriarAnuncioUseCase {
         String marcaNome,
         String modeloCodigo,
         String modeloNome,
+        String modeloBaseNome,
+        List<VersaoCommand> versoes,
+        boolean todasVersoes,
         List<Integer> anos,
         List<String> cores,
         BigDecimal precoMaximo,
@@ -54,6 +57,14 @@ public interface CriarAnuncioUseCase {
             }
         }
     }
+
+    /**
+     * Version info for creation command.
+     */
+    record VersaoCommand(
+        String codigo,
+        String nome
+    ) {}
 }
 
 

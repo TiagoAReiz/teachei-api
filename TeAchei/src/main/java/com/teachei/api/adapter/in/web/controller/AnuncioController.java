@@ -46,12 +46,22 @@ public class AnuncioController {
             @AuthenticationPrincipal CurrentUser currentUser,
             @Valid @RequestBody CriarAnuncioRequest request) {
         
+        // Map version requests to commands
+        var versoesCommand = request.versoes() != null 
+            ? request.versoes().stream()
+                .map(v -> new CriarAnuncioUseCase.VersaoCommand(v.codigo(), v.nome()))
+                .toList()
+            : List.<CriarAnuncioUseCase.VersaoCommand>of();
+        
         var command = new CriarAnuncioUseCase.CriarAnuncioCommand(
             request.tipo(),
             request.marcaCodigo(),
             request.marcaNome(),
             request.modeloCodigo(),
             request.modeloNome(),
+            request.modeloBaseNome(),
+            versoesCommand,
+            request.todasVersoes(),
             request.anos(),
             request.cores(),
             request.precoMaximo(),
@@ -77,8 +87,18 @@ public class AnuncioController {
             @RequestParam(required = false) TipoVeiculo tipoVeiculo,
             @RequestParam(required = false) String marcaCodigo,
             @RequestParam(required = false) String modeloCodigo,
+            // Year range filters (also accept legacy 'ano' for backwards compatibility)
             @RequestParam(required = false) Integer ano,
+            @RequestParam(required = false) Integer anoMin,
+            @RequestParam(required = false) Integer anoMax,
+            // Price range filters (also accept legacy 'precoMinimo' for backwards compatibility)
             @RequestParam(required = false) BigDecimal precoMinimo,
+            @RequestParam(required = false) BigDecimal precoMin,
+            @RequestParam(required = false) BigDecimal precoMax,
+            // Text search
+            @RequestParam(required = false) String search,
+            // Optionals filter (comma-separated)
+            @RequestParam(required = false) List<String> opcionais,
             @RequestParam(required = false) String cidade,
             @RequestParam(required = false) String estado,
             // Accept both 'page'/'pagina' and 'size'/'tamanho' parameter names
@@ -91,9 +111,20 @@ public class AnuncioController {
         TipoVeiculo tipoFinal = tipo != null ? tipo : tipoVeiculo;
         int pageFinal = pagina != null ? pagina : page;
         int sizeFinal = tamanho != null ? tamanho : size;
+        
+        // Handle legacy 'ano' parameter - treat as both min and max
+        Integer anoMinFinal = anoMin != null ? anoMin : ano;
+        Integer anoMaxFinal = anoMax != null ? anoMax : ano;
+        
+        // Handle legacy 'precoMinimo' parameter
+        BigDecimal precoMinFinal = precoMin != null ? precoMin : precoMinimo;
 
         var filtro = new BuscarAnunciosUseCase.FiltroAnuncio(
-            tipoFinal, marcaCodigo, modeloCodigo, ano, precoMinimo, cidade, estado);
+            tipoFinal, marcaCodigo, modeloCodigo, 
+            anoMinFinal, anoMaxFinal,
+            precoMinFinal, precoMax,
+            search, opcionais,
+            cidade, estado);
 
         var resultado = buscarAnunciosUseCase.buscar(filtro, pageFinal, sizeFinal);
 

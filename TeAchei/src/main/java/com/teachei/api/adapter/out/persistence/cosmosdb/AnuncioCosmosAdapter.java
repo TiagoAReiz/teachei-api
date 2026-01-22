@@ -50,7 +50,9 @@ public class AnuncioCosmosAdapter implements AnuncioRepositoryPort {
     @Override
     public ResultadoBusca buscar(StatusAnuncio status, TipoVeiculo tipo,
                                   String marcaCodigo, String modeloCodigo,
-                                  Integer ano, BigDecimal precoMinimo,
+                                  Integer anoMin, Integer anoMax,
+                                  BigDecimal precoMin, BigDecimal precoMax,
+                                  String search, List<String> opcionais,
                                   String cidade, String estado,
                                   int pagina, int tamanho) {
         // Get all active intentions and filter in memory
@@ -65,11 +67,38 @@ public class AnuncioCosmosAdapter implements AnuncioRepositoryPort {
                 (a.getVeiculoInfo() != null && marcaCodigo.equals(a.getVeiculoInfo().getMarcaCodigo())))
             .filter(a -> modeloCodigo == null || 
                 (a.getVeiculoInfo() != null && modeloCodigo.equals(a.getVeiculoInfo().getModeloCodigo())))
-            .filter(a -> ano == null || 
-                (a.getVeiculoInfo() != null && a.getVeiculoInfo().getAnos().contains(ano)))
-            .filter(a -> precoMinimo == null || 
-                (a.getVeiculoInfo() != null && 
-                 a.getVeiculoInfo().getPrecoMaximo().compareTo(precoMinimo) >= 0))
+            // Year range filter: matches if any year in the ad is within the range
+            .filter(a -> {
+                if (anoMin == null && anoMax == null) return true;
+                if (a.getVeiculoInfo() == null || a.getVeiculoInfo().getAnos() == null) return false;
+                return a.getVeiculoInfo().getAnos().stream().anyMatch(ano ->
+                    (anoMin == null || ano >= anoMin) && (anoMax == null || ano <= anoMax)
+                );
+            })
+            // Price range filter: matches if precoMaximo is within the range
+            .filter(a -> {
+                if (precoMin == null && precoMax == null) return true;
+                if (a.getVeiculoInfo() == null || a.getVeiculoInfo().getPrecoMaximo() == null) return false;
+                var preco = a.getVeiculoInfo().getPrecoMaximo();
+                if (precoMin != null && preco.compareTo(precoMin) < 0) return false;
+                if (precoMax != null && preco.compareTo(precoMax) > 0) return false;
+                return true;
+            })
+            // Text search filter: case-insensitive search in marca, modelo, modeloBase, observacoes
+            .filter(a -> {
+                if (search == null || search.isBlank()) return true;
+                String searchLower = search.toLowerCase();
+                return containsIgnoreCase(a.getVeiculoInfo() != null ? a.getVeiculoInfo().getMarcaNome() : null, searchLower) ||
+                       containsIgnoreCase(a.getVeiculoInfo() != null ? a.getVeiculoInfo().getModeloNome() : null, searchLower) ||
+                       containsIgnoreCase(a.getVeiculoInfo() != null ? a.getVeiculoInfo().getModeloBaseNome() : null, searchLower) ||
+                       containsIgnoreCase(a.getObservacoes(), searchLower);
+            })
+            // Optionals filter: matches if ad contains all requested optionals
+            .filter(a -> {
+                if (opcionais == null || opcionais.isEmpty()) return true;
+                if (a.getVeiculoInfo() == null || a.getVeiculoInfo().getOpcionais() == null) return false;
+                return a.getVeiculoInfo().getOpcionais().containsAll(opcionais);
+            })
             .filter(a -> cidade == null || 
                 (a.getContatoInfo() != null && cidade.equals(a.getContatoInfo().getCidade())))
             .filter(a -> estado == null || 
@@ -79,6 +108,11 @@ public class AnuncioCosmosAdapter implements AnuncioRepositoryPort {
         long total = repository.countByStatus(status);
 
         return new ResultadoBusca(filtered, total);
+    }
+
+    private boolean containsIgnoreCase(String text, String search) {
+        if (text == null || search == null) return false;
+        return text.toLowerCase().contains(search);
     }
 
     @Override

@@ -149,12 +149,21 @@ export interface PrecoFipeResponse {
 
 export type StatusAnuncio = "ATIVO" | "FINALIZADO" | "EXPIRADO" | "CANCELADO";
 
+// Version info in VeiculoResponse
+export interface VersaoResponse {
+  codigo: string;
+  nome: string;
+}
+
 // Nested vehicle info in AnuncioResponse
 export interface VeiculoResponse {
   marcaCodigo: string;
   marcaNome: string;
   modeloCodigo: string;
   modeloNome: string;
+  modeloBaseNome?: string;          // Base model name (e.g., "Onix")
+  versoes?: VersaoResponse[];       // Selected versions
+  todasVersoes?: boolean;           // True if "accept any version"
   anos: number[];
   cores: string[];
   precoMaximo: number;
@@ -190,6 +199,12 @@ export interface Anuncio {
   assinaturaAtiva?: boolean;
 }
 
+// Version request for creating intentions
+export interface VersaoRequest {
+  codigo: string;
+  nome: string;
+}
+
 // Request to create an intention (matches CriarAnuncioRequest)
 export interface CreateAnuncioRequest {
   tipo: TipoVeiculo;
@@ -197,6 +212,9 @@ export interface CreateAnuncioRequest {
   marcaNome?: string;
   modeloCodigo?: string;
   modeloNome?: string;
+  modeloBaseNome?: string;          // Base model name (e.g., "Onix")
+  versoes?: VersaoRequest[];        // Selected versions
+  todasVersoes?: boolean;           // True if "accept any version"
   anos: number[];
   cores: string[];
   precoMaximo: number;
@@ -219,6 +237,11 @@ export interface IntentionFilters {
   status?: StatusAnuncio;
   marcaCodigo?: string;
   modeloCodigo?: string;
+  anoMin?: number;
+  anoMax?: number;
+  precoMin?: number;
+  precoMax?: number;
+  opcionais?: string[];
   page?: number;
   size?: number;
 }

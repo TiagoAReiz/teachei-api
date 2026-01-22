@@ -100,8 +100,8 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Filter Button */}
-      <div className="flex items-center gap-3">
+      {/* Filter Button - Mobile Only (filters are in sidebar on desktop) */}
+      <div className="flex items-center gap-3 lg:hidden">
         <Button
           variant="outline"
           onClick={() => setIsSidebarOpen(true)}

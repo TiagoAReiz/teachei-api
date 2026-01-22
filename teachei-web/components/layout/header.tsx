@@ -2,13 +2,21 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Plus, Menu, X, Car } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { Plus, Menu, X, Car, Home, Heart, FileText, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { NotificationsDropdown } from "@/components/notifications";
 import { useAuth } from "@/hooks/use-auth";
 import { SearchInput, SearchInputFallback } from "./search-input";
+import { cn } from "@/lib/utils";
+
+// Navigation items for icon nav
+const navItems = [
+  { href: "/", icon: Home, label: "Feed" },
+  { href: "/favorites", icon: Heart, label: "Favoritos" },
+  { href: "/my-intentions", icon: FileText, label: "Meus Anúncios" },
+];
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -17,6 +25,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -36,6 +45,35 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
           <Car size={28} />
           <span className="hidden sm:inline">TeAchei</span>
         </Link>
+
+        {/* Icon Navigation (Desktop) */}
+        {isAuthenticated && (
+          <nav className="hidden lg:flex items-center gap-1 ml-6">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-full transition-colors relative group",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted hover:text-foreground hover:bg-muted/10"
+                  )}
+                  title={item.label}
+                >
+                  <Icon size={20} />
+                  {/* Tooltip */}
+                  <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        )}
 
         {/* Search Bar (Desktop) */}
         <Suspense fallback={<SearchInputFallback className="hidden md:flex flex-1 max-w-md mx-4" />}>

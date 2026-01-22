@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Car, Bike, Truck } from "lucide-react";
+import { X, Car, Bike, Truck, AlertCircle } from "lucide-react";
 import { Button, Select, CurrencyInput } from "@/components/ui";
 import { useMarcas, useModelos } from "@/hooks/use-vehicles";
 import { vehicleOptions } from "@/lib/vehicle-options";
@@ -175,6 +175,12 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
             <label className="block text-sm font-medium text-foreground">
               Marca
             </label>
+            {!filters.tipo && (
+              <div className="flex items-center gap-2 p-2 bg-warning/10 border border-warning/30 rounded-lg text-sm text-warning">
+                <AlertCircle size={16} className="flex-shrink-0" />
+                <span>Selecione um tipo de veículo primeiro</span>
+              </div>
+            )}
             <Select
               options={marcaOptions}
               value={filters.marca}
@@ -188,6 +194,12 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
             <label className="block text-sm font-medium text-foreground">
               Modelo
             </label>
+            {!filters.marca && filters.tipo && (
+              <div className="flex items-center gap-2 p-2 bg-warning/10 border border-warning/30 rounded-lg text-sm text-warning">
+                <AlertCircle size={16} className="flex-shrink-0" />
+                <span>Selecione uma marca primeiro</span>
+              </div>
+            )}
             <Select
               options={modeloOptions}
               value={filters.modelo}

@@ -16,7 +16,7 @@
 	<description>Marketplace invertido para veículos - Backend API</description>
 	
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 		<java-jwt.version>4.5.0</java-jwt.version>
 		<azure-cosmos.version>4.54.0</azure-cosmos.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>

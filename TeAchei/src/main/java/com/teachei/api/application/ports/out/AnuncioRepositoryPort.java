@@ -46,8 +46,12 @@ public interface AnuncioRepositoryPort {
      * @param tipo the vehicle type filter
      * @param marcaCodigo the brand code filter
      * @param modeloCodigo the model code filter
-     * @param ano the year filter (matches if in anos array)
-     * @param precoMinimo the minimum price filter
+     * @param anoMin the minimum year filter
+     * @param anoMax the maximum year filter
+     * @param precoMin the minimum price filter
+     * @param precoMax the maximum price filter
+     * @param search the text search filter
+     * @param opcionais the optionals filter
      * @param cidade the city filter
      * @param estado the state filter
      * @param pagina the page number
@@ -59,8 +63,12 @@ public interface AnuncioRepositoryPort {
         TipoVeiculo tipo,
         String marcaCodigo,
         String modeloCodigo,
-        Integer ano,
-        BigDecimal precoMinimo,
+        Integer anoMin,
+        Integer anoMax,
+        BigDecimal precoMin,
+        BigDecimal precoMax,
+        String search,
+        List<String> opcionais,
         String cidade,
         String estado,
         int pagina,

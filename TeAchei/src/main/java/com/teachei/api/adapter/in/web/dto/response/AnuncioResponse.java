@@ -64,6 +64,9 @@ public record AnuncioResponse(
         String marcaNome,
         String modeloCodigo,
         String modeloNome,
+        String modeloBaseNome,
+        List<VersaoResponse> versoes,
+        boolean todasVersoes,
         List<Integer> anos,
         List<String> cores,
         BigDecimal precoMaximo,
@@ -75,11 +78,17 @@ public record AnuncioResponse(
     ) {
         public static VeiculoResponse from(com.teachei.api.domain.model.VeiculoInfo info) {
             if (info == null) return null;
+            List<VersaoResponse> versoes = info.getVersoes() != null 
+                ? info.getVersoes().stream().map(VersaoResponse::from).toList()
+                : List.of();
             return new VeiculoResponse(
                 info.getMarcaCodigo(),
                 info.getMarcaNome(),
                 info.getModeloCodigo(),
                 info.getModeloNome(),
+                info.getModeloBaseNome(),
+                versoes,
+                info.isTodasVersoes(),
                 info.getAnos(),
                 info.getCores(),
                 info.getPrecoMaximo(),
@@ -89,6 +98,16 @@ public record AnuncioResponse(
                 info.getOpcionais(),
                 info.isDadosManuais()
             );
+        }
+    }
+
+    public record VersaoResponse(
+        String codigo,
+        String nome
+    ) {
+        public static VersaoResponse from(com.teachei.api.domain.model.VersaoInfo info) {
+            if (info == null) return null;
+            return new VersaoResponse(info.getCodigo(), info.getNome());
         }
     }
 

@@ -4,10 +4,13 @@ import com.teachei.api.adapter.out.persistence.cosmosdb.document.AnuncioDocument
 import com.teachei.api.domain.model.Anuncio;
 import com.teachei.api.domain.model.ContatoInfo;
 import com.teachei.api.domain.model.VeiculoInfo;
+import com.teachei.api.domain.model.VersaoInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class AnuncioDocumentMapper {
@@ -72,6 +75,17 @@ public class AnuncioDocumentMapper {
         info.setMarcaNome(doc.getMarcaNome());
         info.setModeloCodigo(doc.getModeloCodigo());
         info.setModeloNome(doc.getModeloNome());
+        info.setModeloBaseNome(doc.getModeloBaseNome());
+        info.setTodasVersoes(doc.isTodasVersoes());
+        
+        // Map versoes
+        if (doc.getVersoes() != null) {
+            List<VersaoInfo> versoes = doc.getVersoes().stream()
+                .map(v -> new VersaoInfo(v.getCodigo(), v.getNome()))
+                .collect(Collectors.toList());
+            info.setVersoes(versoes);
+        }
+        
         info.setAnos(doc.getAnos() != null ? new ArrayList<>(doc.getAnos()) : new ArrayList<>());
         info.setCores(doc.getCores() != null ? new ArrayList<>(doc.getCores()) : new ArrayList<>());
         info.setPrecoMaximo(doc.getPrecoMaximo());
@@ -89,6 +103,17 @@ public class AnuncioDocumentMapper {
         doc.setMarcaNome(info.getMarcaNome());
         doc.setModeloCodigo(info.getModeloCodigo());
         doc.setModeloNome(info.getModeloNome());
+        doc.setModeloBaseNome(info.getModeloBaseNome());
+        doc.setTodasVersoes(info.isTodasVersoes());
+        
+        // Map versoes
+        if (info.getVersoes() != null && !info.getVersoes().isEmpty()) {
+            List<AnuncioDocument.VersaoInfoDocument> versoes = info.getVersoes().stream()
+                .map(v -> new AnuncioDocument.VersaoInfoDocument(v.getCodigo(), v.getNome()))
+                .collect(Collectors.toList());
+            doc.setVersoes(versoes);
+        }
+        
         doc.setAnos(new ArrayList<>(info.getAnos()));
         doc.setCores(new ArrayList<>(info.getCores()));
         doc.setPrecoMaximo(info.getPrecoMaximo());

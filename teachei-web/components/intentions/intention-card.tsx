@@ -103,29 +103,69 @@ export function IntentionCard({ intention }: IntentionCardProps) {
         </div>
 
         <CardContent className="space-y-3">
-          {/* Title */}
+          {/* Title - use modeloBaseNome if available, fallback to modeloNome */}
           <div>
             <h3 className="font-bold text-lg text-foreground line-clamp-1">
-              {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
+              {intention.veiculo.marcaNome} {intention.veiculo.modeloBaseNome || intention.veiculo.modeloNome}
             </h3>
             <p className="text-sm text-muted">
               {anosDisplay}
             </p>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2">
-            {intention.veiculo.cores.slice(0, 3).map((cor) => (
-              <Badge key={cor} variant="outline" size="sm">
-                {cor}
+          {/* Colors */}
+          {intention.veiculo.cores && intention.veiculo.cores.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {intention.veiculo.cores.slice(0, 3).map((cor) => (
+                <Badge key={cor} variant="outline" size="sm">
+                  {cor}
+                </Badge>
+              ))}
+              {intention.veiculo.cores.length > 3 && (
+                <Badge variant="outline" size="sm">
+                  +{intention.veiculo.cores.length - 3}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Versions */}
+          {intention.veiculo.todasVersoes ? (
+            <div className="flex flex-wrap gap-1.5">
+              <Badge variant="default" size="sm">
+                Todas as versões
               </Badge>
-            ))}
-            {intention.veiculo.cores.length > 3 && (
-              <Badge variant="outline" size="sm">
-                +{intention.veiculo.cores.length - 3}
-              </Badge>
-            )}
-          </div>
+            </div>
+          ) : intention.veiculo.versoes && intention.veiculo.versoes.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {intention.veiculo.versoes.slice(0, 2).map((versao) => (
+                <Badge key={versao.codigo} variant="default" size="sm">
+                  {versao.nome}
+                </Badge>
+              ))}
+              {intention.veiculo.versoes.length > 2 && (
+                <Badge variant="default" size="sm">
+                  +{intention.veiculo.versoes.length - 2}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Optionals */}
+          {intention.veiculo.opcionais && intention.veiculo.opcionais.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {intention.veiculo.opcionais.slice(0, 2).map((opcional) => (
+                <Badge key={opcional} variant="outline" size="sm" className="text-primary border-primary/30">
+                  {opcional}
+                </Badge>
+              ))}
+              {intention.veiculo.opcionais.length > 2 && (
+                <Badge variant="outline" size="sm" className="text-primary border-primary/30">
+                  +{intention.veiculo.opcionais.length - 2}
+                </Badge>
+              )}
+            </div>
+          )}
 
           {/* Location & Time */}
           <div className="flex items-center justify-between pt-2 border-t border-border">

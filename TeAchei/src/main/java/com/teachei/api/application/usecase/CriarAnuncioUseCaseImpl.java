@@ -7,7 +7,9 @@ import com.teachei.api.domain.exception.UsuarioNaoEncontradoException;
 import com.teachei.api.domain.model.*;
 import com.teachei.api.domain.service.AnuncioService;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the create intention use case.
@@ -80,6 +82,18 @@ public class CriarAnuncioUseCaseImpl implements CriarAnuncioUseCase {
         // Set optional features if provided
         if (command.opcionais() != null && !command.opcionais().isEmpty()) {
             veiculoInfo.setOpcionais(command.opcionais());
+        }
+        
+        // Set version info if provided
+        if (command.modeloBaseNome() != null && !command.modeloBaseNome().isBlank()) {
+            veiculoInfo.setModeloBaseNome(command.modeloBaseNome());
+        }
+        veiculoInfo.setTodasVersoes(command.todasVersoes());
+        if (command.versoes() != null && !command.versoes().isEmpty()) {
+            List<VersaoInfo> versoes = command.versoes().stream()
+                .map(v -> new VersaoInfo(v.codigo(), v.nome()))
+                .collect(Collectors.toList());
+            veiculoInfo.setVersoes(versoes);
         }
 
         // Create contact info from profile, with overrides from command

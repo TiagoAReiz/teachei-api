@@ -45,13 +45,17 @@ public interface BuscarAnunciosUseCase {
         TipoVeiculo tipo,
         String marcaCodigo,
         String modeloCodigo,
-        Integer ano,
-        BigDecimal precoMinimo,
+        Integer anoMin,
+        Integer anoMax,
+        BigDecimal precoMin,
+        BigDecimal precoMax,
+        String search,
+        List<String> opcionais,
         String cidade,
         String estado
     ) {
         public static FiltroAnuncio vazio() {
-            return new FiltroAnuncio(null, null, null, null, null, null, null);
+            return new FiltroAnuncio(null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 

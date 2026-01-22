@@ -15,6 +15,9 @@ public class VeiculoInfo {
     private String marcaNome;
     private String modeloCodigo;
     private String modeloNome;
+    private String modeloBaseNome;      // Base model name (e.g., "Onix")
+    private List<VersaoInfo> versoes;   // Selected versions [{codigo, nome}]
+    private boolean todasVersoes;       // True if "accept any version"
     private List<Integer> anos;
     private List<String> cores;
     private BigDecimal precoMaximo;
@@ -28,6 +31,8 @@ public class VeiculoInfo {
         this.anos = new ArrayList<>();
         this.cores = new ArrayList<>();
         this.opcionais = new ArrayList<>();
+        this.versoes = new ArrayList<>();
+        this.todasVersoes = false;
     }
 
     public VeiculoInfo(String marcaCodigo, String marcaNome, String modeloCodigo, String modeloNome,
@@ -186,6 +191,30 @@ public class VeiculoInfo {
 
     public void setOpcionais(List<String> opcionais) {
         this.opcionais = opcionais != null ? new ArrayList<>(opcionais) : new ArrayList<>();
+    }
+
+    public String getModeloBaseNome() {
+        return modeloBaseNome;
+    }
+
+    public void setModeloBaseNome(String modeloBaseNome) {
+        this.modeloBaseNome = modeloBaseNome;
+    }
+
+    public List<VersaoInfo> getVersoes() {
+        return versoes != null ? Collections.unmodifiableList(versoes) : Collections.emptyList();
+    }
+
+    public void setVersoes(List<VersaoInfo> versoes) {
+        this.versoes = versoes != null ? new ArrayList<>(versoes) : new ArrayList<>();
+    }
+
+    public boolean isTodasVersoes() {
+        return todasVersoes;
+    }
+
+    public void setTodasVersoes(boolean todasVersoes) {
+        this.todasVersoes = todasVersoes;
     }
 }
 

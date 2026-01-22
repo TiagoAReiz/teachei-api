@@ -139,7 +139,7 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground mb-1">
-                    {intention.veiculo.marcaNome} {intention.veiculo.modeloNome}
+                    {intention.veiculo.marcaNome} {intention.veiculo.modeloBaseNome || intention.veiculo.modeloNome}
                   </h1>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <p className="text-muted flex items-center gap-2">
@@ -181,6 +181,38 @@ export function IntentionDetailsClient({ initialData }: IntentionDetailsClientPr
                   );
                 })}
               </div>
+
+              {/* Versions Section */}
+              {(intention.veiculo.todasVersoes || (intention.veiculo.versoes && intention.veiculo.versoes.length > 0)) && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-sm text-muted mb-2">Versões aceitas</p>
+                  <div className="flex flex-wrap gap-2">
+                    {intention.veiculo.todasVersoes ? (
+                      <Badge variant="default">Aceita qualquer versão do modelo</Badge>
+                    ) : (
+                      intention.veiculo.versoes?.map((versao) => (
+                        <Badge key={versao.codigo} variant="default">
+                          {versao.nome}
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Optionals Section */}
+              {intention.veiculo.opcionais && intention.veiculo.opcionais.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-sm text-muted mb-2">Opcionais desejados</p>
+                  <div className="flex flex-wrap gap-2">
+                    {intention.veiculo.opcionais.map((opcional) => (
+                      <Badge key={opcional} variant="outline" className="text-primary border-primary/30">
+                        {opcional}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
