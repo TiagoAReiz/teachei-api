@@ -62,8 +62,9 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     const types: { value: TipoVeiculo | ""; label: string; icon: typeof Car }[] = [
       { value: "", label: "Todos", icon: Car },
     ];
-    if (availableFilters?.tipos) {
-      for (const tipo of availableFilters.tipos) {
+    const tiposList = availableFilters?.tipos;
+    if (tiposList) {
+      for (const tipo of tiposList) {
         const config = vehicleTypeConfig[tipo];
         if (config) {
           types.push({ value: tipo, label: config.label, icon: config.icon });
@@ -71,20 +72,24 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
       }
     }
     return types;
-  }, [availableFilters?.tipos]);
+  }, [availableFilters]);
 
   // Build brand options (filtered by selected type)
-  const marcaOptions = useMemo(() => [
-    { value: "", label: "Todas as marcas" },
-    ...(filteredOptions?.marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ], [filteredOptions?.marcas]);
+  const marcaOptions = useMemo(() => {
+    const marcas = filteredOptions?.marcas;
+    return [
+      { value: "", label: "Todas as marcas" },
+      ...(marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
+    ];
+  }, [filteredOptions]);
   
   // Group models by base name (filtered by selected type and brand)
   const groupedModels = useMemo(() => {
     type ModeloArray = NonNullable<typeof filteredOptions>["modelos"];
-    if (!filteredOptions?.modelos) return new Map<string, ModeloArray>();
+    const modelos = filteredOptions?.modelos;
+    if (!modelos) return new Map<string, ModeloArray>();
     const groups = new Map<string, ModeloArray>();
-    for (const modelo of filteredOptions.modelos) {
+    for (const modelo of modelos) {
       const baseName = modelo.baseNome || modelo.nome.split(" ")[0];
       if (!groups.has(baseName)) {
         groups.set(baseName, []);
@@ -92,7 +97,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
       groups.get(baseName)!.push(modelo);
     }
     return groups;
-  }, [filteredOptions?.modelos]);
+  }, [filteredOptions]);
 
   // Build base model options (grouped)
   const modeloOptions = useMemo(() => [
