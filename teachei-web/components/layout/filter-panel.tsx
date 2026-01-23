@@ -321,8 +321,8 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
           </div>
         )}
 
-        {/* Version (only shown when base model is selected and has multiple versions) */}
-        {filters.modelo && versaoOptions.length > 2 && (
+        {/* Version (shown when base model is selected and has versions) */}
+        {filters.modelo && versaoOptions.length > 1 && (
           <div className="space-y-2">
             <label className="block text-xs font-medium text-muted uppercase tracking-wide">
               Versão

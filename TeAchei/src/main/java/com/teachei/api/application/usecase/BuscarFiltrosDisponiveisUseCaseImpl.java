@@ -60,16 +60,30 @@ public class BuscarFiltrosDisponiveisUseCaseImpl implements BuscarFiltrosDisponi
                 .toList()
             : filtradosPorTipo;
 
-        // Extract distinct models
+        // Extract distinct models - include versions from each intention
         Map<String, ModeloOption> modelosMap = new LinkedHashMap<>();
         for (Anuncio anuncio : filtradosPorMarca) {
             VeiculoInfo veiculo = anuncio.getVeiculoInfo();
-            if (veiculo != null && veiculo.getModeloCodigo() != null && veiculo.getModeloNome() != null) {
-                String baseNome = veiculo.getModeloBaseNome() != null 
-                    ? veiculo.getModeloBaseNome() 
-                    : extractBaseName(veiculo.getModeloNome());
+            if (veiculo == null) continue;
+            
+            String baseNome = veiculo.getModeloBaseNome() != null 
+                ? veiculo.getModeloBaseNome() 
+                : extractBaseName(veiculo.getModeloNome());
+            
+            // Add the base model if it has a code
+            if (veiculo.getModeloCodigo() != null && veiculo.getModeloNome() != null) {
                 modelosMap.putIfAbsent(veiculo.getModeloCodigo(), 
                     new ModeloOption(veiculo.getModeloCodigo(), veiculo.getModeloNome(), baseNome));
+            }
+            
+            // Also add specific versions if the intention has them
+            if (veiculo.getVersoes() != null && !veiculo.getVersoes().isEmpty()) {
+                for (var versao : veiculo.getVersoes()) {
+                    if (versao.getCodigo() != null && versao.getNome() != null) {
+                        modelosMap.putIfAbsent(versao.getCodigo(), 
+                            new ModeloOption(versao.getCodigo(), versao.getNome(), baseNome));
+                    }
+                }
             }
         }
 
