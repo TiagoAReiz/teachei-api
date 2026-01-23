@@ -84,6 +84,14 @@ public interface AnuncioRepositoryPort {
     long contarPorStatus(StatusAnuncio status);
 
     /**
+     * Gets all active intentions for filter aggregation.
+     * Used to extract distinct vehicle types, brands, and models.
+     *
+     * @return list of active intentions
+     */
+    List<Anuncio> buscarAtivos();
+
+    /**
      * Deletes an intention by ID.
      *
      * @param id the intention ID

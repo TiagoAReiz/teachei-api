@@ -3,6 +3,7 @@ package com.teachei.api.adapter.in.web.controller;
 import com.teachei.api.adapter.in.web.dto.request.AtualizarAnuncioRequest;
 import com.teachei.api.adapter.in.web.dto.request.CriarAnuncioRequest;
 import com.teachei.api.adapter.in.web.dto.response.AnuncioResponse;
+import com.teachei.api.adapter.in.web.dto.response.FiltrosDisponiveisResponse;
 import com.teachei.api.adapter.in.web.dto.response.PaginaResponse;
 import com.teachei.api.application.ports.in.*;
 import com.teachei.api.config.security.CurrentUser;
@@ -22,6 +23,7 @@ public class AnuncioController {
 
     private final CriarAnuncioUseCase criarAnuncioUseCase;
     private final BuscarAnunciosUseCase buscarAnunciosUseCase;
+    private final BuscarFiltrosDisponiveisUseCase buscarFiltrosDisponiveisUseCase;
     private final AtualizarAnuncioUseCase atualizarAnuncioUseCase;
     private final ExcluirAnuncioUseCase excluirAnuncioUseCase;
     private final FinalizarAnuncioUseCase finalizarAnuncioUseCase;
@@ -29,12 +31,14 @@ public class AnuncioController {
 
     public AnuncioController(CriarAnuncioUseCase criarAnuncioUseCase,
                              BuscarAnunciosUseCase buscarAnunciosUseCase,
+                             BuscarFiltrosDisponiveisUseCase buscarFiltrosDisponiveisUseCase,
                              AtualizarAnuncioUseCase atualizarAnuncioUseCase,
                              ExcluirAnuncioUseCase excluirAnuncioUseCase,
                              FinalizarAnuncioUseCase finalizarAnuncioUseCase,
                              VerificarAssinaturaUseCase verificarAssinaturaUseCase) {
         this.criarAnuncioUseCase = criarAnuncioUseCase;
         this.buscarAnunciosUseCase = buscarAnunciosUseCase;
+        this.buscarFiltrosDisponiveisUseCase = buscarFiltrosDisponiveisUseCase;
         this.atualizarAnuncioUseCase = atualizarAnuncioUseCase;
         this.excluirAnuncioUseCase = excluirAnuncioUseCase;
         this.finalizarAnuncioUseCase = finalizarAnuncioUseCase;
@@ -149,6 +153,26 @@ public class AnuncioController {
             resultado.total(),
             resultado.totalPaginas()
         ));
+    }
+
+    @GetMapping("/filtros")
+    public ResponseEntity<FiltrosDisponiveisResponse> filtrosDisponiveis(
+            @RequestParam(required = false) TipoVeiculo tipo,
+            @RequestParam(required = false) String marcaCodigo) {
+        
+        var filtros = buscarFiltrosDisponiveisUseCase.buscar(tipo, marcaCodigo);
+        
+        var response = new FiltrosDisponiveisResponse(
+            filtros.tipos(),
+            filtros.marcas().stream()
+                .map(m -> new FiltrosDisponiveisResponse.MarcaOption(m.codigo(), m.nome()))
+                .toList(),
+            filtros.modelos().stream()
+                .map(m -> new FiltrosDisponiveisResponse.ModeloOption(m.codigo(), m.nome(), m.baseNome()))
+                .toList()
+        );
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

@@ -69,6 +69,12 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public BuscarFiltrosDisponiveisUseCase buscarFiltrosDisponiveisUseCase(
+            AnuncioRepositoryPort anuncioRepository) {
+        return new BuscarFiltrosDisponiveisUseCaseImpl(anuncioRepository);
+    }
+
+    @Bean
     public AtualizarAnuncioUseCase atualizarAnuncioUseCase(
             AnuncioRepositoryPort anuncioRepository) {
         return new AtualizarAnuncioUseCaseImpl(anuncioRepository);

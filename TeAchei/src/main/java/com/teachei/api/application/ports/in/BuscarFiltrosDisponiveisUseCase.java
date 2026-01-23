@@ -1,0 +1,32 @@
+package com.teachei.api.application.ports.in;
+
+import com.teachei.api.domain.model.TipoVeiculo;
+
+import java.util.List;
+
+/**
+ * Inbound port for retrieving available filter options based on existing intentions.
+ */
+public interface BuscarFiltrosDisponiveisUseCase {
+
+    /**
+     * Gets available filter options.
+     *
+     * @param tipo optional type filter - if provided, filters brands/models for this type
+     * @param marcaCodigo optional brand filter - if provided, filters models for this brand
+     * @return available filter options
+     */
+    FiltrosDisponiveis buscar(TipoVeiculo tipo, String marcaCodigo);
+
+    /**
+     * Available filter options.
+     */
+    record FiltrosDisponiveis(
+        List<TipoVeiculo> tipos,
+        List<MarcaOption> marcas,
+        List<ModeloOption> modelos
+    ) {
+        public record MarcaOption(String codigo, String nome) {}
+        public record ModeloOption(String codigo, String nome, String baseNome) {}
+    }
+}

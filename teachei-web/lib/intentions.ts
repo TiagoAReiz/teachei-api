@@ -2,9 +2,11 @@ import { API_ENDPOINTS } from "@/config/env";
 import { api } from "./api";
 import type {
   Anuncio,
+  AvailableFilters,
   CreateAnuncioRequest,
   PaginatedResponse,
   IntentionFilters,
+  TipoVeiculo,
 } from "@/types";
 
 /**
@@ -88,6 +90,26 @@ export async function markAsCompleted(id: string): Promise<Anuncio> {
  */
 export async function deleteIntention(id: string): Promise<void> {
   return api.delete(API_ENDPOINTS.INTENTION_BY_ID(id));
+}
+
+/**
+ * Fetch available filter options based on existing active intentions
+ */
+export async function getAvailableFilters(
+  tipo?: TipoVeiculo,
+  marcaCodigo?: string
+): Promise<AvailableFilters> {
+  const params = new URLSearchParams();
+  
+  if (tipo) params.append("tipo", tipo);
+  if (marcaCodigo) params.append("marcaCodigo", marcaCodigo);
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `${API_ENDPOINTS.INTENTION_FILTERS}?${queryString}`
+    : API_ENDPOINTS.INTENTION_FILTERS;
+
+  return api.get<AvailableFilters>(url, { requireAuth: false });
 }
 
 

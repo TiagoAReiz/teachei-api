@@ -1,20 +1,18 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { X, Car, Bike, Truck, AlertCircle } from "lucide-react";
+import { X, Car, Bike, Truck } from "lucide-react";
 import { Button, Select, CurrencyInput } from "@/components/ui";
-import { useMarcas, useModelos } from "@/hooks/use-vehicles";
+import { useAvailableFilters } from "@/hooks/use-intentions";
 import { vehicleOptions } from "@/lib/vehicle-options";
 import { cn, generateYearOptions } from "@/lib/utils";
-import { groupModelsByBase } from "@/lib/vehicles";
 import type { TipoVeiculo } from "@/types";
 
-const vehicleTypes: { value: TipoVeiculo | ""; label: string; icon: typeof Car }[] = [
-  { value: "", label: "Todos", icon: Car },
-  { value: "CARRO", label: "Carros", icon: Car },
-  { value: "MOTO", label: "Motos", icon: Bike },
-  { value: "CAMINHAO", label: "Caminhões", icon: Truck },
-];
+const vehicleTypeConfig: Record<TipoVeiculo, { label: string; icon: typeof Car }> = {
+  CARRO: { label: "Carros", icon: Car },
+  MOTO: { label: "Motos", icon: Bike },
+  CAMINHAO: { label: "Caminhões", icon: Truck },
+};
 
 export interface FilterState {
   tipo: TipoVeiculo | "";
@@ -44,11 +42,8 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     setFilters(initialFilters);
   }, [initialFilters]);
 
-  // Fetch brands when vehicle type is selected
-  const { data: marcas, isLoading: isLoadingMarcas } = useMarcas(filters.tipo || null);
-  
-  // Fetch models when brand is selected
-  const { data: modelos, isLoading: isLoadingModelos } = useModelos(
+  // Fetch available filter options based on existing intentions
+  const { data: availableFilters, isLoading: isLoadingFilters } = useAvailableFilters(
     filters.tipo || null,
     filters.marca || null
   );
@@ -56,44 +51,71 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
   // Build year options (includes next year)
   const yearOptions = generateYearOptions(30);
 
-  // Build brand options
-  const marcaOptions = [
+  // Build available vehicle types (only those with intentions)
+  const availableTypes = useMemo(() => {
+    const types: { value: TipoVeiculo | ""; label: string; icon: typeof Car }[] = [
+      { value: "", label: "Todos", icon: Car },
+    ];
+    if (availableFilters?.tipos) {
+      for (const tipo of availableFilters.tipos) {
+        const config = vehicleTypeConfig[tipo];
+        if (config) {
+          types.push({ value: tipo, label: config.label, icon: config.icon });
+        }
+      }
+    }
+    return types;
+  }, [availableFilters?.tipos]);
+
+  // Build brand options (only those with intentions)
+  const marcaOptions = useMemo(() => [
     { value: "", label: "Todas as marcas" },
-    ...(marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ];
+    ...(availableFilters?.marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
+  ], [availableFilters?.marcas]);
   
   // Group models by base name
   const groupedModels = useMemo(() => {
-    if (!modelos) return [];
-    return groupModelsByBase(modelos);
-  }, [modelos]);
+    type ModeloArray = NonNullable<typeof availableFilters>["modelos"];
+    if (!availableFilters?.modelos) return new Map<string, ModeloArray>();
+    const groups = new Map<string, ModeloArray>();
+    for (const modelo of availableFilters.modelos) {
+      const baseName = modelo.baseNome || modelo.nome.split(" ")[0];
+      if (!groups.has(baseName)) {
+        groups.set(baseName, []);
+      }
+      groups.get(baseName)!.push(modelo);
+    }
+    return groups;
+  }, [availableFilters?.modelos]);
 
   // Build base model options (grouped)
   const modeloOptions = useMemo(() => [
     { value: "", label: "Todos os modelos" },
-    ...groupedModels.map((g) => ({
-      value: g.baseName,
-      label: `${g.baseName} (${g.versoes.length})`,
-    })),
+    ...Array.from(groupedModels.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([baseName, versions]) => ({
+        value: baseName,
+        label: versions.length > 1 ? `${baseName} (${versions.length})` : baseName,
+      })),
   ], [groupedModels]);
 
   // Get versions for selected base model
-  const currentGroup = useMemo(() => {
-    if (!filters.modelo) return null;
-    return groupedModels.find((g) => g.baseName === filters.modelo);
+  const currentVersions = useMemo(() => {
+    if (!filters.modelo) return [];
+    return groupedModels.get(filters.modelo) || [];
   }, [groupedModels, filters.modelo]);
 
   // Build version options for selected base model
   const versaoOptions = useMemo(() => {
-    if (!currentGroup) return [];
+    if (currentVersions.length === 0) return [];
     return [
       { value: "", label: "Todas as versões" },
-      ...currentGroup.versoes.map((v) => ({
+      ...currentVersions.map((v) => ({
         value: v.codigo,
         label: v.nome.replace(filters.modelo, "").trim() || v.nome,
       })),
     ];
-  }, [currentGroup, filters.modelo]);
+  }, [currentVersions, filters.modelo]);
 
   const handleTipoChange = (tipo: TipoVeiculo | "") => {
     setFilters((prev) => ({
@@ -160,9 +182,9 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     const filtersWithCodes: FilterState = { ...filters };
     if (filters.modelo && !filters.versao) {
       // No specific version selected - include all version codes
-      const group = groupedModels.find((g) => g.baseName === filters.modelo);
-      if (group) {
-        filtersWithCodes.modeloCodigos = group.versoes.map((v) => v.codigo);
+      const versions = groupedModels.get(filters.modelo);
+      if (versions) {
+        filtersWithCodes.modeloCodigos = versions.map((v) => v.codigo);
       }
     } else if (filters.versao) {
       // Specific version selected - just that code
@@ -203,7 +225,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
               Tipo de Veículo
             </label>
             <div className="flex flex-wrap gap-2">
-              {vehicleTypes.map((type) => {
+              {availableTypes.map((type) => {
                 const Icon = type.icon;
                 const isActive = filters.tipo === type.value;
 
@@ -227,45 +249,37 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
           </div>
 
           {/* Brand */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium text-foreground">
-              Marca
-            </label>
-            {!filters.tipo && (
-              <div className="flex items-center gap-2 p-2 bg-warning/10 border border-warning/30 rounded-lg text-sm text-warning">
-                <AlertCircle size={16} className="flex-shrink-0" />
-                <span>Selecione um tipo de veículo primeiro</span>
-              </div>
-            )}
-            <Select
-              options={marcaOptions}
-              value={filters.marca}
-              onChange={(e) => handleMarcaChange(e.target.value)}
-              disabled={!filters.tipo || isLoadingMarcas}
-            />
-          </div>
+          {marcaOptions.length > 1 && (
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-foreground">
+                Marca
+              </label>
+              <Select
+                options={marcaOptions}
+                value={filters.marca}
+                onChange={(e) => handleMarcaChange(e.target.value)}
+                disabled={isLoadingFilters}
+              />
+            </div>
+          )}
 
           {/* Model */}
-          <div className="space-y-3">
-            <label className="block text-sm font-medium text-foreground">
-              Modelo
-            </label>
-            {!filters.marca && filters.tipo && (
-              <div className="flex items-center gap-2 p-2 bg-warning/10 border border-warning/30 rounded-lg text-sm text-warning">
-                <AlertCircle size={16} className="flex-shrink-0" />
-                <span>Selecione uma marca primeiro</span>
-              </div>
-            )}
-            <Select
-              options={modeloOptions}
-              value={filters.modelo}
-              onChange={(e) => handleModeloChange(e.target.value)}
-              disabled={!filters.marca || isLoadingModelos}
-            />
-          </div>
+          {modeloOptions.length > 1 && (
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-foreground">
+                Modelo
+              </label>
+              <Select
+                options={modeloOptions}
+                value={filters.modelo}
+                onChange={(e) => handleModeloChange(e.target.value)}
+                disabled={isLoadingFilters}
+              />
+            </div>
+          )}
 
-          {/* Version (only shown when base model is selected) */}
-          {filters.modelo && versaoOptions.length > 1 && (
+          {/* Version (only shown when base model is selected and has multiple versions) */}
+          {filters.modelo && versaoOptions.length > 2 && (
             <div className="space-y-3">
               <label className="block text-sm font-medium text-foreground">
                 Versão

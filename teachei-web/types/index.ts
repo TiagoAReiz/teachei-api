@@ -231,6 +231,31 @@ export interface CreateAnuncioRequest {
 // Filter Types
 // ============================================
 
+// ============================================
+// Available Filters Types (from active intentions)
+// ============================================
+
+export interface AvailableFilters {
+  tipos: TipoVeiculo[];
+  marcas: AvailableMarca[];
+  modelos: AvailableModelo[];
+}
+
+export interface AvailableMarca {
+  codigo: string;
+  nome: string;
+}
+
+export interface AvailableModelo {
+  codigo: string;
+  nome: string;
+  baseNome: string;
+}
+
+// ============================================
+// Filter Types
+// ============================================
+
 export interface IntentionFilters {
   tipoVeiculo?: TipoVeiculo;
   search?: string;

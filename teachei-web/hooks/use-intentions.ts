@@ -14,8 +14,9 @@ import {
   updateIntention,
   markAsCompleted,
   deleteIntention,
+  getAvailableFilters,
 } from "@/lib/intentions";
-import type { CreateAnuncioRequest, IntentionFilters } from "@/types";
+import type { CreateAnuncioRequest, IntentionFilters, TipoVeiculo } from "@/types";
 
 /**
  * Hook for paginated intentions with filters
@@ -129,5 +130,19 @@ export function useDeleteIntention() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["intentions"] });
     },
+  });
+}
+
+/**
+ * Hook for fetching available filter options based on existing intentions
+ */
+export function useAvailableFilters(
+  tipo?: TipoVeiculo | null,
+  marcaCodigo?: string | null
+) {
+  return useQuery({
+    queryKey: ["intentions", "filters", tipo, marcaCodigo],
+    queryFn: () => getAvailableFilters(tipo || undefined, marcaCodigo || undefined),
+    staleTime: 60 * 1000, // 1 minute - filter options can change as intentions are created
   });
 }
