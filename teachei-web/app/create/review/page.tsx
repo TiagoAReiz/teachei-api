@@ -21,6 +21,9 @@ export default function CreateReviewPage() {
   const [showUpdateProfileDialog, setShowUpdateProfileDialog] = useState(false);
   const hasInitializedRef = useRef(!!user?.whatsapp);
   
+  // Flag to prevent redirect after successful creation
+  const isCreatedSuccessfullyRef = useRef(false);
+  
   const {
     tipoVeiculo,
     marcaCodigo,
@@ -57,8 +60,11 @@ export default function CreateReviewPage() {
 
   const { mutate: createIntention, isPending: isCreating } = useCreateIntention();
 
-  // Redirect if incomplete
+  // Redirect if incomplete (but not after successful creation)
   useEffect(() => {
+    // Skip redirect if creation was successful (we're navigating to feed)
+    if (isCreatedSuccessfullyRef.current) return;
+    
     // Check for both old (modeloCodigo) and new (versoesSelecionadas) flow
     const hasModel = modeloCodigo || versoesSelecionadas.length > 0;
     if (!tipoVeiculo || !marcaCodigo || !hasModel) {
@@ -143,7 +149,11 @@ export default function CreateReviewPage() {
           }
           
           success("Sua intenção foi publicada com sucesso!");
+          
+          // Mark as successful to prevent the incomplete check from redirecting to /create
+          isCreatedSuccessfullyRef.current = true;
           reset();
+          
           // Redirect to feed page
           router.push("/");
         },
