@@ -42,8 +42,14 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     setFilters(initialFilters);
   }, [initialFilters]);
 
-  // Fetch available filter options based on existing intentions
+  // Fetch all available types (regardless of current selection)
   const { data: availableFilters, isLoading: isLoadingFilters } = useAvailableFilters(
+    null, // Always get all types to show all available type buttons
+    null
+  );
+  
+  // Fetch brands and models filtered by selected type/brand
+  const { data: filteredOptions } = useAvailableFilters(
     filters.tipo || null,
     filters.marca || null
   );
@@ -67,18 +73,18 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     return types;
   }, [availableFilters?.tipos]);
 
-  // Build brand options (only those with intentions)
+  // Build brand options (filtered by selected type)
   const marcaOptions = useMemo(() => [
     { value: "", label: "Todas as marcas" },
-    ...(availableFilters?.marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ], [availableFilters?.marcas]);
+    ...(filteredOptions?.marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
+  ], [filteredOptions?.marcas]);
   
-  // Group models by base name
+  // Group models by base name (filtered by selected type and brand)
   const groupedModels = useMemo(() => {
-    type ModeloArray = NonNullable<typeof availableFilters>["modelos"];
-    if (!availableFilters?.modelos) return new Map<string, ModeloArray>();
+    type ModeloArray = NonNullable<typeof filteredOptions>["modelos"];
+    if (!filteredOptions?.modelos) return new Map<string, ModeloArray>();
     const groups = new Map<string, ModeloArray>();
-    for (const modelo of availableFilters.modelos) {
+    for (const modelo of filteredOptions.modelos) {
       const baseName = modelo.baseNome || modelo.nome.split(" ")[0];
       if (!groups.has(baseName)) {
         groups.set(baseName, []);
@@ -86,7 +92,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
       groups.get(baseName)!.push(modelo);
     }
     return groups;
-  }, [availableFilters?.modelos]);
+  }, [filteredOptions?.modelos]);
 
   // Build base model options (grouped)
   const modeloOptions = useMemo(() => [

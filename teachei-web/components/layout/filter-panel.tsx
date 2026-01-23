@@ -52,7 +52,15 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
   });
 
   // Fetch available filter options based on existing intentions
+  // Always pass null for tipo to get all available types (we want to show all type buttons)
+  // Only marca is filtered based on the selected type
   const { data: availableFilters, isLoading: isLoadingFilters } = useAvailableFilters(
+    null, // Always get all types to show all available type buttons
+    filters.marca || null
+  );
+  
+  // Fetch types and brands filtered by selected type (for brand/model options)
+  const { data: filteredOptions } = useAvailableFilters(
     filters.tipo || null,
     filters.marca || null
   );
@@ -76,18 +84,18 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
     return types;
   }, [availableFilters?.tipos]);
 
-  // Build brand options (only those with intentions)
+  // Build brand options (filtered by selected type)
   const marcaOptions = useMemo(() => [
     { value: "", label: "Todas as marcas" },
-    ...(availableFilters?.marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ], [availableFilters?.marcas]);
+    ...(filteredOptions?.marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
+  ], [filteredOptions?.marcas]);
   
-  // Group models by base name
+  // Group models by base name (filtered by selected type and brand)
   const groupedModels = useMemo(() => {
-    type ModeloArray = NonNullable<typeof availableFilters>["modelos"];
-    if (!availableFilters?.modelos) return new Map<string, ModeloArray>();
+    type ModeloArray = NonNullable<typeof filteredOptions>["modelos"];
+    if (!filteredOptions?.modelos) return new Map<string, ModeloArray>();
     const groups = new Map<string, ModeloArray>();
-    for (const modelo of availableFilters.modelos) {
+    for (const modelo of filteredOptions.modelos) {
       const baseName = modelo.baseNome || modelo.nome.split(" ")[0];
       if (!groups.has(baseName)) {
         groups.set(baseName, []);
@@ -95,7 +103,7 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
       groups.get(baseName)!.push(modelo);
     }
     return groups;
-  }, [availableFilters?.modelos]);
+  }, [filteredOptions?.modelos]);
 
   // Build base model options (grouped)
   const modeloOptions = useMemo(() => [
