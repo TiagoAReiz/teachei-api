@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FilterPanel } from "./filter-panel";
@@ -8,28 +8,15 @@ import { FilterPanel } from "./filter-panel";
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 // Pages that should show the filter sidebar
 const FILTER_PAGES = ["/", "/feed"];
 
-// Helper to get initial collapsed state from localStorage
-function getInitialCollapsedState(): boolean {
-  if (typeof window === "undefined") return false;
-  const saved = localStorage.getItem("sidebar-collapsed");
-  return saved === "true";
-}
-
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(getInitialCollapsedState);
-
-  // Save collapsed state to localStorage
-  const handleToggleCollapse = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
-    localStorage.setItem("sidebar-collapsed", String(newState));
-  };
 
   // Only show filter sidebar on filter-enabled pages
   const showFilters = FILTER_PAGES.some(
@@ -61,7 +48,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <Suspense fallback={<div className="w-72 h-full bg-surface animate-pulse" />}>
           <FilterPanel 
             isCollapsed={isCollapsed} 
-            onToggleCollapse={handleToggleCollapse}
+            onToggleCollapse={onToggleCollapse}
             className="h-full"
           />
         </Suspense>

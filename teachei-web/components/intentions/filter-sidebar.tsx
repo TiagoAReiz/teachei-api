@@ -21,6 +21,7 @@ export interface FilterState {
   marca: string;
   modelo: string; // Base model name (e.g., "Onix")
   versao: string; // Specific version code (e.g., "1234-5")
+  modeloCodigos?: string[]; // All version codes for base model (computed when applying)
   opcionais: string[];
   precoMin: number | null;
   precoMax: number | null;
@@ -155,7 +156,19 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
   };
 
   const handleApply = () => {
-    onApply(filters);
+    // Compute version codes for the selected model
+    let filtersWithCodes = { ...filters };
+    if (filters.modelo && !filters.versao) {
+      // No specific version selected - include all version codes
+      const group = groupedModels.find((g) => g.baseName === filters.modelo);
+      if (group) {
+        filtersWithCodes.modeloCodigos = group.versoes.map((v) => v.codigo);
+      }
+    } else if (filters.versao) {
+      // Specific version selected - just that code
+      filtersWithCodes.modeloCodigos = [filters.versao];
+    }
+    onApply(filtersWithCodes);
     onClose();
   };
 

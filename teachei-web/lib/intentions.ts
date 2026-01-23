@@ -20,6 +20,9 @@ export async function getIntentions(
   if (filters.status) params.append("status", filters.status);
   if (filters.marcaCodigo) params.append("marcaCodigo", filters.marcaCodigo);
   if (filters.modeloCodigo) params.append("modeloCodigo", filters.modeloCodigo);
+  if (filters.modelos && filters.modelos.length > 0) {
+    params.append("modelos", filters.modelos.join(","));
+  }
   if (filters.anoMin !== undefined) params.append("anoMin", filters.anoMin.toString());
   if (filters.anoMax !== undefined) params.append("anoMax", filters.anoMax.toString());
   if (filters.precoMin !== undefined) params.append("precoMin", filters.precoMin.toString());

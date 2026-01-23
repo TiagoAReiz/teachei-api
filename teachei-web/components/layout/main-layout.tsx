@@ -39,6 +39,13 @@ export function MainLayout({ children, showSidebar = true, className }: MainLayo
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(getInitialCollapsedState);
 
+  // Handle sidebar collapse toggle
+  const handleToggleSidebarCollapse = () => {
+    const newState = !isSidebarCollapsed;
+    setIsSidebarCollapsed(newState);
+    localStorage.setItem("sidebar-collapsed", String(newState));
+  };
+
   // Listen for changes to localStorage from other tabs
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -73,6 +80,8 @@ export function MainLayout({ children, showSidebar = true, className }: MainLayo
           <Sidebar
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={handleToggleSidebarCollapse}
           />
         )}
         

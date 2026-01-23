@@ -64,8 +64,23 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
     // Apply new filters
     if (filters.tipo) params.set("tipo", filters.tipo);
     if (filters.marca) params.set("marca", filters.marca);
-    if (filters.modelo) params.set("modelo", filters.modelo);
-    if (filters.versao) params.set("versao", filters.versao);
+    
+    // Handle model/version filtering
+    if (filters.modelo) {
+      // Keep the base model name for UI state
+      params.set("modelo", filters.modelo);
+      
+      if (filters.modeloCodigos && filters.modeloCodigos.length > 0) {
+        if (filters.modeloCodigos.length === 1) {
+          // Single version - use modeloCodigo
+          params.set("modeloCodigo", filters.modeloCodigos[0]);
+        } else {
+          // Multiple versions - use modelos (comma-separated)
+          params.set("modelos", filters.modeloCodigos.join(","));
+        }
+      }
+    }
+    
     if (filters.opcionais.length > 0) params.set("opcionais", filters.opcionais.join(","));
     if (filters.precoMin !== null) params.set("precoMin", filters.precoMin.toString());
     if (filters.precoMax !== null) params.set("precoMax", filters.precoMax.toString());
@@ -93,13 +108,23 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
       params.delete("marca");
       params.delete("modelo");
       params.delete("versao");
+      params.delete("modeloCodigo");
+      params.delete("modelos");
     }
     if (key === "marca") {
       params.delete("modelo");
       params.delete("versao");
+      params.delete("modeloCodigo");
+      params.delete("modelos");
     }
     if (key === "modelo") {
       params.delete("versao");
+      params.delete("modeloCodigo");
+      params.delete("modelos");
+    }
+    if (key === "versao") {
+      params.delete("modeloCodigo");
+      params.delete("modelos");
     }
     
     const queryString = params.toString();

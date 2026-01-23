@@ -237,6 +237,7 @@ export interface IntentionFilters {
   status?: StatusAnuncio;
   marcaCodigo?: string;
   modeloCodigo?: string;
+  modelos?: string[]; // Multiple model codes (comma-separated in URL)
   anoMin?: number;
   anoMax?: number;
   precoMin?: number;

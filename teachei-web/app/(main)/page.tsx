@@ -9,11 +9,16 @@ import type { TipoVeiculo, IntentionFilters as Filters } from "@/types";
 function HomeContent() {
   const searchParams = useSearchParams();
   
+  // Handle model filter - can be single modeloCodigo or comma-separated modelos
+  const modeloCodigo = searchParams.get("modeloCodigo") || undefined;
+  const modelos = searchParams.get("modelos")?.split(",").filter(Boolean) || undefined;
+  
   const filters: Omit<Filters, "page"> = {
     tipoVeiculo: (searchParams.get("tipo") as TipoVeiculo) || undefined,
     search: searchParams.get("search") || undefined,
     marcaCodigo: searchParams.get("marca") || undefined,
-    modeloCodigo: searchParams.get("modelo") || undefined,
+    modeloCodigo: modeloCodigo,
+    modelos: modelos,
     anoMin: searchParams.get("anoMin") ? parseInt(searchParams.get("anoMin")!) : undefined,
     anoMax: searchParams.get("anoMax") ? parseInt(searchParams.get("anoMax")!) : undefined,
     precoMin: searchParams.get("precoMin") ? parseInt(searchParams.get("precoMin")!) : undefined,

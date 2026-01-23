@@ -109,13 +109,22 @@ export default function CreateReviewPage() {
       finalObservacoes = versionsText + (observacoes ? `\n\n${observacoes}` : "");
     }
 
+    // Build versoes array from selected versions
+    const versoes = versoesSelecionadas.map(v => ({
+      codigo: v.codigo,
+      nome: v.nome,
+    }));
+
     createIntention(
       {
         tipo: tipoVeiculo,
         marcaCodigo: marcaCodigo || undefined,
         marcaNome,
-        modeloCodigo: modeloCodigo || undefined,
-        modeloNome,
+        modeloCodigo: modeloCodigo || versoesSelecionadas[0]?.codigo || undefined,
+        modeloNome: modeloBaseNome || modeloNome,
+        modeloBaseNome: modeloBaseNome || undefined,
+        versoes: versoes.length > 0 ? versoes : undefined,
+        todasVersoes: todasVersoes || undefined,
         anos,
         cores,
         precoMaximo,
@@ -127,6 +136,12 @@ export default function CreateReviewPage() {
       },
       {
         onSuccess: () => {
+          // Silently update profile with location if different
+          const locationChanged = cidade !== user?.cidade || estado !== user?.estado;
+          if (locationChanged) {
+            updateProfile({ cidade, estado }, { onError: () => {} }); // Silent update
+          }
+          
           success("Sua intenção foi publicada com sucesso!");
           reset();
           // Redirect to feed page

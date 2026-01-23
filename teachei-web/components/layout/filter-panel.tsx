@@ -109,8 +109,25 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
     
     if (newFilters.tipo) params.set("tipo", newFilters.tipo);
     if (newFilters.marca) params.set("marca", newFilters.marca);
-    if (newFilters.modelo) params.set("modelo", newFilters.modelo);
-    if (newFilters.versao) params.set("versao", newFilters.versao);
+    
+    // Handle model/version filtering
+    if (newFilters.modelo) {
+      // Keep the base model name for UI state
+      params.set("modelo", newFilters.modelo);
+      
+      if (newFilters.versao) {
+        // Specific version selected - send that version code
+        params.set("modeloCodigo", newFilters.versao);
+      } else {
+        // No specific version - send all version codes for this base model
+        const group = groupedModels.find((g) => g.baseName === newFilters.modelo);
+        if (group && group.versoes.length > 0) {
+          const allCodes = group.versoes.map((v) => v.codigo).join(",");
+          params.set("modelos", allCodes);
+        }
+      }
+    }
+    
     if (newFilters.opcionais.length > 0) params.set("opcionais", newFilters.opcionais.join(","));
     if (newFilters.precoMin !== null) params.set("precoMin", newFilters.precoMin.toString());
     if (newFilters.precoMax !== null) params.set("precoMax", newFilters.precoMax.toString());
