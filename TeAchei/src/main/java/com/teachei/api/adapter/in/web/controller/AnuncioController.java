@@ -91,6 +91,7 @@ public class AnuncioController {
             @RequestParam(required = false) TipoVeiculo tipoVeiculo,
             @RequestParam(required = false) String marcaCodigo,
             @RequestParam(required = false) String modeloCodigo,
+            @RequestParam(required = false) String modelos, // Comma-separated model codes
             // Year range filters (also accept legacy 'ano' for backwards compatibility)
             @RequestParam(required = false) Integer ano,
             @RequestParam(required = false) Integer anoMin,
@@ -122,9 +123,14 @@ public class AnuncioController {
         
         // Handle legacy 'precoMinimo' parameter
         BigDecimal precoMinFinal = precoMin != null ? precoMin : precoMinimo;
+        
+        // Parse comma-separated modelos into a list
+        List<String> modelosList = modelos != null && !modelos.isBlank()
+            ? java.util.Arrays.asList(modelos.split(","))
+            : null;
 
         var filtro = new BuscarAnunciosUseCase.FiltroAnuncio(
-            tipoFinal, marcaCodigo, modeloCodigo, 
+            tipoFinal, marcaCodigo, modeloCodigo, modelosList,
             anoMinFinal, anoMaxFinal,
             precoMinFinal, precoMax,
             search, opcionais,

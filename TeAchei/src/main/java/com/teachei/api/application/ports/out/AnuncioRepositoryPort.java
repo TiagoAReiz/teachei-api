@@ -45,7 +45,8 @@ public interface AnuncioRepositoryPort {
      * @param status the status filter
      * @param tipo the vehicle type filter
      * @param marcaCodigo the brand code filter
-     * @param modeloCodigo the model code filter
+     * @param modeloCodigo the model code filter (single)
+     * @param modelos the model codes filter (multiple, alternative to modeloCodigo)
      * @param anoMin the minimum year filter
      * @param anoMax the maximum year filter
      * @param precoMin the minimum price filter
@@ -63,6 +64,7 @@ public interface AnuncioRepositoryPort {
         TipoVeiculo tipo,
         String marcaCodigo,
         String modeloCodigo,
+        List<String> modelos,
         Integer anoMin,
         Integer anoMax,
         BigDecimal precoMin,

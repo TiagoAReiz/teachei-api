@@ -27,6 +27,7 @@ public class BuscarAnunciosUseCaseImpl implements BuscarAnunciosUseCase {
             filtro.tipo(),
             filtro.marcaCodigo(),
             filtro.modeloCodigo(),
+            filtro.modelos(),
             filtro.anoMin(),
             filtro.anoMax(),
             filtro.precoMin(),

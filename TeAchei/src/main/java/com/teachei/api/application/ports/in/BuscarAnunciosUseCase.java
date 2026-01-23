@@ -45,6 +45,7 @@ public interface BuscarAnunciosUseCase {
         TipoVeiculo tipo,
         String marcaCodigo,
         String modeloCodigo,
+        List<String> modelos, // Multiple model codes (alternative to single modeloCodigo)
         Integer anoMin,
         Integer anoMax,
         BigDecimal precoMin,
@@ -55,7 +56,7 @@ public interface BuscarAnunciosUseCase {
         String estado
     ) {
         public static FiltroAnuncio vazio() {
-            return new FiltroAnuncio(null, null, null, null, null, null, null, null, null, null, null);
+            return new FiltroAnuncio(null, null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 

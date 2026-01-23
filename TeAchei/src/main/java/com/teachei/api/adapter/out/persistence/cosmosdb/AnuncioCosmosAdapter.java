@@ -50,6 +50,7 @@ public class AnuncioCosmosAdapter implements AnuncioRepositoryPort {
     @Override
     public ResultadoBusca buscar(StatusAnuncio status, TipoVeiculo tipo,
                                   String marcaCodigo, String modeloCodigo,
+                                  List<String> modelos,
                                   Integer anoMin, Integer anoMax,
                                   BigDecimal precoMin, BigDecimal precoMax,
                                   String search, List<String> opcionais,
@@ -65,8 +66,18 @@ public class AnuncioCosmosAdapter implements AnuncioRepositoryPort {
             .filter(a -> tipo == null || a.getTipo() == tipo)
             .filter(a -> marcaCodigo == null || 
                 (a.getVeiculoInfo() != null && marcaCodigo.equals(a.getVeiculoInfo().getMarcaCodigo())))
-            .filter(a -> modeloCodigo == null || 
-                (a.getVeiculoInfo() != null && modeloCodigo.equals(a.getVeiculoInfo().getModeloCodigo())))
+            // Model filter: single modeloCodigo OR any of the modelos list
+            .filter(a -> {
+                if (modeloCodigo == null && (modelos == null || modelos.isEmpty())) return true;
+                if (a.getVeiculoInfo() == null) return false;
+                String adModeloCodigo = a.getVeiculoInfo().getModeloCodigo();
+                if (adModeloCodigo == null) return false;
+                // Check single model code
+                if (modeloCodigo != null && modeloCodigo.equals(adModeloCodigo)) return true;
+                // Check if any of the modelos list matches
+                if (modelos != null && modelos.contains(adModeloCodigo)) return true;
+                return false;
+            })
             // Year range filter: matches if any year in the ad is within the range
             .filter(a -> {
                 if (anoMin == null && anoMax == null) return true;
