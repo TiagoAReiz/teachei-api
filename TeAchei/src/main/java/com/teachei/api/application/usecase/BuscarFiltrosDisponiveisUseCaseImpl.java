@@ -1,6 +1,8 @@
 package com.teachei.api.application.usecase;
 
 import com.teachei.api.application.ports.in.BuscarFiltrosDisponiveisUseCase;
+import com.teachei.api.application.ports.in.BuscarFiltrosDisponiveisUseCase.FiltrosDisponiveis.MarcaOption;
+import com.teachei.api.application.ports.in.BuscarFiltrosDisponiveisUseCase.FiltrosDisponiveis.ModeloOption;
 import com.teachei.api.application.ports.out.AnuncioRepositoryPort;
 import com.teachei.api.domain.model.Anuncio;
 import com.teachei.api.domain.model.TipoVeiculo;
