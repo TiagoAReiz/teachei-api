@@ -5,8 +5,7 @@ import { useEffect, useMemo } from "react";
 import { ArrowRight, AlertCircle } from "lucide-react";
 import { Button, CurrencyInput, Select, Input } from "@/components/ui";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
-import { useAnos } from "@/hooks/use-vehicles";
-import { vehicleColors } from "@/lib/utils";
+import { vehicleColors, generateYearOptions } from "@/lib/utils";
 import { vehicleOptions } from "@/lib/vehicle-options";
 import { cn } from "@/lib/utils";
 
@@ -32,12 +31,8 @@ export default function CreateSpecsPage() {
     setObservacoes,
   } = useCreateIntentionStore();
 
-  // Fetch FIPE years for the selected model
-  const { data: fipeAnos, isLoading: isLoadingAnos } = useAnos(
-    tipoVeiculo,
-    marcaCodigo,
-    modeloCodigo
-  );
+  // Static year options (no API call needed)
+  const yearOptions = generateYearOptions(30);
 
   // Redirect if no vehicle selected
   useEffect(() => {
@@ -62,37 +57,6 @@ export default function CreateSpecsPage() {
   }, [quilometragemMinima, quilometragemMaxima]);
 
   const hasValidationErrors = yearRangeError || mileageRangeError;
-
-  // Build year options from FIPE data or fall back to generic range
-  const yearOptions = useMemo(() => {
-    if (fipeAnos && fipeAnos.length > 0) {
-      // Extract years from FIPE anos (format: "2024 Gasolina", "2023 Flex", etc.)
-      const yearsFromFipe = fipeAnos
-        .map((ano) => {
-          // Extract year number from the nome (e.g., "2024 Gasolina" -> 2024)
-          const match = ano.nome.match(/^(\d{4})/);
-          return match ? parseInt(match[1]) : null;
-        })
-        .filter((year): year is number => year !== null)
-        // Remove duplicates and sort descending
-        .filter((year, index, arr) => arr.indexOf(year) === index)
-        .sort((a, b) => b - a);
-
-      if (yearsFromFipe.length > 0) {
-        return yearsFromFipe.map((year) => ({
-          value: year.toString(),
-          label: year.toString(),
-        }));
-      }
-    }
-
-    // Fallback to generic year range
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 30 }, (_, i) => ({
-      value: (currentYear - i).toString(),
-      label: (currentYear - i).toString(),
-    }));
-  }, [fipeAnos]);
 
   const toggleColor = (colorValue: string) => {
     if (cores.includes(colorValue)) {
@@ -132,12 +96,6 @@ export default function CreateSpecsPage() {
       <div className="space-y-3">
         <label className="block text-sm font-medium text-foreground">
           Ano do veículo
-          {isLoadingAnos && (
-            <span className="ml-2 text-xs text-muted">(carregando anos...)</span>
-          )}
-          {fipeAnos && fipeAnos.length > 0 && (
-            <span className="ml-2 text-xs text-success">(anos FIPE)</span>
-          )}
         </label>
         <div className="grid grid-cols-2 gap-4">
           <Select
@@ -145,14 +103,12 @@ export default function CreateSpecsPage() {
             value={anoMinimo?.toString() || ""}
             onChange={(e) => setAnos(e.target.value ? parseInt(e.target.value) : null, anoMaximo)}
             placeholder="A partir de"
-            disabled={isLoadingAnos}
           />
           <Select
             options={[{ value: "", label: "Até" }, ...yearOptions]}
             value={anoMaximo?.toString() || ""}
             onChange={(e) => setAnos(anoMinimo, e.target.value ? parseInt(e.target.value) : null)}
             placeholder="Até"
-            disabled={isLoadingAnos}
           />
         </div>
         {yearRangeError && (

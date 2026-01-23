@@ -14,7 +14,9 @@ const COLORS = [
   "Azul", "Marrom", "Bege", "Verde", "Amarelo"
 ];
 
-const YEARS = Array.from({ length: 10 }, (_, i) => 2024 - i);
+// Dynamic year options: next year down to 10 years back
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: 11 }, (_, i) => currentYear + 1 - i);
 
 const TRANSMISSIONS = ["Automático", "Manual"];
 const FUELS = ["Flex", "Gasolina", "Diesel", "Elétrico", "Híbrido"];

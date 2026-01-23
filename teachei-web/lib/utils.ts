@@ -123,6 +123,19 @@ export function formatExpiration(expiraEm: string | null | undefined): string {
   }
 }
 
+// Generate year options for vehicle selection (current year - 30 to current year + 1)
+export function generateYearOptions(yearsBack: number = 30): { value: string; label: string }[] {
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
+  const years: { value: string; label: string }[] = [];
+  
+  for (let year = nextYear; year >= currentYear - yearsBack; year--) {
+    years.push({ value: year.toString(), label: year.toString() });
+  }
+  
+  return years;
+}
+
 // Vehicle colors
 export const vehicleColors = [
   { value: "BRANCO", label: "Branco", hex: "#FFFFFF" },

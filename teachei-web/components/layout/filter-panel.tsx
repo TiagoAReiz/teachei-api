@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Car, Bike, Truck, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, Select, CurrencyInput } from "@/components/ui";
 import { useMarcas, useModelos } from "@/hooks/use-vehicles";
 import { vehicleOptions } from "@/lib/vehicle-options";
-import { cn } from "@/lib/utils";
+import { cn, generateYearOptions } from "@/lib/utils";
+import { groupModelsByBase } from "@/lib/vehicles";
 import type { TipoVeiculo } from "@/types";
 
 const vehicleTypes: { value: TipoVeiculo | ""; label: string; icon: typeof Car }[] = [
@@ -19,7 +20,8 @@ const vehicleTypes: { value: TipoVeiculo | ""; label: string; icon: typeof Car }
 interface FilterState {
   tipo: TipoVeiculo | "";
   marca: string;
-  modelo: string;
+  modelo: string; // Base model name (e.g., "Onix")
+  versao: string; // Specific version code (e.g., "1234-5")
   opcionais: string[];
   precoMin: number | null;
   precoMax: number | null;
@@ -43,6 +45,7 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
     tipo: (searchParams.get("tipo") as TipoVeiculo) || "",
     marca: searchParams.get("marca") || "",
     modelo: searchParams.get("modelo") || "",
+    versao: searchParams.get("versao") || "",
     opcionais: searchParams.get("opcionais")?.split(",").filter(Boolean) || [],
     precoMin: searchParams.get("precoMin") ? parseInt(searchParams.get("precoMin")!) : null,
     precoMax: searchParams.get("precoMax") ? parseInt(searchParams.get("precoMax")!) : null,
@@ -59,12 +62,8 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
     filters.marca || null
   );
 
-  // Build year options
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 30 }, (_, i) => ({
-    value: (currentYear - i).toString(),
-    label: (currentYear - i).toString(),
-  }));
+  // Build year options (includes next year)
+  const yearOptions = generateYearOptions(30);
 
   // Build brand options
   const marcaOptions = [
@@ -72,11 +71,38 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
     ...(marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
   ];
   
-  // Build model options
-  const modeloOptions = [
+  // Group models by base name
+  const groupedModels = useMemo(() => {
+    if (!modelos) return [];
+    return groupModelsByBase(modelos);
+  }, [modelos]);
+
+  // Build base model options (grouped)
+  const modeloOptions = useMemo(() => [
     { value: "", label: "Todos os modelos" },
-    ...(modelos?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ];
+    ...groupedModels.map((g) => ({
+      value: g.baseName,
+      label: `${g.baseName} (${g.versoes.length})`,
+    })),
+  ], [groupedModels]);
+
+  // Get versions for selected base model
+  const currentGroup = useMemo(() => {
+    if (!filters.modelo) return null;
+    return groupedModels.find((g) => g.baseName === filters.modelo);
+  }, [groupedModels, filters.modelo]);
+
+  // Build version options for selected base model
+  const versaoOptions = useMemo(() => {
+    if (!currentGroup) return [];
+    return [
+      { value: "", label: "Todas as versões" },
+      ...currentGroup.versoes.map((v) => ({
+        value: v.codigo,
+        label: v.nome.replace(filters.modelo, "").trim() || v.nome,
+      })),
+    ];
+  }, [currentGroup, filters.modelo]);
 
   const applyFilters = (newFilters: FilterState) => {
     const params = new URLSearchParams();
@@ -84,6 +110,7 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
     if (newFilters.tipo) params.set("tipo", newFilters.tipo);
     if (newFilters.marca) params.set("marca", newFilters.marca);
     if (newFilters.modelo) params.set("modelo", newFilters.modelo);
+    if (newFilters.versao) params.set("versao", newFilters.versao);
     if (newFilters.opcionais.length > 0) params.set("opcionais", newFilters.opcionais.join(","));
     if (newFilters.precoMin !== null) params.set("precoMin", newFilters.precoMin.toString());
     if (newFilters.precoMax !== null) params.set("precoMax", newFilters.precoMax.toString());
@@ -99,19 +126,25 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
   };
 
   const handleTipoChange = (tipo: TipoVeiculo | "") => {
-    const newFilters = { ...filters, tipo, marca: "", modelo: "" };
+    const newFilters = { ...filters, tipo, marca: "", modelo: "", versao: "" };
     setFilters(newFilters);
     applyFilters(newFilters);
   };
 
   const handleMarcaChange = (marca: string) => {
-    const newFilters = { ...filters, marca, modelo: "" };
+    const newFilters = { ...filters, marca, modelo: "", versao: "" };
     setFilters(newFilters);
     applyFilters(newFilters);
   };
 
   const handleModeloChange = (modelo: string) => {
-    const newFilters = { ...filters, modelo };
+    const newFilters = { ...filters, modelo, versao: "" };
+    setFilters(newFilters);
+    applyFilters(newFilters);
+  };
+
+  const handleVersaoChange = (versao: string) => {
+    const newFilters = { ...filters, versao };
     setFilters(newFilters);
     applyFilters(newFilters);
   };
@@ -130,6 +163,7 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
       tipo: "",
       marca: "",
       modelo: "",
+      versao: "",
       opcionais: [],
       precoMin: null,
       precoMax: null,
@@ -242,6 +276,21 @@ export function FilterPanel({ isCollapsed, onToggleCollapse, className }: Filter
             className="text-sm"
           />
         </div>
+
+        {/* Version (only shown when base model is selected) */}
+        {filters.modelo && versaoOptions.length > 1 && (
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-muted uppercase tracking-wide">
+              Versão
+            </label>
+            <Select
+              options={versaoOptions}
+              value={filters.versao}
+              onChange={(e) => handleVersaoChange(e.target.value)}
+              className="text-sm"
+            />
+          </div>
+        )}
 
         {/* Optional Features */}
         <div className="space-y-2">

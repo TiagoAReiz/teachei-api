@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Car, Bike, Truck, AlertCircle } from "lucide-react";
 import { Button, Select, CurrencyInput } from "@/components/ui";
 import { useMarcas, useModelos } from "@/hooks/use-vehicles";
 import { vehicleOptions } from "@/lib/vehicle-options";
-import { cn } from "@/lib/utils";
+import { cn, generateYearOptions } from "@/lib/utils";
+import { groupModelsByBase } from "@/lib/vehicles";
 import type { TipoVeiculo } from "@/types";
 
 const vehicleTypes: { value: TipoVeiculo | ""; label: string; icon: typeof Car }[] = [
@@ -18,7 +19,8 @@ const vehicleTypes: { value: TipoVeiculo | ""; label: string; icon: typeof Car }
 export interface FilterState {
   tipo: TipoVeiculo | "";
   marca: string;
-  modelo: string;
+  modelo: string; // Base model name (e.g., "Onix")
+  versao: string; // Specific version code (e.g., "1234-5")
   opcionais: string[];
   precoMin: number | null;
   precoMax: number | null;
@@ -50,12 +52,8 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     filters.marca || null
   );
 
-  // Build year options
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 30 }, (_, i) => ({
-    value: (currentYear - i).toString(),
-    label: (currentYear - i).toString(),
-  }));
+  // Build year options (includes next year)
+  const yearOptions = generateYearOptions(30);
 
   // Build brand options
   const marcaOptions = [
@@ -63,11 +61,38 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
     ...(marcas?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
   ];
   
-  // Build model options
-  const modeloOptions = [
+  // Group models by base name
+  const groupedModels = useMemo(() => {
+    if (!modelos) return [];
+    return groupModelsByBase(modelos);
+  }, [modelos]);
+
+  // Build base model options (grouped)
+  const modeloOptions = useMemo(() => [
     { value: "", label: "Todos os modelos" },
-    ...(modelos?.map((m) => ({ value: m.codigo, label: m.nome })) || []),
-  ];
+    ...groupedModels.map((g) => ({
+      value: g.baseName,
+      label: `${g.baseName} (${g.versoes.length})`,
+    })),
+  ], [groupedModels]);
+
+  // Get versions for selected base model
+  const currentGroup = useMemo(() => {
+    if (!filters.modelo) return null;
+    return groupedModels.find((g) => g.baseName === filters.modelo);
+  }, [groupedModels, filters.modelo]);
+
+  // Build version options for selected base model
+  const versaoOptions = useMemo(() => {
+    if (!currentGroup) return [];
+    return [
+      { value: "", label: "Todas as versões" },
+      ...currentGroup.versoes.map((v) => ({
+        value: v.codigo,
+        label: v.nome.replace(filters.modelo, "").trim() || v.nome,
+      })),
+    ];
+  }, [currentGroup, filters.modelo]);
 
   const handleTipoChange = (tipo: TipoVeiculo | "") => {
     setFilters((prev) => ({
@@ -75,6 +100,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
       tipo,
       marca: "",
       modelo: "",
+      versao: "",
     }));
   };
 
@@ -83,6 +109,22 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
       ...prev,
       marca,
       modelo: "",
+      versao: "",
+    }));
+  };
+
+  const handleModeloChange = (modelo: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      modelo,
+      versao: "",
+    }));
+  };
+
+  const handleVersaoChange = (versao: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      versao,
     }));
   };
 
@@ -100,6 +142,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
       tipo: "",
       marca: "",
       modelo: "",
+      versao: "",
       opcionais: [],
       precoMin: null,
       precoMax: null,
@@ -203,10 +246,24 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
             <Select
               options={modeloOptions}
               value={filters.modelo}
-              onChange={(e) => setFilters((prev) => ({ ...prev, modelo: e.target.value }))}
+              onChange={(e) => handleModeloChange(e.target.value)}
               disabled={!filters.marca || isLoadingModelos}
             />
           </div>
+
+          {/* Version (only shown when base model is selected) */}
+          {filters.modelo && versaoOptions.length > 1 && (
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-foreground">
+                Versão
+              </label>
+              <Select
+                options={versaoOptions}
+                value={filters.versao}
+                onChange={(e) => handleVersaoChange(e.target.value)}
+              />
+            </div>
+          )}
 
           {/* Optional Features */}
           <div className="space-y-3">
