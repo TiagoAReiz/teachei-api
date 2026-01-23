@@ -157,7 +157,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
 
   const handleApply = () => {
     // Compute version codes for the selected model
-    let filtersWithCodes = { ...filters };
+    const filtersWithCodes: FilterState = { ...filters };
     if (filters.modelo && !filters.versao) {
       // No specific version selected - include all version codes
       const group = groupedModels.find((g) => g.baseName === filters.modelo);
