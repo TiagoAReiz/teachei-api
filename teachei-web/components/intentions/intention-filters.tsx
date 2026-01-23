@@ -28,6 +28,7 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
     tipo: (searchParams.get("tipo") as TipoVeiculo) || "",
     marca: searchParams.get("marca") || "",
     modelo: searchParams.get("modelo") || "",
+    versao: searchParams.get("versao") || "",
     opcionais: searchParams.get("opcionais")?.split(",").filter(Boolean) || [],
     precoMin: searchParams.get("precoMin") ? parseInt(searchParams.get("precoMin")!) : null,
     precoMax: searchParams.get("precoMax") ? parseInt(searchParams.get("precoMax")!) : null,
@@ -43,6 +44,7 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
     if (currentFilters.tipo) count++;
     if (currentFilters.marca) count++;
     if (currentFilters.modelo) count++;
+    if (currentFilters.versao) count++;
     if (currentFilters.opcionais.length > 0) count++;
     if (currentFilters.precoMin !== null || currentFilters.precoMax !== null) count++;
     if (currentFilters.anoMin !== null || currentFilters.anoMax !== null) count++;
@@ -63,6 +65,7 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
     if (filters.tipo) params.set("tipo", filters.tipo);
     if (filters.marca) params.set("marca", filters.marca);
     if (filters.modelo) params.set("modelo", filters.modelo);
+    if (filters.versao) params.set("versao", filters.versao);
     if (filters.opcionais.length > 0) params.set("opcionais", filters.opcionais.join(","));
     if (filters.precoMin !== null) params.set("precoMin", filters.precoMin.toString());
     if (filters.precoMax !== null) params.set("precoMax", filters.precoMax.toString());
@@ -89,9 +92,14 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
     if (key === "tipo") {
       params.delete("marca");
       params.delete("modelo");
+      params.delete("versao");
     }
     if (key === "marca") {
       params.delete("modelo");
+      params.delete("versao");
+    }
+    if (key === "modelo") {
+      params.delete("versao");
     }
     
     const queryString = params.toString();
@@ -155,9 +163,21 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
           
           {currentFilters.modelo && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
-              Modelo selecionado
+              {currentFilters.modelo}
               <button
                 onClick={() => removeFilter("modelo")}
+                className="hover:bg-primary/20 rounded-full p-0.5"
+              >
+                <X size={14} />
+              </button>
+            </span>
+          )}
+
+          {currentFilters.versao && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
+              Versão selecionada
+              <button
+                onClick={() => removeFilter("versao")}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />
