@@ -5,7 +5,7 @@
 - [x] 1.2 Add repository method to aggregate distinct filter values from active intentions
 - [x] 1.3 Add service method `getFiltrosDisponiveis(tipo?, marcaCodigo?)` 
 - [x] 1.4 Add controller endpoint `GET /api/v1/anuncios/filtros`
-- [ ] 1.5 Write integration tests for the new endpoint
+- [x] 1.5 Write integration tests for the new endpoint
 
 ## 2. Frontend - New Hook
 - [x] 2.1 Add `INTENTION_FILTERS` endpoint to `config/env.ts`
@@ -21,7 +21,7 @@
 - [x] 3.5 Ensure model dropdown only shows models with intentions
 
 ## 4. Validation
-- [ ] 4.1 Test filter shows only options with existing intentions
-- [ ] 4.2 Verify cascading behavior (selecting type filters brands, selecting brand filters models)
-- [ ] 4.3 Verify empty state when no intentions exist for a category
-- [ ] 4.4 Verify intention creation still uses FIPE API (unchanged)
+- [x] 4.1 Test filter shows only options with existing intentions
+- [x] 4.2 Verify cascading behavior (selecting type filters brands, selecting brand filters models)
+- [x] 4.3 Verify empty state when no intentions exist for a category
+- [x] 4.4 Verify intention creation still uses FIPE API (unchanged)
