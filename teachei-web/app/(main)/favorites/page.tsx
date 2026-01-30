@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueries } from "@tanstack/react-query";
-import { Bookmark } from "lucide-react";
+import { Flag } from "lucide-react";
 import { Button } from "@/components/ui";
 import { IntentionCard } from "@/components/intentions";
 import { useSavedIntentions } from "@/hooks/use-saved-intentions";
@@ -47,15 +47,15 @@ export default function FavoritesPage() {
   if (savedIds.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
-        <div className="w-20 h-20 bg-muted/10 rounded-full flex items-center justify-center mb-6">
-          <Bookmark className="text-muted" size={32} />
+        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <Flag className="text-primary" size={32} />
         </div>
         <h2 className="text-xl font-bold text-foreground mb-2">
           Nenhum favorito ainda
         </h2>
         <p className="text-muted text-center max-w-sm mb-6">
           Salve intenções de compra para encontrá-las facilmente depois.
-          Clique no ícone de marcador em qualquer intenção para salvá-la.
+          Clique no ícone de salvar em qualquer intenção para adicioná-la aqui.
         </p>
         <Link href="/">
           <Button>Explorar intenções</Button>

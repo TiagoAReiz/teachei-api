@@ -131,6 +131,16 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
     router.push(queryString ? `/?${queryString}` : "/");
   };
 
+  // Remove range filters (min and max) in a single navigation
+  const removeRangeFilter = (minKey: string, maxKey: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(minKey);
+    params.delete(maxKey);
+    
+    const queryString = params.toString();
+    router.push(queryString ? `/?${queryString}` : "/");
+  };
+
   return (
     <div className={cn("space-y-4", className)}>
       {/* Filter Button - Mobile Only (filters are in sidebar on desktop) */}
@@ -226,10 +236,7 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
               Faixa de preço
               <button
-                onClick={() => {
-                  removeFilter("precoMin");
-                  removeFilter("precoMax");
-                }}
+                onClick={() => removeRangeFilter("precoMin", "precoMax")}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />
@@ -241,10 +248,7 @@ export function IntentionFilters({ className }: IntentionFiltersProps) {
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full">
               Faixa de ano
               <button
-                onClick={() => {
-                  removeFilter("anoMin");
-                  removeFilter("anoMax");
-                }}
+                onClick={() => removeRangeFilter("anoMin", "anoMax")}
                 className="hover:bg-primary/20 rounded-full p-0.5"
               >
                 <X size={14} />

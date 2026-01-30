@@ -34,6 +34,7 @@ export interface Perfil {
   usuarioId: string;
   nome: string;
   bio?: string;
+  fotoBase64?: string;
   whatsapp?: string;
   whatsappLink?: string;
   instagram?: string;
@@ -49,6 +50,7 @@ export interface Perfil {
 export interface AtualizarPerfilRequest {
   nome?: string;
   bio?: string;
+  fotoBase64?: string;
   whatsapp?: string;
   instagram?: string;
   facebook?: string;
@@ -67,6 +69,7 @@ export interface User {
   cidade?: string;
   estado?: string;
   avatarUrl?: string;
+  fotoBase64?: string;
   bio?: string;
   whatsapp?: string;
   whatsappLink?: string;
@@ -318,6 +321,7 @@ export function perfilToUser(perfil: Perfil, email?: string): User {
     email: email || "",
     nome: perfil.nome,
     bio: perfil.bio,
+    fotoBase64: perfil.fotoBase64,
     whatsapp: perfil.whatsapp,
     whatsappLink: perfil.whatsappLink,
     instagram: perfil.instagram,

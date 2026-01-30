@@ -3,9 +3,10 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Plus, Menu, X, Car, Home, Heart, FileText } from "lucide-react";
+import { Plus, Menu, X, Home, Heart, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { Logo } from "@/components/ui/logo";
 import { NotificationsDropdown } from "@/components/notifications";
 import { useAuth } from "@/hooks/use-auth";
 import { SearchInput, SearchInputFallback } from "./search-input";
@@ -41,10 +42,8 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
         </button>
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 text-primary font-extrabold text-xl tracking-tight">
-          <Car size={28} />
-          <span className="hidden sm:inline">TeAchei</span>
-        </Link>
+        <Logo size="md" className="hidden sm:flex" />
+        <Logo size="sm" showIcon={false} className="sm:hidden" />
 
         {/* Icon Navigation (Desktop) */}
         {isAuthenticated && (
@@ -118,7 +117,7 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 p-1 rounded-full hover:bg-muted/10 transition-colors"
                 >
-                  <Avatar src={user?.avatarUrl} fallback={user?.nome} size="sm" />
+                  <Avatar src={user?.avatarUrl} fotoBase64={user?.fotoBase64} fallback={user?.nome} size="sm" />
                 </button>
 
                 {showUserMenu && (

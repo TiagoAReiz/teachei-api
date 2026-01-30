@@ -7,6 +7,7 @@ export { Badge, type BadgeProps } from "./badge";
 export { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "./dialog";
 export { Select, type SelectProps } from "./select";
 export { Avatar } from "./avatar";
+export { Logo } from "./logo";
 export { Skeleton, SkeletonCard, SkeletonList } from "./skeleton";
 export { ToastProvider, useToast } from "./toast";
 

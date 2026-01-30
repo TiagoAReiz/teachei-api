@@ -12,7 +12,7 @@ export function getToken(): string | null {
 // Set auth token in cookies
 export function setToken(token: string): void {
   Cookies.set(TOKEN_COOKIE, token, {
-    expires: 7, // 7 days
+    expires: 1 / 24, // 1 hour
     secure: env.IS_PRODUCTION,
     sameSite: "lax",
   });

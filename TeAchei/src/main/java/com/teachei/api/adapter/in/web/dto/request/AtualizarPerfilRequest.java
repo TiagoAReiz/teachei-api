@@ -27,7 +27,10 @@ public record AtualizarPerfilRequest(
     String estado,
 
     @Pattern(regexp = "^$|^(BUYER|SELLER)$", message = "Role deve ser BUYER ou SELLER")
-    String role
+    String role,
+
+    @Size(max = 700000, message = "Foto deve ter no máximo 500KB")
+    String fotoBase64
 ) {}
 
 

@@ -27,7 +27,7 @@ azure:
 # JWT Configuration
 jwt:
   secret: test-secret-key-for-testing-purposes-minimum-32-characters
-  expiration-days: 1
+  expiration-hours: 1
 
 # Mercado Pago Configuration (mock values for tests)
 mercadopago:

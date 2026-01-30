@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, Mail, Phone, Instagram, Facebook } from "lucide-react";
-import { Button, Input, Card, CardContent } from "@/components/ui";
+import { User, Mail, Phone, Instagram, Facebook, Camera } from "lucide-react";
+import { Button, Input, Card, CardContent, Avatar } from "@/components/ui";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/components/ui/toast";
 
@@ -24,9 +24,69 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
+const MAX_PHOTO_SIZE = 500 * 1024; // 500KB
+
 export default function SettingsPage() {
   const { user, updateProfile, isUpdatingProfile } = useAuth();
   const { success, error } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  // Set initial photo preview from user
+  useEffect(() => {
+    if (user?.fotoBase64 && !photoPreview) {
+      setPhotoPreview(user.fotoBase64);
+    }
+  }, [user?.fotoBase64, photoPreview]);
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      error("Formato não suportado. Use JPEG, PNG ou WebP.");
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_PHOTO_SIZE) {
+      error("Imagem deve ter no máximo 500KB");
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      setPhotoPreview(base64);
+      
+      // Upload immediately
+      setIsUploadingPhoto(true);
+      try {
+        await new Promise<void>((resolve, reject) => {
+          updateProfile({ fotoBase64: base64 }, {
+            onSuccess: () => {
+              success("Foto atualizada com sucesso!");
+              resolve();
+            },
+            onError: (err: Error) => {
+              error(err.message || "Erro ao atualizar foto");
+              reject(err);
+            },
+          });
+        });
+      } finally {
+        setIsUploadingPhoto(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const {
     register,
@@ -75,6 +135,44 @@ export default function SettingsPage() {
       <Card>
         <CardContent className="p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Informações do Perfil</h2>
+          
+          {/* Photo Upload Section */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={handlePhotoClick}
+                disabled={isUploadingPhoto}
+                className="relative group"
+              >
+                <Avatar
+                  fotoBase64={photoPreview || user?.fotoBase64}
+                  fallback={user?.nome}
+                  size="xl"
+                  className="ring-2 ring-border group-hover:ring-primary transition-all"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera size={20} className="text-white" />
+                </div>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Foto do perfil</p>
+              <p className="text-sm text-muted">
+                Clique para alterar. Max 500KB.
+              </p>
+              {isUploadingPhoto && (
+                <p className="text-sm text-primary">Enviando...</p>
+              )}
+            </div>
+          </div>
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input

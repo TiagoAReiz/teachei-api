@@ -44,6 +44,11 @@ public class GerenciarPerfilUseCaseImpl implements GerenciarPerfilUseCase {
             perfil.setRole(command.role());
         }
 
+        // Update photo if provided
+        if (command.fotoBase64() != null) {
+            perfil.setFotoBase64(command.fotoBase64());
+        }
+
         return perfilRepository.salvar(perfil);
     }
 }

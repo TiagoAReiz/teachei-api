@@ -55,7 +55,22 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
   );
 
   // Build year options (includes next year)
-  const yearOptions = generateYearOptions(30);
+  const allYearOptions = generateYearOptions(30);
+  
+  // Filter max year options based on selected min year
+  const yearOptionsMin = allYearOptions;
+  const yearOptionsMax = useMemo(() => {
+    if (!filters.anoMin) return allYearOptions;
+    return allYearOptions.filter(opt => parseInt(opt.value) >= filters.anoMin!);
+  }, [allYearOptions, filters.anoMin]);
+  
+  // Price validation error
+  const priceError = useMemo(() => {
+    if (filters.precoMin !== null && filters.precoMax !== null && filters.precoMin > filters.precoMax) {
+      return "Preço mínimo não pode ser maior que máximo";
+    }
+    return null;
+  }, [filters.precoMin, filters.precoMax]);
 
   // Build available vehicle types (only those with intentions)
   const availableTypes = useMemo(() => {
@@ -358,6 +373,9 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
                 onChange={(value) => setFilters((prev) => ({ ...prev, precoMax: value }))}
               />
             </div>
+            {priceError && (
+              <p className="text-xs text-error">{priceError}</p>
+            )}
           </div>
 
           {/* Year Range */}
@@ -367,15 +385,19 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
             </label>
             <div className="grid grid-cols-2 gap-4">
               <Select
-                options={[{ value: "", label: "A partir de" }, ...yearOptions]}
+                options={[{ value: "", label: "A partir de" }, ...yearOptionsMin]}
                 value={filters.anoMin?.toString() || ""}
-                onChange={(e) => setFilters((prev) => ({ 
-                  ...prev, 
-                  anoMin: e.target.value ? parseInt(e.target.value) : null 
-                }))}
+                onChange={(e) => {
+                  const newMin = e.target.value ? parseInt(e.target.value) : null;
+                  setFilters((prev) => {
+                    // Reset max if it would become invalid
+                    const newMax = prev.anoMax && newMin && prev.anoMax < newMin ? null : prev.anoMax;
+                    return { ...prev, anoMin: newMin, anoMax: newMax };
+                  });
+                }}
               />
               <Select
-                options={[{ value: "", label: "Até" }, ...yearOptions]}
+                options={[{ value: "", label: "Até" }, ...yearOptionsMax]}
                 value={filters.anoMax?.toString() || ""}
                 onChange={(e) => setFilters((prev) => ({ 
                   ...prev, 
@@ -391,7 +413,7 @@ export function FilterSidebar({ isOpen, onClose, initialFilters, onApply }: Filt
           <Button variant="outline" onClick={handleClear} className="flex-1">
             Limpar
           </Button>
-          <Button onClick={handleApply} className="flex-1">
+          <Button onClick={handleApply} className="flex-1" disabled={!!priceError}>
             Aplicar Filtros
           </Button>
         </div>

@@ -21,6 +21,9 @@ export default function CreateReviewPage() {
   const [showUpdateProfileDialog, setShowUpdateProfileDialog] = useState(false);
   const hasInitializedRef = useRef(!!user?.whatsapp);
   
+  // Track if user has attempted to publish (for validation display)
+  const [hasAttemptedPublish, setHasAttemptedPublish] = useState(false);
+  
   // Flag to prevent redirect after successful creation
   const isCreatedSuccessfullyRef = useRef(false);
   
@@ -196,6 +199,9 @@ export default function CreateReviewPage() {
   };
 
   const handleSubmit = () => {
+    // Mark that user has attempted to publish (for validation display)
+    setHasAttemptedPublish(true);
+    
     if (!tipoVeiculo || !marcaNome || !modeloNome || !precoMaximo) return;
 
     // Validate contact phone
@@ -342,11 +348,11 @@ export default function CreateReviewPage() {
       </Card>
 
       {/* Location Card - Required */}
-      <Card className={!isLocationValid ? "border-error/50" : ""}>
+      <Card className={hasAttemptedPublish && !isLocationValid ? "border-error/50" : ""}>
         <CardContent className="p-6">
           <h3 className="font-semibold text-foreground mb-3">
             Localização *
-            {!isLocationValid && (
+            {hasAttemptedPublish && !isLocationValid && (
               <span className="text-error text-sm font-normal ml-2">(obrigatório)</span>
             )}
           </h3>
@@ -359,7 +365,7 @@ export default function CreateReviewPage() {
               onChange={(e) => setLocalizacao(e.target.value, estado)}
               label="Cidade"
               placeholder="São Paulo"
-              error={cidade.trim() === "" ? "Obrigatório" : undefined}
+              error={hasAttemptedPublish && cidade.trim() === "" ? "Obrigatório" : undefined}
             />
             <Input
               value={estado}
@@ -367,7 +373,7 @@ export default function CreateReviewPage() {
               label="Estado"
               placeholder="SP"
               maxLength={2}
-              error={estado.trim() === "" ? "Obrigatório" : undefined}
+              error={hasAttemptedPublish && estado.trim() === "" ? "Obrigatório" : undefined}
             />
           </div>
         </CardContent>
@@ -417,7 +423,6 @@ export default function CreateReviewPage() {
         className="w-full" 
         size="lg" 
         isLoading={isCreating}
-        disabled={!isLocationValid}
       >
         <span>Publicar Intenção</span>
         <Send size={20} />

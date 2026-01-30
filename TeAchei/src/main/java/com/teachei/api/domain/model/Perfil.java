@@ -14,6 +14,7 @@ public class Perfil {
     private String nome;
     private String bio;
     private String fotoUrl;
+    private String fotoBase64;
     private String whatsapp;
     private String instagram;
     private String facebook;
@@ -110,6 +111,14 @@ public class Perfil {
 
     public void setFotoUrl(String fotoUrl) {
         this.fotoUrl = fotoUrl;
+    }
+
+    public String getFotoBase64() {
+        return fotoBase64;
+    }
+
+    public void setFotoBase64(String fotoBase64) {
+        this.fotoBase64 = fotoBase64;
     }
 
     public String getRole() {

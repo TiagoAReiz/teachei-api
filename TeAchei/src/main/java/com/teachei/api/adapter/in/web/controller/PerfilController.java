@@ -56,7 +56,8 @@ public class PerfilController {
             request.facebook(),
             request.cidade(),
             request.estado(),
-            request.role()
+            request.role(),
+            request.fotoBase64()
         );
 
         var perfil = gerenciarPerfilUseCase.atualizar(currentUser.getId(), command);

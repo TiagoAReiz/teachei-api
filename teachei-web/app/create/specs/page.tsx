@@ -49,6 +49,20 @@ export default function CreateSpecsPage() {
     return null;
   }, [anoMinimo, anoMaximo]);
 
+  const yearRequiredError = useMemo(() => {
+    if (!anoMinimo && !anoMaximo) {
+      return "Selecione pelo menos um ano";
+    }
+    return null;
+  }, [anoMinimo, anoMaximo]);
+
+  const priceRequiredError = useMemo(() => {
+    if (!precoMaximo) {
+      return "Informe o preço máximo";
+    }
+    return null;
+  }, [precoMaximo]);
+
   const mileageRangeError = useMemo(() => {
     if (quilometragemMinima && quilometragemMaxima && quilometragemMinima > quilometragemMaxima) {
       return "Quilometragem mínima não pode ser maior que máxima";
@@ -57,6 +71,7 @@ export default function CreateSpecsPage() {
   }, [quilometragemMinima, quilometragemMaxima]);
 
   const hasValidationErrors = yearRangeError || mileageRangeError;
+  const hasMissingRequired = yearRequiredError || priceRequiredError;
 
   const toggleColor = (colorValue: string) => {
     if (cores.includes(colorValue)) {
@@ -95,7 +110,7 @@ export default function CreateSpecsPage() {
       {/* Year Range */}
       <div className="space-y-3">
         <label className="block text-sm font-medium text-foreground">
-          Ano do veículo
+          Ano do veículo <span className="text-error">*</span>
         </label>
         <div className="grid grid-cols-2 gap-4">
           <Select
@@ -117,6 +132,9 @@ export default function CreateSpecsPage() {
             <span>{yearRangeError}</span>
           </div>
         )}
+        <p className="text-xs text-muted">
+          Selecione o ano mínimo, máximo ou ambos
+        </p>
       </div>
 
       {/* Colors */}
@@ -125,6 +143,21 @@ export default function CreateSpecsPage() {
           Cores preferidas
         </label>
         <div className="flex flex-wrap gap-2">
+          {/* "Any color" option */}
+          <button
+            onClick={() => setCores([])}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-colors",
+              cores.length === 0
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-muted"
+            )}
+          >
+            <div className="w-4 h-4 rounded-full border border-border bg-gradient-to-br from-red-400 via-yellow-400 to-blue-400" />
+            <span className={cn("text-sm font-medium", cores.length === 0 ? "text-primary" : "text-foreground")}>
+              Qualquer cor
+            </span>
+          </button>
           {vehicleColors.map((color) => {
             const isSelected = cores.includes(color.value);
             return (
@@ -149,14 +182,21 @@ export default function CreateSpecsPage() {
             );
           })}
         </div>
+        {cores.length === 0 && (
+          <p className="text-xs text-muted">
+            Aceita qualquer cor de veículo
+          </p>
+        )}
       </div>
 
       {/* Price */}
-      <CurrencyInput
-        label="Preço máximo"
-        value={precoMaximo}
-        onChange={(value) => setPreco(null, value)}
-      />
+      <div className="space-y-1">
+        <CurrencyInput
+          label="Preço máximo *"
+          value={precoMaximo}
+          onChange={(value) => setPreco(null, value)}
+        />
+      </div>
 
       {/* Mileage Range */}
       <div className="space-y-3">
@@ -249,11 +289,24 @@ export default function CreateSpecsPage() {
         />
       </div>
 
+      {/* Validation summary */}
+      {hasMissingRequired && (
+        <div className="p-3 bg-error/10 border border-error/30 rounded-lg">
+          <div className="flex items-start gap-2 text-error text-sm">
+            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+            <div className="space-y-1">
+              {yearRequiredError && <p>{yearRequiredError}</p>}
+              {priceRequiredError && <p>{priceRequiredError}</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
       <Button 
         onClick={handleContinue} 
         className="w-full" 
         size="lg"
-        disabled={!!hasValidationErrors}
+        disabled={!!hasValidationErrors || !!hasMissingRequired}
       >
         <span>Continuar</span>
         <ArrowRight size={20} />

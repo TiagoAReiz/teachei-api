@@ -16,21 +16,21 @@ public class JwtService {
 
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
-    private final long expirationDays;
+    private final long expirationHours;
 
     public JwtService(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-days}") long expirationDays) {
+            @Value("${jwt.expiration-hours:1}") long expirationHours) {
         this.algorithm = Algorithm.HMAC256(secret);
         this.verifier = JWT.require(algorithm)
             .withIssuer("teachei-api")
             .build();
-        this.expirationDays = expirationDays;
+        this.expirationHours = expirationHours;
     }
 
     public String generateToken(String userId, String email) {
         Instant now = Instant.now();
-        Instant expiry = now.plus(expirationDays, ChronoUnit.DAYS);
+        Instant expiry = now.plus(expirationHours, ChronoUnit.HOURS);
 
         return JWT.create()
             .withIssuer("teachei-api")
@@ -58,7 +58,7 @@ public class JwtService {
     }
 
     public long getExpirationMillis() {
-        return expirationDays * 24 * 60 * 60 * 1000;
+        return expirationHours * 60 * 60 * 1000;
     }
 }
 
