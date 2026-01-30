@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { CheckCircle, Edit2, Car, Calendar, Palette, DollarSign, Phone, Gauge, Send } from "lucide-react";
+import { CheckCircle, Edit2, Car, Calendar, Palette, DollarSign, Phone, Gauge, Send, Settings } from "lucide-react";
 import { Button, Card, CardContent, Badge, Input } from "@/components/ui";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useCreateIntentionStore } from "@/stores/create-intention-store";
@@ -42,6 +42,7 @@ export default function CreateReviewPage() {
     precoMaximo,
     quilometragemMinima,
     quilometragemMaxima,
+    opcionais,
     observacoes,
     cidade,
     estado,
@@ -139,6 +140,7 @@ export default function CreateReviewPage() {
         precoMaximo,
         quilometragemMinima: quilometragemMinima || undefined,
         quilometragemMaxima: quilometragemMaxima || undefined,
+        opcionais: opcionais.length > 0 ? opcionais : undefined,
         observacoes: finalObservacoes || undefined,
         cidade,
         estado,
@@ -283,6 +285,11 @@ export default function CreateReviewPage() {
       icon: Gauge,
       label: "Quilometragem",
       value: mileageDisplay,
+    }] : []),
+    ...(opcionais.length > 0 ? [{
+      icon: Settings,
+      label: "Opcionais",
+      value: opcionais.join(", "),
     }] : []),
   ];
 
