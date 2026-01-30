@@ -46,11 +46,10 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Make mvnw executable
-        run: chmod +x mvnw
-
       - name: Build with Maven
-        run: ./mvnw clean package -DskipTests -B
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests -B
 
       # TODO: Add unit tests that don't require database connection
       # - name: Run Tests

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -12,38 +12,32 @@ interface SearchInputProps {
 export function SearchInput({ className }: SearchInputProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   
-  // Track if navigation is in progress to prevent loops
-  const isNavigatingRef = useRef(false);
-  // Store initial search param for comparison
-  const lastSearchRef = useRef(searchParams.get("search") || "");
+  // Get current URL search value  
+  const urlSearch = searchParams.get("search") || "";
   
-  // Debounce search query by 500ms to prevent excessive API calls
-  const debouncedSearch = useDebounce(searchQuery, 500);
-
-  // Sync input with URL when searchParams change externally (e.g., back button)
+  // Local input state
+  const [localSearch, setLocalSearch] = useState(urlSearch);
+  
+  // Debounce the local search value
+  const debouncedSearch = useDebounce(localSearch, 500);
+  
+  // Track what we've navigated to prevent loops
+  const lastNavigatedRef = useRef(urlSearch);
+  
+  // Handle input change
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalSearch(e.target.value);
+  }, []);
+  
+  // Navigate when debounced value changes
   useEffect(() => {
-    const urlSearch = searchParams.get("search") || "";
-    if (urlSearch !== lastSearchRef.current && !isNavigatingRef.current) {
-      setSearchQuery(urlSearch);
-      lastSearchRef.current = urlSearch;
-    }
-  }, [searchParams]);
-
-  // Trigger search when debounced value changes
-  useEffect(() => {
-    // Skip if we're already navigating or if the value hasn't actually changed
-    if (isNavigatingRef.current) return;
-    
     const trimmedSearch = debouncedSearch.trim();
-    const currentSearch = lastSearchRef.current;
     
-    // Only update if the debounced value is different from last known value
-    if (trimmedSearch === currentSearch) return;
+    // Only navigate if different from what we last navigated to
+    if (trimmedSearch === lastNavigatedRef.current) return;
     
-    isNavigatingRef.current = true;
-    lastSearchRef.current = trimmedSearch;
+    lastNavigatedRef.current = trimmedSearch;
     
     const params = new URLSearchParams(searchParams.toString());
     
@@ -53,15 +47,20 @@ export function SearchInput({ className }: SearchInputProps) {
       params.delete("search");
     }
     
-    // Navigate to update URL with new search params
     const queryString = params.toString();
     router.push(queryString ? `/?${queryString}` : "/");
-    
-    // Reset navigation flag after a short delay
-    setTimeout(() => {
-      isNavigatingRef.current = false;
-    }, 100);
   }, [debouncedSearch, router, searchParams]);
+  
+  // Sync input when URL changes externally (back button, filter clearing)
+  useEffect(() => {
+    // Only sync if URL changed to something different than what we navigated to
+    if (urlSearch !== lastNavigatedRef.current) {
+      lastNavigatedRef.current = urlSearch;
+      // Sync local state with URL - this is intentional for external navigation (back button)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLocalSearch(urlSearch);
+    }
+  }, [urlSearch]);
 
   return (
     <div className={className}>
@@ -71,8 +70,8 @@ export function SearchInput({ className }: SearchInputProps) {
         </div>
         <input
           type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={localSearch}
+          onChange={handleChange}
           placeholder="Buscar por marca ou modelo..."
           className="w-full bg-background border-0 ring-1 ring-border text-foreground placeholder:text-muted rounded-full h-10 pl-11 pr-4 focus:ring-2 focus:ring-primary transition-all text-sm"
         />
