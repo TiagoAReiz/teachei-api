@@ -32,7 +32,18 @@ export default function CreateSpecsPage() {
   } = useCreateIntentionStore();
 
   // Static year options (no API call needed)
-  const yearOptions = generateYearOptions(30);
+  const allYearOptions = generateYearOptions(30);
+  
+  // Filter year options based on selection
+  const yearOptionsMin = useMemo(() => {
+    if (!anoMaximo) return allYearOptions;
+    return allYearOptions.filter(opt => parseInt(opt.value) <= anoMaximo);
+  }, [allYearOptions, anoMaximo]);
+  
+  const yearOptionsMax = useMemo(() => {
+    if (!anoMinimo) return allYearOptions;
+    return allYearOptions.filter(opt => parseInt(opt.value) >= anoMinimo);
+  }, [allYearOptions, anoMinimo]);
 
   // Redirect if no vehicle selected
   useEffect(() => {
@@ -42,13 +53,6 @@ export default function CreateSpecsPage() {
   }, [tipoVeiculo, marcaCodigo, modeloCodigo, router]);
 
   // Validation errors
-  const yearRangeError = useMemo(() => {
-    if (anoMinimo && anoMaximo && anoMinimo > anoMaximo) {
-      return "Ano mínimo não pode ser maior que ano máximo";
-    }
-    return null;
-  }, [anoMinimo, anoMaximo]);
-
   const yearRequiredError = useMemo(() => {
     if (!anoMinimo && !anoMaximo) {
       return "Selecione pelo menos um ano";
@@ -70,7 +74,7 @@ export default function CreateSpecsPage() {
     return null;
   }, [quilometragemMinima, quilometragemMaxima]);
 
-  const hasValidationErrors = yearRangeError || mileageRangeError;
+  const hasValidationErrors = mileageRangeError;
   const hasMissingRequired = yearRequiredError || priceRequiredError;
 
   const toggleColor = (colorValue: string) => {
@@ -114,24 +118,18 @@ export default function CreateSpecsPage() {
         </label>
         <div className="grid grid-cols-2 gap-4">
           <Select
-            options={[{ value: "", label: "A partir de" }, ...yearOptions]}
+            options={[{ value: "", label: "A partir de" }, ...yearOptionsMin]}
             value={anoMinimo?.toString() || ""}
             onChange={(e) => setAnos(e.target.value ? parseInt(e.target.value) : null, anoMaximo)}
             placeholder="A partir de"
           />
           <Select
-            options={[{ value: "", label: "Até" }, ...yearOptions]}
+            options={[{ value: "", label: "Até" }, ...yearOptionsMax]}
             value={anoMaximo?.toString() || ""}
             onChange={(e) => setAnos(anoMinimo, e.target.value ? parseInt(e.target.value) : null)}
             placeholder="Até"
           />
         </div>
-        {yearRangeError && (
-          <div className="flex items-center gap-2 text-error text-sm">
-            <AlertCircle size={16} />
-            <span>{yearRangeError}</span>
-          </div>
-        )}
         <p className="text-xs text-muted">
           Selecione o ano mínimo, máximo ou ambos
         </p>
