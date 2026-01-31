@@ -23,7 +23,7 @@ export function AuthLayout({ children, backgroundImage }: AuthLayoutProps) {
         
         <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-white">
           <div className="mb-8">
-            <Logo size="lg" href="/" className="text-white [&>span]:text-white" />
+            <Logo size="xl" href="/" />
           </div>
           <h1 className="text-3xl font-bold text-center mb-4">
             Encontre o veículo dos seus sonhos

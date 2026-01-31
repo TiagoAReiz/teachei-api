@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Car,
   Search,
   MessageCircle,
   Shield,
@@ -13,6 +12,7 @@ import {
   Facebook,
 } from "lucide-react";
 import { Button } from "@/components/ui";
+import { Logo } from "@/components/ui/logo";
 import { siteConfig } from "@/config/site";
 
 const features = [
@@ -70,10 +70,7 @@ export function LandingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
-          <Link href="/" className="flex items-center gap-2 text-primary font-extrabold text-xl tracking-tight">
-            <Car size={28} />
-            <span>TeAchei</span>
-          </Link>
+          <Logo size="md" />
 
           <nav className="hidden md:flex items-center gap-6">
             <a href="#como-funciona" className="text-foreground hover:text-primary transition-colors font-medium">
@@ -234,10 +231,9 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <Link href="/" className="flex items-center gap-2 text-primary font-extrabold text-xl tracking-tight mb-4">
-                <Car size={28} />
-                <span>TeAchei</span>
-              </Link>
+              <div className="mb-4">
+                <Logo size="md" />
+              </div>
               <p className="text-muted text-sm max-w-sm mb-4">
                 A maneira mais fácil de encontrar seu próximo veículo. Conecte-se com vendedores e encontre o carro, moto ou caminhão dos seus sonhos.
               </p>
